@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "skills": {
+    "clerk": {
+      "source": "/var/folders/vh/lm95s78n4rl___p676l6zh8w0000gn/T/clerk-skill-bYZvoU",
+      "sourceType": "local",
+      "computedHash": "e848b7e83b791af39aece9185f733cc663c6b464caf9e1d339524a3bfed3c011"
+    },
+    "next-best-practices": {
+      "source": "vercel-labs/next-skills",
+      "sourceType": "github",
+      "skillPath": "skills/next-best-practices/SKILL.md",
+      "computedHash": "db85045827ebeb83ac8dbc992b69188755eeb74dcf01cbf5e694d58aa494a106"
+    }
+  }
+}
