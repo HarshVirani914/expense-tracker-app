@@ -46,3 +46,13 @@ next-env.d.ts
 
 # agents
 .agents
+
+
+# generated
+/src/generated/prisma
+
+# prisma
+prisma/migrations
+
+# ngrok
+ngrok.yml

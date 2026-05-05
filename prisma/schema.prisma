@@ -1,0 +1,288 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Enums
+enum ExpenseType {
+  EXPENSE
+  INCOME
+}
+
+enum SplitType {
+  EQUAL
+  EXACT
+  PERCENTAGE
+  SHARES
+}
+
+enum AccountType {
+  SAVINGS
+  CURRENT
+  WALLET
+  CASH
+  CREDIT_CARD
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  UPI
+  BANK_TRANSFER
+  OTHER
+}
+
+enum RecurrenceFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+  CUSTOM
+}
+
+// User model - stores Clerk user ID and app-specific preferences
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Preferences
+  defaultCurrency String @default("INR")
+
+  // Relations
+  expenses          Expense[]
+  accounts          Account[]
+  categories        Category[]
+  groups            GroupMember[]
+  budgets           Budget[]
+  recurringExpenses RecurringExpense[]
+  contactsCreated   Contact[]          @relation("ContactCreator")
+  settlementsFrom   Settlement[]       @relation("SettlementPayer")
+  settlementsTo     Settlement[]       @relation("SettlementReceiver")
+
+  @@map("users")
+}
+
+// Category model - both default and user-created categories
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  color     String   @default("#9333EA")
+  isDefault Boolean  @default(false)
+  userId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses Expense[]
+  budgets  Budget[]
+
+  @@unique([userId, name])
+  @@map("categories")
+}
+
+// Account model - bank accounts, wallets, cash
+model Account {
+  id             String      @id @default(cuid())
+  name           String
+  type           AccountType
+  initialBalance Decimal     @default(0) @db.Decimal(10, 2)
+  currency       String      @default("INR")
+  userId         String
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expenses Expense[]
+
+  @@map("accounts")
+}
+
+// Expense model - individual and group expenses
+model Expense {
+  id            String        @id @default(cuid())
+  amount        Decimal       @db.Decimal(10, 2)
+  description   String?
+  type          ExpenseType   @default(EXPENSE)
+  date          DateTime      @default(now())
+  paymentMethod PaymentMethod @default(OTHER)
+  notes         String?
+
+  userId     String
+  categoryId String
+  accountId  String?
+  groupId    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category     Category             @relation(fields: [categoryId], references: [id])
+  account      Account?             @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  group        Group?               @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  participants ExpenseParticipant[]
+
+  @@index([userId, date])
+  @@index([categoryId])
+  @@index([groupId])
+  @@map("expenses")
+}
+
+// Contact model - people who can be added to groups (no account required)
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user                User                 @relation("ContactCreator", fields: [userId], references: [id], onDelete: Cascade)
+  groupMemberships    GroupMember[]
+  expenseParticipants ExpenseParticipant[]
+  settlementsFrom     Settlement[]         @relation("SettlementContactPayer")
+  settlementsTo       Settlement[]         @relation("SettlementContactReceiver")
+
+  @@map("contacts")
+}
+
+// Group model - for splitting expenses
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members     GroupMember[]
+  expenses    Expense[]
+  settlements Settlement[]
+
+  @@map("groups")
+}
+
+// GroupMember - many-to-many relationship between groups and users/contacts
+model GroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  userId    String?
+  contactId String?
+  role      String   @default("member")
+  createdAt DateTime @default(now())
+
+  group   Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contact Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@unique([groupId, contactId])
+  @@map("group_members")
+}
+
+// ExpenseParticipant - tracks who paid and who owes in group expenses
+model ExpenseParticipant {
+  id        String  @id @default(cuid())
+  expenseId String
+  contactId String?
+  userId    String?
+
+  // Payer info
+  paidAmount Decimal @default(0) @db.Decimal(10, 2)
+
+  // Owe info
+  splitType  SplitType
+  splitValue Decimal   @db.Decimal(10, 4) // Can store percentage, amount, or share ratio
+  oweAmount  Decimal   @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+
+  expense Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  contact Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@map("expense_participants")
+}
+
+// Settlement - records when someone pays back a debt
+model Settlement {
+  id     String   @id @default(cuid())
+  amount Decimal  @db.Decimal(10, 2)
+  date   DateTime @default(now())
+  notes  String?
+
+  groupId String
+
+  // Payer (who paid)
+  payerUserId    String?
+  payerContactId String?
+
+  // Receiver (who received)
+  receiverUserId    String?
+  receiverContactId String?
+
+  createdAt DateTime @default(now())
+
+  group           Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  payerUser       User?    @relation("SettlementPayer", fields: [payerUserId], references: [id], onDelete: Cascade)
+  payerContact    Contact? @relation("SettlementContactPayer", fields: [payerContactId], references: [id], onDelete: Cascade)
+  receiverUser    User?    @relation("SettlementReceiver", fields: [receiverUserId], references: [id], onDelete: Cascade)
+  receiverContact Contact? @relation("SettlementContactReceiver", fields: [receiverContactId], references: [id], onDelete: Cascade)
+
+  @@map("settlements")
+}
+
+// Budget - category-based budgets
+model Budget {
+  id        String    @id @default(cuid())
+  amount    Decimal   @db.Decimal(10, 2)
+  period    String    @default("MONTHLY") // WEEKLY, MONTHLY
+  startDate DateTime
+  endDate   DateTime?
+
+  userId     String
+  categoryId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId, period])
+  @@map("budgets")
+}
+
+// RecurringExpense - templates for recurring expenses
+model RecurringExpense {
+  id          String              @id @default(cuid())
+  amount      Decimal             @db.Decimal(10, 2)
+  description String?
+  type        ExpenseType         @default(EXPENSE)
+  frequency   RecurrenceFrequency
+  customDays  Int? // For custom frequency
+  startDate   DateTime
+  endDate     DateTime?
+  nextDate    DateTime
+  isActive    Boolean             @default(true)
+
+  userId     String
+  categoryId String
+  accountId  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("recurring_expenses")
+}
