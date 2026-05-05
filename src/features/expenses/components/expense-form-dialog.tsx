@@ -68,7 +68,7 @@ export const ExpenseFormDialog = ({
       paymentMethod: PaymentMethod.OTHER,
       notes: "",
       categoryId: "",
-      accountId: undefined,
+      accountId: null,
     },
   });
 
@@ -83,7 +83,7 @@ export const ExpenseFormDialog = ({
           paymentMethod: expense.paymentMethod,
           notes: expense.notes || "",
           categoryId: expense.categoryId,
-          accountId: expense.accountId || undefined,
+          accountId: expense.accountId || null,
         });
       } else {
         form.reset({
@@ -94,7 +94,7 @@ export const ExpenseFormDialog = ({
           paymentMethod: PaymentMethod.OTHER,
           notes: "",
           categoryId: "",
-          accountId: undefined,
+          accountId: null,
         });
       }
     }
@@ -239,8 +239,11 @@ export const ExpenseFormDialog = ({
                   <FormItem>
                     <FormLabel>Account</FormLabel>
                     <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value || undefined}
+                      onValueChange={(value) => {
+                        // Convert "none" to undefined for optional field
+                        field.onChange(value === "none" ? undefined : value);
+                      }}
+                      defaultValue={field.value || "none"}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -270,7 +273,9 @@ export const ExpenseFormDialog = ({
                   <FormItem className="flex flex-col">
                     <FormLabel>Date</FormLabel>
                     <DatePicker
-                      date={field.value instanceof Date ? field.value : undefined}
+                      date={
+                        field.value instanceof Date ? field.value : undefined
+                      }
                       onSelect={field.onChange}
                       placeholder="Select date"
                     />

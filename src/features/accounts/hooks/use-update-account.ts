@@ -23,11 +23,7 @@ export const useUpdateAccount = () => {
   })
 
   const updateAccount = async ({ id, data }: { id: string; data: UpdateAccountInput }) => {
-    try {
-      return await mutateAsync({ id, data })
-    } catch (error) {
-      throw new Error('Failed to update account')
-    }
+    return await mutateAsync({ id, data })
   }
 
   return {

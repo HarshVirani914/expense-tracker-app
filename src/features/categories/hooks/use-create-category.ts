@@ -22,11 +22,7 @@ export const useCreateCategory = () => {
   })
 
   const createCategory = async (data: CreateCategoryInput) => {
-    try {
-      return await mutateAsync(data)
-    } catch (error) {
-      throw new Error('Failed to create category')
-    }
+    return await mutateAsync(data)
   }
 
   return {

@@ -22,11 +22,7 @@ export const useUpdateCategory = () => {
   })
 
   const updateCategory = async ({ id, data }: { id: string; data: UpdateCategoryInput }) => {
-    try {
-      return await mutateAsync({ id, data })
-    } catch (error) {
-      throw new Error('Failed to update category')
-    }
+    return await mutateAsync({ id, data })
   }
 
   return {

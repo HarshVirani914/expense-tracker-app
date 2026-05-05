@@ -19,8 +19,20 @@ export const createExpenseSchema = z.object({
     .max(1000, 'Notes must be less than 1000 characters')
     .trim()
     .optional(),
-  categoryId: z.string().cuid('Invalid category ID'),
-  accountId: z.string().cuid('Invalid account ID').optional().nullable(),
+  categoryId: z.cuid2('Invalid category ID'),
+  accountId: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => {
+      // Handle "none" or empty strings as null
+      if (!val || val === 'none' || val === '') return null
+      // Validate as CUID2 if present
+      if (!val.match(/^c[^\s-]{24,}$/)) {
+        throw new Error('Invalid account ID')
+      }
+      return val
+    }),
 })
 
 export const updateExpenseSchema = z.object({
@@ -42,15 +54,27 @@ export const updateExpenseSchema = z.object({
     .max(1000, 'Notes must be less than 1000 characters')
     .trim()
     .optional(),
-  categoryId: z.string().cuid('Invalid category ID').optional(),
-  accountId: z.string().cuid('Invalid account ID').optional().nullable(),
+  categoryId: z.cuid2('Invalid category ID').optional(),
+  accountId: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((val) => {
+      // Handle "none" or empty strings as null
+      if (!val || val === 'none' || val === '') return null
+      // Validate as CUID2 if present
+      if (!val.match(/^c[^\s-]{24,}$/)) {
+        throw new Error('Invalid account ID')
+      }
+      return val
+    }),
 })
 
 export const expenseFiltersSchema = z.object({
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(20),
-  categoryId: z.string().cuid().optional(),
-  accountId: z.string().cuid().optional(),
+  categoryId: z.cuid2().optional(),
+  accountId: z.cuid2().optional(),
   type: z.enum(ExpenseType).optional(),
   paymentMethod: z.enum(PaymentMethod).optional(),
   startDate: z.union([z.string(), z.date()]).optional(),

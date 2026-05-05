@@ -22,11 +22,7 @@ export const useCreateAccount = () => {
   })
 
   const createAccount = async (data: CreateAccountInput) => {
-    try {
-      return await mutateAsync(data)
-    } catch (error) {
-      throw new Error('Failed to create account')
-    }
+    return await mutateAsync(data)
   }
 
   return {

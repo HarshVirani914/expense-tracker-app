@@ -28,6 +28,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 
 const navigation = [
   {
@@ -81,8 +82,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Wallet2 className="size-4" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <Image
+                    src="/logo.svg"
+                    alt="PocketPulse"
+                    width={42}
+                    height={42}
+                  />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">PocketPulse</span>

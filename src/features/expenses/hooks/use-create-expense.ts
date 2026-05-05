@@ -26,11 +26,7 @@ export const useCreateExpense = () => {
   })
 
   const createExpense = async (data: CreateExpenseInput) => {
-    try {
-      return await mutateAsync(data)
-    } catch (error) {
-      throw new Error('Failed to create expense')
-    }
+    return await mutateAsync(data)
   }
 
   return {

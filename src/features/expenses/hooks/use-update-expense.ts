@@ -27,11 +27,7 @@ export const useUpdateExpense = () => {
   })
 
   const updateExpense = async ({ id, data }: { id: string; data: UpdateExpenseInput }) => {
-    try {
-      return await mutateAsync({ id, data })
-    } catch (error) {
-      throw new Error('Failed to update expense')
-    }
+    return await mutateAsync({ id, data })
   }
 
   return {
