@@ -1,5 +1,6 @@
 import { clerkClient, currentUser } from '@clerk/nextjs/server'
 import { prisma } from './prisma'
+import { logger } from './logger'
 
 /**
  * Gets the current authenticated user from database
@@ -25,6 +26,7 @@ export const getCurrentUser = async () => {
     const name = `${clerkUser.firstName ?? ''} ${clerkUser.lastName ?? ''}`.trim() || null
 
     if (!email) {
+      logger.error('User email not found', undefined, { clerkId: clerkUser.id })
       throw new Error('User email not found')
     }
 
@@ -36,7 +38,10 @@ export const getCurrentUser = async () => {
       },
     })
 
-    console.log(`Created user via fallback sync: ${email} (${clerkUser.id})`)
+    logger.info('User created via fallback sync', { 
+      clerkId: clerkUser.id, 
+      email 
+    })
   }
 
   return user
@@ -50,6 +55,8 @@ export const getCurrentUser = async () => {
  * @returns User from database
  */
 export const getOrCreateUserByClerkId = async (clerkId: string) => {
+  const log = logger.child({ clerkId })
+
   // Try to find existing user
   let user = await prisma.user.findUnique({
     where: { clerkId },
@@ -60,6 +67,8 @@ export const getOrCreateUserByClerkId = async (clerkId: string) => {
   }
 
   // If not found, fetch from Clerk and create
+  log.debug('User not found in database, fetching from Clerk')
+  
   const clerk = await clerkClient()
   const clerkUser = await clerk.users.getUser(clerkId)
 
@@ -67,6 +76,7 @@ export const getOrCreateUserByClerkId = async (clerkId: string) => {
   const name = `${clerkUser.firstName ?? ''} ${clerkUser.lastName ?? ''}`.trim() || null
 
   if (!email) {
+    log.error('User email not found in Clerk')
     throw new Error('User email not found')
   }
 
@@ -78,7 +88,7 @@ export const getOrCreateUserByClerkId = async (clerkId: string) => {
     },
   })
 
-  console.log(`Created user via Clerk API: ${email} (${clerkId})`)
+  log.info('User created via Clerk API', { email })
   return user
 }
 
@@ -93,6 +103,7 @@ export const requireCurrentUser = async () => {
   const user = await getCurrentUser()
 
   if (!user) {
+    logger.warn('Unauthorized access attempt')
     throw new Error('Unauthorized: User not authenticated')
   }
 
