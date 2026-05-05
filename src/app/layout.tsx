@@ -44,7 +44,7 @@ export default function RootLayout({
             <TooltipProvider>
               <ConfirmDialogProvider>
                 {children}
-                <Toaster />
+                <Toaster richColors />
               </ConfirmDialogProvider>
             </TooltipProvider>
           </QueryProvider>

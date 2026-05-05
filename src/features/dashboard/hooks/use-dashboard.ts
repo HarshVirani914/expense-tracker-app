@@ -3,7 +3,7 @@ import { apiClient } from '@/lib/api-client'
 import type { DashboardStats } from '../types'
 import type { ApiResponse } from '@/types/api'
 
-const DASHBOARD_KEY = ['dashboard', 'stats'] as const
+export const DASHBOARD_KEY = ['dashboard', 'stats'] as const
 
 export const useDashboardStats = () => {
   const { data, isLoading, error, refetch } = useQuery({
