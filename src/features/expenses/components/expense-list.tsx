@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useExpenses } from "../hooks/use-expenses";
 import { useDeleteExpense } from "../hooks/use-delete-expense";
 import { DataTable } from "@/components/data-table";
-import type { ExpenseWithRelations } from "../types";
+import type { ExpenseWithRelations, ExpenseFilters } from "../types";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,13 +21,19 @@ import { useConfirmDialog } from "@/components/confirm-dialog";
 
 type ExpenseListProps = {
   onEdit: (expense: ExpenseWithRelations) => void;
+  filters: ExpenseFilters;
 };
 
-export const ExpenseList = ({ onEdit }: ExpenseListProps) => {
+export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
   const [page, setPage] = useState(0);
   const pageSize = 20;
 
+  useEffect(() => {
+    setPage(0);
+  }, [filters.categoryId, filters.type, filters.startDate, filters.endDate]);
+
   const { expenses, pagination, isLoading } = useExpenses({
+    ...filters,
     page: page + 1,
     limit: pageSize,
   });

@@ -1,6 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, DM_Sans } from "next/font/google";
+import { DM_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { QueryProvider } from "@/providers/query-provider";
@@ -8,13 +8,12 @@ import { Toaster } from "@/components/ui/sonner";
 import { ConfirmDialogProvider } from "@/components/confirm-dialog";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const geistHeading = Geist({ subsets: ["latin"], variable: "--font-heading" });
+const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
 
-const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-sans" });
-
-const geistMono = Geist_Mono({
-  variable: "--font-mono",
+const dmMono = DM_Mono({
+  weight: ["400"],
   subsets: ["latin"],
+  variable: "--font-dm-mono",
 });
 
 export const metadata: Metadata = {
@@ -30,13 +29,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(
-        "h-full",
-        "antialiased",
-        geistMono.variable,
-        dmSans.variable,
-        geistHeading.variable,
-      )}
+      className={cn("h-full", "antialiased", dmSans.variable, dmMono.variable)}
     >
       <body className="min-h-full flex flex-col">
         <ClerkProvider>

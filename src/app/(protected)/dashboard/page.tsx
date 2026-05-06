@@ -6,6 +6,7 @@ import { RecentExpensesList } from "@/features/dashboard/components/recent-expen
 import { StatsCards } from "@/features/dashboard/components/stats-cards";
 import { useDashboardStats } from "@/features/dashboard/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
+import { IconLayoutDashboard } from "@tabler/icons-react";
 
 export default function DashboardPage() {
   const { stats, isLoading, error } = useDashboardStats();
@@ -47,11 +48,16 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col md:flex-row gap-4 items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back! Here&apos;s an overview of your finances.
+      <div className="flex flex-col md:flex-row gap-4 items-start md:justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-primary/10 p-2.5">
+              <IconLayoutDashboard className="h-6 w-6 text-primary" />
+            </div>
+            <h1 className="text-4xl font-bold tracking-tight">Dashboard</h1>
+          </div>
+          <p className="text-muted-foreground text-base pl-[52px]">
+            Welcome back! Here&apos;s an overview of your finances
           </p>
         </div>
         <QuickActions />

@@ -4,13 +4,11 @@ import { useCategories } from "../hooks/use-categories";
 import { useDeleteCategory } from "../hooks/use-delete-category";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { IconEdit, IconTrash, IconTag } from "@tabler/icons-react";
 import { toast } from "sonner";
 import type { Category } from "../types";
 import { useConfirmDialog } from "@/components/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 
 type CategoryListProps = {
   onEdit: (category: Category) => void;
@@ -44,90 +42,76 @@ export const CategoryList = ({ onEdit }: CategoryListProps) => {
 
   if (isLoading) {
     return (
-      <Card className="divide-y">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 p-4">
-            <Skeleton className="h-10 w-10 rounded-xl" />
-            <Skeleton className="h-5 flex-1" />
-            <Skeleton className="h-8 w-16" />
+      <div className="space-y-2">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 py-3 px-4 rounded-lg border bg-card"
+          >
+            <Skeleton className="h-3 w-3 rounded-full" />
+            <Skeleton className="h-4 flex-1 max-w-xs" />
+            <Skeleton className="h-6 w-16" />
           </div>
         ))}
-      </Card>
+      </div>
     );
   }
 
   if (!categories || categories.length === 0) {
     return (
-      <Card className="border-dashed">
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="rounded-full bg-muted p-4 mb-4">
-            <IconTag className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="font-semibold text-lg mb-2">No categories yet</h3>
-          <p className="text-muted-foreground text-sm max-w-sm">
-            Get started by creating your first category to organize your expenses.
-          </p>
-        </div>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-20 text-center border rounded-lg border-dashed bg-muted/20">
+        <IconTag className="h-12 w-12 text-muted-foreground/40 mb-3" />
+        <h3 className="font-medium text-base mb-1">No categories yet</h3>
+        <p className="text-muted-foreground text-sm">
+          Create your first category to get started
+        </p>
+      </div>
     );
   }
 
   return (
-    <Card className="divide-y">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {categories.map((category) => (
         <div
           key={category.id}
-          className={cn(
-            "group flex items-center gap-4 p-4 transition-colors hover:bg-muted/50",
-            category.isDefault && "bg-muted/30"
-          )}
+          className="group flex items-center gap-3 py-3 px-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
         >
           <div
-            className="rounded-xl p-2.5 shrink-0 transition-transform duration-200 group-hover:scale-110"
-            style={{ backgroundColor: category.color + "20" }}
-          >
-            <IconTag className="h-5 w-5" style={{ color: category.color }} />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-base">{category.name}</span>
-              {category.isDefault && (
-                <Badge variant="secondary" className="text-xs">
-                  Default
-                </Badge>
-              )}
-            </div>
-          </div>
-
-          <div
-            className="w-1 h-8 rounded-full transition-all duration-200 group-hover:w-1.5"
+            className="h-3 w-3 rounded-full shrink-0"
             style={{ backgroundColor: category.color }}
           />
 
+          <span className="font-medium text-sm flex-1">{category.name}</span>
+
+          {category.isDefault && (
+            <Badge variant="secondary" className="text-xs font-normal">
+              System
+            </Badge>
+          )}
+
           {!category.isDefault && (
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => onEdit(category)}
-                className="h-8 w-8"
+                className="h-7 w-7"
               >
-                <IconEdit className="h-4 w-4" />
+                <IconEdit className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => handleDelete(category.id, category.name)}
                 disabled={isDeleting}
-                className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
               >
-                <IconTrash className="h-4 w-4" />
+                <IconTrash className="h-3.5 w-3.5" />
               </Button>
             </div>
           )}
         </div>
       ))}
-    </Card>
+    </div>
   );
 };
