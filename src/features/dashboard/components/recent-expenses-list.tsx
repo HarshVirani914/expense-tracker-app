@@ -1,6 +1,7 @@
-'use client'
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -8,24 +9,25 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import type { ExpenseWithRelations } from '@/features/expenses/types'
-import { format } from 'date-fns'
+} from "@/components/ui/table";
+import type { ExpenseWithRelations } from "@/features/expenses/types";
+import { format } from "date-fns";
+import { IconUsers } from "@tabler/icons-react";
+import Link from "next/link";
 
 type RecentExpensesListProps = {
-  expenses: ExpenseWithRelations[]
-}
+  expenses: ExpenseWithRelations[];
+};
 
 export const RecentExpensesList = ({ expenses }: RecentExpensesListProps) => {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(amount)
-  }
+    }).format(amount);
+  };
 
   if (expenses.length === 0) {
     return (
@@ -37,7 +39,7 @@ export const RecentExpensesList = ({ expenses }: RecentExpensesListProps) => {
           <p className="text-sm text-muted-foreground">No expenses yet.</p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -51,6 +53,7 @@ export const RecentExpensesList = ({ expenses }: RecentExpensesListProps) => {
             <TableRow>
               <TableHead>Date</TableHead>
               <TableHead>Description</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Category</TableHead>
               <TableHead className="text-right">Amount</TableHead>
             </TableRow>
@@ -59,9 +62,26 @@ export const RecentExpensesList = ({ expenses }: RecentExpensesListProps) => {
             {expenses.map((expense) => (
               <TableRow key={expense.id}>
                 <TableCell className="font-medium">
-                  {format(new Date(expense.date), 'MMM dd')}
+                  {format(new Date(expense.date), "MMM dd")}
                 </TableCell>
-                <TableCell>{expense.description || 'No description'}</TableCell>
+                <TableCell>{expense.description || "No description"}</TableCell>
+                <TableCell>
+                  {expense.group ? (
+                    <Link href={`/groups/${expense.group.id}`}>
+                      <Badge
+                        variant="outline"
+                        className="gap-1 hover:bg-accent cursor-pointer"
+                      >
+                        <IconUsers className="h-3 w-3" />
+                        {expense.group.name}
+                      </Badge>
+                    </Link>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">
+                      Personal
+                    </span>
+                  )}
+                </TableCell>
                 <TableCell>
                   <Badge
                     variant="outline"
@@ -74,9 +94,9 @@ export const RecentExpensesList = ({ expenses }: RecentExpensesListProps) => {
                   </Badge>
                 </TableCell>
                 <TableCell
-                  className={`text-right font-medium ${expense.type === 'INCOME' ? 'text-green-600' : 'text-red-600'}`}
+                  className={`text-right font-medium ${expense.type === "INCOME" ? "text-green-600" : "text-red-600"}`}
                 >
-                  {expense.type === 'INCOME' ? '+' : '-'}
+                  {expense.type === "INCOME" ? "+" : "-"}
                   {formatCurrency(Number(expense.amount))}
                 </TableCell>
               </TableRow>
@@ -85,5 +105,5 @@ export const RecentExpensesList = ({ expenses }: RecentExpensesListProps) => {
         </Table>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

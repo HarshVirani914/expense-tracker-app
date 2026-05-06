@@ -5,7 +5,7 @@ import { useDeleteAccount } from '../hooks/use-delete-account'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Pencil, Trash2, Wallet, CreditCard, Landmark, DollarSign } from 'lucide-react'
+import { IconPencil, IconTrash, IconWallet, IconCreditCard, IconBuildingBank, IconCurrencyDollar } from '@tabler/icons-react'
 import { toast } from 'sonner'
 import type { AccountWithBalance } from '../types'
 import { AccountType } from '@/types/prisma'
@@ -17,11 +17,11 @@ type AccountListProps = {
 }
 
 const ACCOUNT_ICONS = {
-  [AccountType.SAVINGS]: Landmark,
-  [AccountType.CURRENT]: Landmark,
-  [AccountType.WALLET]: Wallet,
-  [AccountType.CASH]: DollarSign,
-  [AccountType.CREDIT_CARD]: CreditCard,
+  [AccountType.SAVINGS]: IconBuildingBank,
+  [AccountType.CURRENT]: IconBuildingBank,
+  [AccountType.WALLET]: IconWallet,
+  [AccountType.CASH]: IconCurrencyDollar,
+  [AccountType.CREDIT_CARD]: IconCreditCard,
 }
 
 export const AccountList = ({ onEdit }: AccountListProps) => {
@@ -98,14 +98,14 @@ export const AccountList = ({ onEdit }: AccountListProps) => {
                     size="icon"
                     onClick={() => onEdit(account)}
                   >
-                    <Pencil className="h-4 w-4" />
+                    <IconPencil className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => handleDelete(account.id, account.name)}
                   >
-                    <Trash2 className="h-4 w-4 text-red-600" />
+                    <IconTrash className="h-4 w-4 text-red-600" />
                   </Button>
                 </div>
               </div>

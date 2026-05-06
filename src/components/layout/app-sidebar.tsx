@@ -5,14 +5,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
 import {
-  LayoutDashboard,
-  Receipt,
-  Wallet,
-  Tag,
-  Users,
-  BarChart3,
-  Wallet2,
-} from "lucide-react";
+  IconLayoutDashboard,
+  IconReceipt,
+  IconWallet,
+  IconTag,
+  IconUsers,
+  IconChartBar,
+  IconUserCircle,
+} from "@tabler/icons-react";
 
 import {
   Sidebar,
@@ -34,38 +34,43 @@ const navigation = [
   {
     name: "Dashboard",
     href: "/dashboard",
-    icon: LayoutDashboard,
+    icon: IconLayoutDashboard,
     disabled: false,
   },
   {
     name: "Expenses",
     href: "/expenses",
-    icon: Receipt,
+    icon: IconReceipt,
     disabled: false,
   },
   {
     name: "Accounts",
     href: "/accounts",
-    icon: Wallet,
+    icon: IconWallet,
     disabled: false,
   },
   {
     name: "Categories",
     href: "/categories",
-    icon: Tag,
+    icon: IconTag,
+    disabled: false,
+  },
+  {
+    name: "Contacts",
+    href: "/contacts",
+    icon: IconUserCircle,
     disabled: false,
   },
   {
     name: "Groups",
     href: "/groups",
-    icon: Users,
-    disabled: true,
-    badge: "Soon",
+    icon: IconUsers,
+    disabled: false,
   },
   {
     name: "Analytics",
     href: "/analytics",
-    icon: BarChart3,
+    icon: IconChartBar,
     disabled: true,
     badge: "Soon",
   },

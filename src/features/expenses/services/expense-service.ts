@@ -1,13 +1,13 @@
-import { prisma } from '@/lib/prisma'
-import { logger } from '@/lib/logger'
-import type {
-  ExpenseWithRelations,
-  CreateExpenseInput,
-  UpdateExpenseInput,
-  ExpenseFilters,
-} from '../types'
-import type { PaginatedResponse } from '@/types/api'
 import { Prisma } from '@/generated/prisma/client'
+import { logger } from '@/lib/logger'
+import { prisma } from '@/lib/prisma'
+import type { PaginatedResponse } from '@/types/api'
+import type {
+  CreateExpenseInput,
+  ExpenseFilters,
+  ExpenseWithRelations,
+  UpdateExpenseInput,
+} from '../types'
 
 export const expenseService = {
   async list(
@@ -45,11 +45,11 @@ export const expenseService = {
         }),
         ...(startDate || endDate
           ? {
-              date: {
-                ...(startDate && { gte: new Date(startDate) }),
-                ...(endDate && { lte: new Date(endDate) }),
-              },
-            }
+            date: {
+              ...(startDate && { gte: new Date(startDate) }),
+              ...(endDate && { lte: new Date(endDate) }),
+            },
+          }
           : {}),
       }
 
@@ -59,6 +59,12 @@ export const expenseService = {
           include: {
             category: true,
             account: true,
+            group: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
           skip,
           take: limit,
@@ -96,6 +102,12 @@ export const expenseService = {
         include: {
           category: true,
           account: true,
+          group: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
       })
 
@@ -145,6 +157,12 @@ export const expenseService = {
         include: {
           category: true,
           account: true,
+          group: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
       })
 
@@ -208,6 +226,12 @@ export const expenseService = {
         include: {
           category: true,
           account: true,
+          group: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
       })
 

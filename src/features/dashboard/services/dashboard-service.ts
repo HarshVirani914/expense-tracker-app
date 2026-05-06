@@ -1,7 +1,7 @@
-import { prisma } from '@/lib/prisma'
-import { logger } from '@/lib/logger'
-import type { DashboardStats } from '../types'
 import { accountService } from '@/features/accounts/services/account-service'
+import { logger } from '@/lib/logger'
+import { prisma } from '@/lib/prisma'
+import type { DashboardStats } from '../types'
 
 export const dashboardService = {
   async getStats(userId: string): Promise<DashboardStats> {
@@ -63,6 +63,12 @@ export const dashboardService = {
             include: {
               category: true,
               account: true,
+              group: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
             },
             orderBy: { date: 'desc' },
             take: 10,

@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { Loader2 } from 'lucide-react'
+import { IconLoader2 } from '@tabler/icons-react'
 
 type LoaderProps = {
   size?: 'sm' | 'md' | 'lg'
@@ -16,7 +16,7 @@ const sizeClasses = {
 export const Loader = ({ size = 'md', className, text }: LoaderProps) => {
   return (
     <div className={cn('flex flex-col items-center justify-center gap-2', className)}>
-      <Loader2 className={cn('animate-spin text-primary', sizeClasses[size])} />
+      <IconLoader2 className={cn('animate-spin text-primary', sizeClasses[size])} />
       {text && <p className="text-sm text-muted-foreground">{text}</p>}
     </div>
   )

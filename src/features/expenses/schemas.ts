@@ -1,5 +1,5 @@
+import { ExpenseType, PaymentMethod, SplitType } from '@/types/prisma'
 import { z } from 'zod'
-import { ExpenseType, PaymentMethod } from '@/types/prisma'
 
 export const createExpenseSchema = z.object({
   amount: z
@@ -84,7 +84,37 @@ export const expenseFiltersSchema = z.object({
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 })
 
+export const participantSchema = z.object({
+  memberIdOrContact: z.string().min(1, 'Member is required'),
+  paidAmount: z.number().min(0, 'Paid amount cannot be negative').default(0),
+  oweAmount: z.number().min(0, 'Owe amount cannot be negative'),
+  splitType: z.enum(SplitType),
+  splitValue: z.number().min(0, 'Split value cannot be negative'),
+  isUser: z.boolean().default(false),
+})
+
+export const createGroupExpenseSchema = z
+  .object({
+    amount: z.number().positive('Amount must be greater than 0'),
+    description: z.string().max(500, 'Description is too long').trim().optional(),
+    date: z.union([z.string(), z.date()]).optional().default(() => new Date()),
+    categoryId: z.cuid2('Invalid category ID'),
+    groupId: z.cuid2('Invalid group ID'),
+    participants: z.array(participantSchema).min(1, 'At least one participant is required'),
+  })
+  .refine(
+    (data) => {
+      const totalOwed = data.participants.reduce((sum, p) => sum + p.oweAmount, 0)
+      return Math.abs(totalOwed - data.amount) < 0.01
+    },
+    {
+      message: 'Total split amounts must equal the expense amount',
+    }
+  )
+
 export type CreateExpenseInput = z.input<typeof createExpenseSchema>
 export type CreateExpenseSchema = z.output<typeof createExpenseSchema>
 export type UpdateExpenseSchema = z.infer<typeof updateExpenseSchema>
 export type ExpenseFiltersSchema = z.infer<typeof expenseFiltersSchema>
+export type ParticipantInput = z.infer<typeof participantSchema>
+export type CreateGroupExpenseInput = z.input<typeof createGroupExpenseSchema>

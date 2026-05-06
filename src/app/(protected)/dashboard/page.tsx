@@ -1,11 +1,12 @@
 "use client";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { AccountBalances } from "@/features/dashboard/components/account-balances";
+import { GroupBalancesSummary } from "@/features/dashboard/components/group-balances-summary";
 import { QuickActions } from "@/features/dashboard/components/quick-actions";
 import { RecentExpensesList } from "@/features/dashboard/components/recent-expenses-list";
 import { StatsCards } from "@/features/dashboard/components/stats-cards";
 import { useDashboardStats } from "@/features/dashboard/hooks";
-import { Skeleton } from "@/components/ui/skeleton";
 import { IconLayoutDashboard } from "@tabler/icons-react";
 
 export default function DashboardPage() {
@@ -65,8 +66,12 @@ export default function DashboardPage() {
 
       <StatsCards stats={stats.currentMonth} />
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <RecentExpensesList expenses={stats.recentExpenses} />
+        <GroupBalancesSummary />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
         <AccountBalances accounts={stats.accounts} />
       </div>
     </div>

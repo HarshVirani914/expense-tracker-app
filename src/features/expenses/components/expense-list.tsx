@@ -1,11 +1,5 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useExpenses } from "../hooks/use-expenses";
-import { useDeleteExpense } from "../hooks/use-delete-expense";
+import { useConfirmDialog } from "@/components/confirm-dialog";
 import { DataTable } from "@/components/data-table";
-import type { ExpenseWithRelations, ExpenseFilters } from "../types";
-import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,10 +8,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { IconDotsVertical, IconPencil, IconTrash, IconUsers } from "@tabler/icons-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useConfirmDialog } from "@/components/confirm-dialog";
+import { useDeleteExpense } from "../hooks/use-delete-expense";
+import { useExpenses } from "../hooks/use-expenses";
+import type { ExpenseFilters, ExpenseWithRelations } from "../types";
 
 type ExpenseListProps = {
   onEdit: (expense: ExpenseWithRelations) => void;
@@ -85,6 +84,28 @@ export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
       ),
     },
     {
+      accessorKey: "group",
+      header: "Group",
+      cell: ({ row }) => {
+        if (!row.original.group) {
+          return (
+            <span className="text-sm text-muted-foreground">Personal</span>
+          );
+        }
+        return (
+          <Link href={`/groups/${row.original.group.id}`}>
+            <Badge
+              variant="outline"
+              className="gap-1 hover:bg-accent cursor-pointer"
+            >
+              <IconUsers className="h-3 w-3" />
+              {row.original.group.name}
+            </Badge>
+          </Link>
+        );
+      },
+    },
+    {
       accessorKey: "category",
       header: "Category",
       cell: ({ row }) => (
@@ -135,12 +156,12 @@ export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-4 w-4" />
+              <IconDotsVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => onEdit(row.original)}>
-              <Pencil className="mr-2 h-4 w-4" />
+              <IconPencil className="mr-2 h-4 w-4" />
               Edit
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -152,7 +173,7 @@ export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
               }
               className="text-red-600"
             >
-              <Trash2 className="mr-2 h-4 w-4" />
+              <IconTrash className="mr-2 h-4 w-4" />
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -1,11 +1,11 @@
+import type { FilterOptions } from '@/types/api'
 import type {
+  Account,
+  Category,
   Expense,
   ExpenseType,
   PaymentMethod,
-  Category,
-  Account,
 } from '@/types/prisma'
-import type { FilterOptions } from '@/types/api'
 
 export { ExpenseType, PaymentMethod }
 
@@ -14,6 +14,10 @@ export type { Expense }
 export type ExpenseWithRelations = Expense & {
   category: Category
   account: Account | null
+  group: {
+    id: string
+    name: string
+  } | null
 }
 
 export type CreateExpenseInput = {

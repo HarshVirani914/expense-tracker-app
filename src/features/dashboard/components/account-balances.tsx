@@ -1,31 +1,36 @@
-'use client'
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import type { AccountWithBalance } from '@/features/accounts/types'
-import { Wallet, CreditCard, Landmark, DollarSign } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import type { AccountWithBalance } from "@/features/accounts/types";
+import {
+  IconWallet,
+  IconCreditCard,
+  IconBuildingBank,
+  IconCurrencyRupee,
+} from "@tabler/icons-react";
 
 type AccountBalancesProps = {
-  accounts: AccountWithBalance[]
-}
+  accounts: AccountWithBalance[];
+};
 
 const ACCOUNT_ICONS = {
-  SAVINGS: Landmark,
-  CURRENT: Landmark,
-  WALLET: Wallet,
-  CASH: DollarSign,
-  CREDIT_CARD: CreditCard,
-}
+  SAVINGS: IconBuildingBank,
+  CURRENT: IconBuildingBank,
+  WALLET: IconWallet,
+  CASH: IconCurrencyRupee,
+  CREDIT_CARD: IconCreditCard,
+};
 
 export const AccountBalances = ({ accounts }: AccountBalancesProps) => {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(amount)
-  }
+    }).format(amount);
+  };
 
   if (accounts.length === 0) {
     return (
@@ -37,7 +42,7 @@ export const AccountBalances = ({ accounts }: AccountBalancesProps) => {
           <p className="text-sm text-muted-foreground">No accounts yet.</p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -48,7 +53,7 @@ export const AccountBalances = ({ accounts }: AccountBalancesProps) => {
       <CardContent>
         <div className="space-y-4">
           {accounts.map((account) => {
-            const Icon = ACCOUNT_ICONS[account.type]
+            const Icon = ACCOUNT_ICONS[account.type];
             return (
               <div
                 key={account.id}
@@ -61,7 +66,7 @@ export const AccountBalances = ({ accounts }: AccountBalancesProps) => {
                   <div>
                     <p className="font-medium">{account.name}</p>
                     <Badge variant="secondary" className="text-xs">
-                      {account.type.replace('_', ' ')}
+                      {account.type.replace("_", " ")}
                     </Badge>
                   </div>
                 </div>
@@ -74,10 +79,10 @@ export const AccountBalances = ({ accounts }: AccountBalancesProps) => {
                   </p>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { TableSkeleton } from "@/components/skeletons";
 
 interface DataTableProps<TData, TValue> {
@@ -149,7 +149,7 @@ export function DataTable<TData, TValue>({
               }
               disabled={pagination.pageIndex === 0}
             >
-              <ChevronLeft className="h-4 w-4" />
+                <IconChevronLeft className="h-4 w-4" />
               Previous
             </Button>
             <Button
@@ -167,7 +167,7 @@ export function DataTable<TData, TValue>({
               }
             >
               Next
-              <ChevronRight className="h-4 w-4" />
+                <IconChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
