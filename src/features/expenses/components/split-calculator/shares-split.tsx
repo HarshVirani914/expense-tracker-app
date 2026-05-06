@@ -1,28 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { MemberInfo } from "@/features/groups/types";
-import type { ParticipantInput } from "../../schemas";
-import { SplitType } from "@/types/prisma";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { IconScale } from "@tabler/icons-react";
+import { formatCurrencyWithDecimals } from "@/lib/format";
 
 type SharesSplitProps = {
   members: MemberInfo[];
   totalAmount: number;
-  participants: ParticipantInput[];
-  onParticipantsChange: (participants: ParticipantInput[]) => void;
+  onChange: (shares: Record<string, number>) => void;
 };
 
-export const SharesSplit = ({
-  members,
-  totalAmount,
-  participants,
-  onParticipantsChange,
-}: SharesSplitProps) => {
+export const SharesSplit = ({ members, totalAmount, onChange }: SharesSplitProps) => {
+  const memberIds = useMemo(
+    () => members.map((m) => m.userId || m.contactId || "").join(","),
+    [members]
+  );
+
   const [shares, setShares] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -32,36 +30,21 @@ export const SharesSplit = ({
       initialShares[memberId] = 1;
     });
     setShares(initialShares);
-  }, [members]);
+  }, [memberIds]);
 
-  const handleShareChange = (memberId: string, value: string) => {
+  useEffect(() => {
+    onChange(shares);
+  }, [shares, onChange]);
+
+  const handleShareChange = useCallback((memberId: string, value: string) => {
     const numValue = parseInt(value) || 0;
-    const newShares = { ...shares, [memberId]: numValue };
-    setShares(newShares);
+    setShares((prev) => ({ ...prev, [memberId]: numValue }));
+  }, []);
 
-    const totalShares = Object.values(newShares).reduce((sum, val) => sum + val, 0);
-
-    if (totalShares === 0) return;
-
-    const newParticipants: ParticipantInput[] = members.map((member) => {
-      const memberKey = member.userId || member.contactId || "";
-      const memberShares = newShares[memberKey] || 0;
-      const oweAmount = (totalAmount * memberShares) / totalShares;
-
-      return {
-        memberIdOrContact: memberKey,
-        paidAmount: 0,
-        oweAmount,
-        splitType: SplitType.SHARES,
-        splitValue: memberShares,
-        isUser: member.isCurrentUser,
-      };
-    });
-
-    onParticipantsChange(newParticipants);
-  };
-
-  const totalShares = Object.values(shares).reduce((sum, val) => sum + val, 0);
+  const totalShares = useMemo(
+    () => Object.values(shares).reduce((sum, val) => sum + val, 0),
+    [shares]
+  );
 
   if (members.length === 0) {
     return (
@@ -75,13 +58,16 @@ export const SharesSplit = ({
 
   return (
     <Card className="p-6">
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-2">
         <IconScale className="h-5 w-5 text-primary" />
         <h3 className="font-semibold">Shares Split</h3>
         <Badge variant="secondary" className="text-xs">
           1:2:3 ratio
         </Badge>
       </div>
+      <p className="text-xs text-muted-foreground mb-4">
+        Split by ratio (e.g., 1:2:1:4 for different proportions)
+      </p>
 
       <div className="space-y-3 mb-4">
         {members.map((member) => {
@@ -112,7 +98,7 @@ export const SharesSplit = ({
                   className="flex-1"
                 />
                 <span className="text-sm text-muted-foreground w-20">
-                  ${amount.toFixed(2)}
+                  {formatCurrencyWithDecimals(amount)}
                 </span>
               </div>
             </div>

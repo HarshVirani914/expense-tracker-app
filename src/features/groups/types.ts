@@ -14,7 +14,7 @@ export type MemberInfo = {
 
 export type GroupWithMembers = Group & {
   members: (GroupMember & {
-    user?: { id: string; name: string | null; email: string } | null
+    user?: { id: string; clerkId: string; name: string | null; email: string } | null
     contact?: Contact | null
   })[]
   _count?: {
@@ -50,6 +50,7 @@ export type CreateGroupInput = {
 export type UpdateGroupInput = {
   name?: string
   description?: string | null
+  memberIds?: string[]
 }
 
 export type AddMemberInput = {

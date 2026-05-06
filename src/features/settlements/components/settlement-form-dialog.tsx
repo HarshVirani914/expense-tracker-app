@@ -34,6 +34,7 @@ import { useCreateSettlement } from "../hooks/use-create-settlement";
 import { createSettlementSchema, type CreateSettlementInput } from "../schemas";
 import type { MemberInfo } from "@/features/groups/types";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 type SettlementFormDialogProps = {
   open: boolean;
@@ -51,54 +52,102 @@ export const SettlementFormDialog = ({
   const { createSettlement, isCreating } = useCreateSettlement();
   const [payerId, setPayerId] = useState("");
   const [receiverId, setReceiverId] = useState("");
+  const [payerError, setPayerError] = useState("");
+  const [receiverError, setReceiverError] = useState("");
 
   const form = useForm<CreateSettlementInput>({
     resolver: zodResolver(createSettlementSchema),
-    mode: "onSubmit",
+    mode: "onBlur",
     defaultValues: {
-      amount: 0,
+      amount: undefined,
       notes: "",
       groupId,
+      date: new Date(),
+      payerUserId: null,
+      payerContactId: null,
+      receiverUserId: null,
+      receiverContactId: null,
     },
   });
 
   useEffect(() => {
     if (open) {
       form.reset({
-        amount: 0,
+        amount: undefined,
         notes: "",
         groupId,
+        date: new Date(),
+        payerUserId: null,
+        payerContactId: null,
+        receiverUserId: null,
+        receiverContactId: null,
       });
       setPayerId("");
       setReceiverId("");
+      setPayerError("");
+      setReceiverError("");
     }
   }, [open, groupId, form]);
 
   const onSubmit = async (data: CreateSettlementInput) => {
     try {
+      setPayerError("");
+      setReceiverError("");
+
+      if (!payerId) {
+        setPayerError("Please select who paid");
+        return;
+      }
+
+      if (!receiverId) {
+        setReceiverError("Please select who received");
+        return;
+      }
+
+      if (payerId === receiverId) {
+        toast.error("Payer and receiver cannot be the same person");
+        return;
+      }
+
       const payer = members.find((m) => (m.userId || m.contactId) === payerId);
       const receiver = members.find(
         (m) => (m.userId || m.contactId) === receiverId,
       );
 
-      if (!payer || !receiver) {
-        toast.error("Please select both payer and receiver");
+      if (!payer) {
+        setPayerError("Selected payer not found");
+        return;
+      }
+
+      if (!receiver) {
+        setReceiverError("Selected receiver not found");
         return;
       }
 
       const payload = {
-        ...data,
+        amount: data.amount,
+        date: data.date,
+        notes: data.notes,
+        groupId: data.groupId,
         payerUserId: payer.userId || null,
         payerContactId: payer.contactId || null,
         receiverUserId: receiver.userId || null,
         receiverContactId: receiver.contactId || null,
       };
 
+      logger.info("Submitting settlement", {
+        payerId,
+        receiverId,
+        data: payload,
+      });
+
       await createSettlement(payload);
       toast.success("Settlement recorded successfully");
       onOpenChange(false);
-    } catch {
-      toast.error("Failed to record settlement");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to record settlement";
+      toast.error(errorMessage);
     }
   };
 
@@ -126,9 +175,11 @@ export const SettlementFormDialog = ({
                       step="0.01"
                       placeholder="0.00"
                       {...field}
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value))
-                      }
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -138,7 +189,20 @@ export const SettlementFormDialog = ({
 
             <div className="space-y-2">
               <FormLabel>From (Payer) *</FormLabel>
-              <Select value={payerId} onValueChange={setPayerId}>
+              <Select
+                value={payerId}
+                onValueChange={(value) => {
+                  setPayerId(value);
+                  setPayerError("");
+                  const payer = members.find(
+                    (m) => (m.userId || m.contactId) === value,
+                  );
+                  if (payer) {
+                    form.setValue("payerUserId", payer.userId || null);
+                    form.setValue("payerContactId", payer.contactId || null);
+                  }
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select who paid" />
                 </SelectTrigger>
@@ -154,11 +218,32 @@ export const SettlementFormDialog = ({
                   ))}
                 </SelectContent>
               </Select>
+              {payerError && (
+                <p className="text-sm font-medium text-destructive">
+                  {payerError}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
               <FormLabel>To (Receiver) *</FormLabel>
-              <Select value={receiverId} onValueChange={setReceiverId}>
+              <Select
+                value={receiverId}
+                onValueChange={(value) => {
+                  setReceiverId(value);
+                  setReceiverError("");
+                  const receiver = members.find(
+                    (m) => (m.userId || m.contactId) === value,
+                  );
+                  if (receiver) {
+                    form.setValue("receiverUserId", receiver.userId || null);
+                    form.setValue(
+                      "receiverContactId",
+                      receiver.contactId || null,
+                    );
+                  }
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select who received" />
                 </SelectTrigger>
@@ -174,6 +259,11 @@ export const SettlementFormDialog = ({
                   ))}
                 </SelectContent>
               </Select>
+              {receiverError && (
+                <p className="text-sm font-medium text-destructive">
+                  {receiverError}
+                </p>
+              )}
             </div>
 
             <FormField
@@ -219,10 +309,7 @@ export const SettlementFormDialog = ({
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isCreating || !payerId || !receiverId}
-              >
+              <Button type="submit" disabled={isCreating}>
                 {isCreating ? "Recording..." : "Record Payment"}
               </Button>
             </DialogFooter>

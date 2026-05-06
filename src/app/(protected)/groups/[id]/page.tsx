@@ -4,13 +4,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { GroupExpenseFormDialog } from "@/features/expenses/components/group-expense-form-dialog";
+import { useExpenses } from "@/features/expenses/hooks/use-expenses";
 import { GroupBalanceSummary } from "@/features/groups/components/group-balance-summary";
 import { GroupFormDialog } from "@/features/groups/components/group-form-dialog";
 import { useGroup } from "@/features/groups/hooks/use-group";
 import { getMembersInfo } from "@/features/groups/utils/member-info";
 import { SettlementFormDialog } from "@/features/settlements/components/settlement-form-dialog";
 import { SettlementHistory } from "@/features/settlements/components/settlement-history";
+import { formatCurrency } from "@/lib/format";
+import { format } from "date-fns";
 import {
   IconArrowLeft,
   IconCash,
@@ -30,9 +39,16 @@ export default function GroupDetailPage({ params }: PageProps) {
   const { id } = use(params);
   const router = useRouter();
   const { group, isLoading } = useGroup(id);
+  const { expenses, isLoading: isLoadingExpenses } = useExpenses({
+    groupId: id,
+    limit: 5,
+    sortBy: "date",
+    sortOrder: "desc",
+  });
   const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
   const [isSettlementDialogOpen, setIsSettlementDialogOpen] = useState(false);
   const [isEditGroupDialogOpen, setIsEditGroupDialogOpen] = useState(false);
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6">
@@ -57,6 +73,7 @@ export default function GroupDetailPage({ params }: PageProps) {
 
   const userMember = group.members.find((m) => m.user);
   const isAdmin = userMember?.role === "admin";
+  const hasExpenses = (group._count?.expenses ?? 0) > 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -100,15 +117,29 @@ export default function GroupDetailPage({ params }: PageProps) {
             <IconPlus className="h-5 w-5" />
             Add Expense
           </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="gap-2"
-            onClick={() => setIsSettlementDialogOpen(true)}
-          >
-            <IconCash className="h-5 w-5" />
-            Record Payment
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="gap-2"
+                    onClick={() => setIsSettlementDialogOpen(true)}
+                    disabled={!hasExpenses}
+                  >
+                    <IconCash className="h-5 w-5" />
+                    Record Payment
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {!hasExpenses && (
+                <TooltipContent>
+                  <p>Add expenses before recording payments</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
           {isAdmin && (
             <Button
               variant="outline"
@@ -171,10 +202,61 @@ export default function GroupDetailPage({ params }: PageProps) {
               <IconReceipt className="h-5 w-5 text-primary" />
               Recent Expenses
             </h3>
-            <div className="text-center py-8 text-muted-foreground">
-              <p>No expenses yet.</p>
-              <p className="text-sm mt-2">Add an expense to get started.</p>
-            </div>
+            {isLoadingExpenses ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : expenses && expenses.length > 0 ? (
+              <div className="space-y-2">
+                {expenses.map((expense) => (
+                  <div
+                    key={expense.id}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium">
+                        {expense.description || "Untitled Expense"}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                        <span>{expense.category.name}</span>
+                        <span>•</span>
+                        <span>
+                          {format(new Date(expense.date), "MMM d, yyyy")}
+                        </span>
+                        {expense.participants && expense.participants.length > 0 && (
+                          <>
+                            <span>•</span>
+                            <span>{expense.participants.length} people</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold">
+                        {formatCurrency(Number(expense.amount))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {expenses.length >= 5 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full mt-2"
+                    onClick={() => router.push(`/expenses?groupId=${id}`)}
+                  >
+                    View All Expenses
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No expenses yet.</p>
+                <p className="text-sm mt-2">Add an expense to get started.</p>
+              </div>
+            )}
           </Card>
         </div>
       </div>

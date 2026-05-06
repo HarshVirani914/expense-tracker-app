@@ -4,7 +4,9 @@ import type { MemberInfo } from "@/features/groups/types";
 import type { ParticipantInput } from "../../schemas";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { IconArrowRight, IconCheck } from "@tabler/icons-react";
+import { IconCheck } from "@tabler/icons-react";
+import { memo, useMemo, useCallback } from "react";
+import { formatCurrencyWithDecimals } from "@/lib/format";
 
 type SplitPreviewProps = {
   members: MemberInfo[];
@@ -12,65 +14,48 @@ type SplitPreviewProps = {
   totalAmount: number;
 };
 
-export const SplitPreview = ({
-  members,
-  participants,
-  totalAmount,
-}: SplitPreviewProps) => {
-  if (participants.length === 0) {
-    return null;
-  }
-
-  const payers = participants.filter((p) => p.paidAmount > 0);
-  const owes = participants.filter((p) => p.oweAmount > p.paidAmount + 0.01);
-
-  const getMemberName = (memberIdOrContact: string) => {
-    const member = members.find(
-      (m) =>
-        m.userId === memberIdOrContact || m.contactId === memberIdOrContact
+export const SplitPreview = memo(
+  ({ members, participants, totalAmount }: SplitPreviewProps) => {
+    const getMemberName = useCallback(
+      (memberIdOrContact: string) => {
+        const member = members.find(
+          (m) =>
+            m.userId === memberIdOrContact || m.contactId === memberIdOrContact,
+        );
+        return member?.name || "Unknown";
+      },
+      [members],
     );
-    return member?.name || "Unknown";
-  };
 
-  const totalPaid = participants.reduce((sum, p) => sum + p.paidAmount, 0);
-  const totalOwed = participants.reduce((sum, p) => sum + p.oweAmount, 0);
+    const payers = useMemo(
+      () => participants.filter((p) => p.paidAmount > 0),
+      [participants],
+    );
 
-  return (
-    <Card className="p-6">
-      <h3 className="font-semibold mb-4">Split Preview</h3>
+    const totalPaid = useMemo(
+      () => participants.reduce((sum, p) => sum + p.paidAmount, 0),
+      [participants],
+    );
 
-      <div className="space-y-4">
-        <div>
-          <h4 className="text-sm font-medium text-muted-foreground mb-2">
-            Who paid?
-          </h4>
-          {payers.length > 0 ? (
-            <div className="space-y-2">
-              {payers.map((payer, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between p-2 bg-muted rounded-lg"
-                >
-                  <span className="font-medium">
-                    {getMemberName(payer.memberIdOrContact)}
-                  </span>
-                  <Badge className="bg-green-600">
-                    ${payer.paidAmount.toFixed(2)}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground italic">
-              No payer selected
-            </p>
-          )}
+    const totalOwed = useMemo(
+      () => participants.reduce((sum, p) => sum + p.oweAmount, 0),
+      [participants],
+    );
+
+    if (participants.length === 0) {
+      return null;
+    }
+
+    return (
+      <Card className="border-border/50 shadow-sm">
+        <div className="p-4 border-b">
+          <h3 className="font-medium text-sm">Settlement Summary</h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Who owes whom after this expense
+          </p>
         </div>
 
-        <div className="pt-4 border-t">
-          <h4 className="text-sm font-medium text-muted-foreground mb-2">
-            Split breakdown:
-          </h4>
+        <div className="p-4 space-y-4">
           <div className="space-y-2">
             {participants.map((participant, idx) => {
               const netAmount = participant.oweAmount - participant.paidAmount;
@@ -79,10 +64,10 @@ export const SplitPreview = ({
               return (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-2 bg-muted rounded-lg"
+                  className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">
+                    <span className="text-sm font-medium">
                       {getMemberName(participant.memberIdOrContact)}
                     </span>
                     {isSettled && (
@@ -94,41 +79,44 @@ export const SplitPreview = ({
                       Settled
                     </Badge>
                   ) : netAmount > 0 ? (
-                    <Badge variant="destructive">
-                      Owes ${netAmount.toFixed(2)}
+                    <Badge variant="destructive" className="text-xs">
+                      Owes {formatCurrencyWithDecimals(netAmount)}
                     </Badge>
                   ) : (
-                    <Badge className="bg-green-600">
-                      Gets ${Math.abs(netAmount).toFixed(2)}
+                    <Badge className="bg-green-600 text-xs">
+                      Gets {formatCurrencyWithDecimals(Math.abs(netAmount))}
                     </Badge>
                   )}
                 </div>
               );
             })}
           </div>
-        </div>
 
-        <div className="pt-4 border-t">
-          <div className="flex items-center justify-between text-sm mb-2">
-            <span className="text-muted-foreground">Total expense:</span>
-            <span className="font-semibold">${totalAmount.toFixed(2)}</span>
-          </div>
-          <div className="flex items-center justify-between text-sm mb-2">
-            <span className="text-muted-foreground">Total paid:</span>
-            <span className="font-semibold">${totalPaid.toFixed(2)}</span>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Total split:</span>
-            <Badge
-              variant={
-                Math.abs(totalOwed - totalAmount) < 0.01 ? "default" : "destructive"
-              }
-            >
-              ${totalOwed.toFixed(2)}
-            </Badge>
+          <div className="pt-3 border-t space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Total expense:</span>
+              <span className="font-semibold">
+                {formatCurrencyWithDecimals(totalAmount)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Total allocated:</span>
+              <Badge
+                variant={
+                  Math.abs(totalOwed - totalAmount) < 0.01
+                    ? "default"
+                    : "destructive"
+                }
+                className="text-xs"
+              >
+                {formatCurrencyWithDecimals(totalOwed)}
+              </Badge>
+            </div>
           </div>
         </div>
-      </div>
-    </Card>
-  );
-};
+      </Card>
+    );
+  },
+);
+
+SplitPreview.displayName = "SplitPreview";

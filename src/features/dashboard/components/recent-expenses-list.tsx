@@ -14,20 +14,14 @@ import type { ExpenseWithRelations } from "@/features/expenses/types";
 import { format } from "date-fns";
 import { IconUsers } from "@tabler/icons-react";
 import Link from "next/link";
+import { memo } from "react";
+import { formatCurrency } from "@/lib/format";
 
 type RecentExpensesListProps = {
   expenses: ExpenseWithRelations[];
 };
 
-export const RecentExpensesList = ({ expenses }: RecentExpensesListProps) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+export const RecentExpensesList = memo(({ expenses }: RecentExpensesListProps) => {
 
   if (expenses.length === 0) {
     return (
@@ -106,4 +100,6 @@ export const RecentExpensesList = ({ expenses }: RecentExpensesListProps) => {
       </CardContent>
     </Card>
   );
-};
+});
+
+RecentExpensesList.displayName = "RecentExpensesList";

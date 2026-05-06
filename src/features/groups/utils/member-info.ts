@@ -1,8 +1,13 @@
 import type { GroupWithMembers, MemberInfo } from '../types'
 
+/**
+ * Converts group members to MemberInfo format
+ * @param group - The group with members data
+ * @param currentUserClerkId - The Clerk authentication ID of the current user (e.g., "user_abc123")
+ */
 export const getMembersInfo = (
   group: GroupWithMembers,
-  currentUserId: string
+  currentUserClerkId: string
 ): MemberInfo[] => {
   return group.members.map((member) => {
     if (member.userId) {
@@ -10,7 +15,7 @@ export const getMembersInfo = (
         id: member.id,
         name: member.user?.name || 'Unknown User',
         email: member.user?.email,
-        isCurrentUser: member.userId === currentUserId,
+        isCurrentUser: member.user?.clerkId === currentUserClerkId,
         userId: member.userId,
         contactId: null,
       }

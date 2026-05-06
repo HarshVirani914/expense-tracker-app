@@ -101,10 +101,33 @@ export const settlementService = {
             },
           },
         },
+        include: {
+          _count: {
+            select: {
+              expenses: true,
+            },
+          },
+        },
       })
 
       if (!group) {
         throw new Error('Group not found or you are not a member')
+      }
+
+      if (group._count.expenses === 0) {
+        throw new Error('Cannot record settlement in a group with no expenses')
+      }
+
+      if (data.payerUserId && data.receiverUserId && data.payerUserId === data.receiverUserId) {
+        throw new Error('Payer and receiver cannot be the same person')
+      }
+
+      if (
+        data.payerContactId &&
+        data.receiverContactId &&
+        data.payerContactId === data.receiverContactId
+      ) {
+        throw new Error('Payer and receiver cannot be the same person')
       }
 
       const settlement = await prisma.settlement.create({

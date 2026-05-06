@@ -9,6 +9,8 @@ import {
   IconBuildingBank,
   IconCurrencyRupee,
 } from "@tabler/icons-react";
+import { memo } from "react";
+import { formatCurrency } from "@/lib/format";
 
 type AccountBalancesProps = {
   accounts: AccountWithBalance[];
@@ -22,15 +24,7 @@ const ACCOUNT_ICONS = {
   CREDIT_CARD: IconCreditCard,
 };
 
-export const AccountBalances = ({ accounts }: AccountBalancesProps) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+export const AccountBalances = memo(({ accounts }: AccountBalancesProps) => {
 
   if (accounts.length === 0) {
     return (
@@ -85,4 +79,6 @@ export const AccountBalances = ({ accounts }: AccountBalancesProps) => {
       </CardContent>
     </Card>
   );
-};
+});
+
+AccountBalances.displayName = "AccountBalances";

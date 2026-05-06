@@ -10,6 +10,7 @@ import type {
   UpdateGroupInput,
 } from '../types'
 import { getMembersInfo } from '../utils/member-info'
+import { memberValidationService } from './member-validation-service'
 
 export const groupService = {
   async list(
@@ -41,6 +42,7 @@ export const groupService = {
                 user: {
                   select: {
                     id: true,
+                    clerkId: true,
                     name: true,
                     email: true,
                   },
@@ -97,6 +99,7 @@ export const groupService = {
               user: {
                 select: {
                   id: true,
+                  clerkId: true,
                   name: true,
                   email: true,
                 },
@@ -159,6 +162,7 @@ export const groupService = {
               user: {
                 select: {
                   id: true,
+                  clerkId: true,
                   name: true,
                   email: true,
                 },
@@ -204,34 +208,75 @@ export const groupService = {
         throw new Error('Group not found or you do not have permission to edit')
       }
 
-      const updated = await prisma.group.update({
-        where: { id: groupId },
-        data: {
-          ...(data.name && { name: data.name }),
-          ...(data.description !== undefined && { description: data.description || null }),
-        },
-        include: {
-          members: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
+      if (data.memberIds !== undefined) {
+        const validation = await memberValidationService.validateMemberUpdates(
+          groupId,
+          data.memberIds
+        )
+
+        if (!validation.canUpdate) {
+          const errorMessages = validation.blockedRemovals
+            .map((b) => b.reason)
+            .join('; ')
+          throw new Error(errorMessages)
+        }
+
+        await prisma.$transaction(async (tx) => {
+          if (validation.membersToRemove.length > 0) {
+            await tx.groupMember.deleteMany({
+              where: {
+                id: {
+                  in: validation.membersToRemove,
                 },
               },
-              contact: true,
-            },
-          },
-          _count: {
-            select: {
-              expenses: true,
-            },
-          },
-        },
-      })
+            })
+          }
 
-      logger.info('Group updated', { userId, groupId })
+          if (validation.membersToAdd.length > 0) {
+            const contacts = await tx.contact.findMany({
+              where: {
+                id: { in: validation.membersToAdd },
+                userId,
+              },
+            })
+
+            if (contacts.length !== validation.membersToAdd.length) {
+              throw new Error('One or more contacts not found')
+            }
+
+            await tx.groupMember.createMany({
+              data: validation.membersToAdd.map((contactId) => ({
+                groupId,
+                contactId,
+                role: 'member',
+              })),
+            })
+          }
+
+          await tx.group.update({
+            where: { id: groupId },
+            data: {
+              ...(data.name && { name: data.name }),
+              ...(data.description !== undefined && {
+                description: data.description || null,
+              }),
+            },
+          })
+        })
+      } else {
+        await prisma.group.update({
+          where: { id: groupId },
+          data: {
+            ...(data.name && { name: data.name }),
+            ...(data.description !== undefined && {
+              description: data.description || null,
+            }),
+          },
+        })
+      }
+
+      const updated = await this.get(userId, groupId)
+
       return updated
     } catch (error) {
       logger.error('Failed to update group', { error, userId, groupId, data })
@@ -372,6 +417,12 @@ export const groupService = {
         if (adminCount === 1) {
           throw new Error('Cannot remove the last admin from the group')
         }
+      }
+
+      const validation = await memberValidationService.canRemoveMember(memberId)
+
+      if (!validation.canRemove) {
+        throw new Error(validation.reason || 'Cannot remove member')
       }
 
       await prisma.groupMember.delete({

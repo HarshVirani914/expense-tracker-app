@@ -1,28 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { MemberInfo } from "@/features/groups/types";
-import type { ParticipantInput } from "../../schemas";
-import { SplitType } from "@/types/prisma";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { IconPercentage } from "@tabler/icons-react";
+import { formatCurrencyWithDecimals } from "@/lib/format";
 
 type PercentageSplitProps = {
   members: MemberInfo[];
   totalAmount: number;
-  participants: ParticipantInput[];
-  onParticipantsChange: (participants: ParticipantInput[]) => void;
+  onChange: (percentages: Record<string, number>) => void;
 };
 
 export const PercentageSplit = ({
   members,
   totalAmount,
-  participants,
-  onParticipantsChange,
+  onChange,
 }: PercentageSplitProps) => {
+  const memberIds = useMemo(
+    () => members.map((m) => m.userId || m.contactId || "").join(","),
+    [members]
+  );
+
   const [percentages, setPercentages] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -32,36 +34,26 @@ export const PercentageSplit = ({
       initialPercentages[memberId] = 0;
     });
     setPercentages(initialPercentages);
-  }, [members]);
+  }, [memberIds]);
 
-  const handlePercentageChange = (memberId: string, value: string) => {
+  useEffect(() => {
+    onChange(percentages);
+  }, [percentages, onChange]);
+
+  const handlePercentageChange = useCallback((memberId: string, value: string) => {
     const numValue = parseFloat(value) || 0;
-    const newPercentages = { ...percentages, [memberId]: numValue };
-    setPercentages(newPercentages);
+    setPercentages((prev) => ({ ...prev, [memberId]: numValue }));
+  }, []);
 
-    const newParticipants: ParticipantInput[] = members.map((member) => {
-      const memberKey = member.userId || member.contactId || "";
-      const percentage = newPercentages[memberKey] || 0;
-      const oweAmount = (totalAmount * percentage) / 100;
-
-      return {
-        memberIdOrContact: memberKey,
-        paidAmount: 0,
-        oweAmount,
-        splitType: SplitType.PERCENTAGE,
-        splitValue: percentage,
-        isUser: member.isCurrentUser,
-      };
-    });
-
-    onParticipantsChange(newParticipants);
-  };
-
-  const totalPercentage = Object.values(percentages).reduce(
-    (sum, val) => sum + val,
-    0
+  const totalPercentage = useMemo(
+    () => Object.values(percentages).reduce((sum, val) => sum + val, 0),
+    [percentages]
   );
-  const isValid = Math.abs(totalPercentage - 100) < 0.01;
+
+  const isValid = useMemo(
+    () => Math.abs(totalPercentage - 100) < 0.01,
+    [totalPercentage]
+  );
 
   if (members.length === 0) {
     return (
@@ -75,10 +67,13 @@ export const PercentageSplit = ({
 
   return (
     <Card className="p-6">
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-2">
         <IconPercentage className="h-5 w-5 text-primary" />
         <h3 className="font-semibold">Percentage Split</h3>
       </div>
+      <p className="text-xs text-muted-foreground mb-4">
+        Percentages must add up to 100% to submit
+      </p>
 
       <div className="space-y-3 mb-4">
         {members.map((member) => {
@@ -109,7 +104,7 @@ export const PercentageSplit = ({
                   className="flex-1"
                 />
                 <span className="text-sm text-muted-foreground w-16">
-                  ${amount.toFixed(2)}
+                  {formatCurrencyWithDecimals(amount)}
                 </span>
               </div>
             </div>

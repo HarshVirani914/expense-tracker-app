@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -28,26 +29,25 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCategories } from "@/features/categories/hooks/use-categories";
+import { useGroupMembers } from "@/features/groups/hooks/use-group-members";
 import { useGroups } from "@/features/groups/hooks/use-groups";
-import type { MemberInfo } from "@/features/groups/types";
-import { getMembersInfo } from "@/features/groups/utils/member-info";
-import { apiClient } from "@/lib/api-client";
 import { SplitType } from "@/types/prisma";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useCreateGroupExpense } from "../hooks/use-create-group-expense";
+import { useSplitCalculation } from "../hooks/use-split-calculation";
 import {
   createGroupExpenseSchema,
   type CreateGroupExpenseInput,
-  type ParticipantInput,
 } from "../schemas";
 import { EqualSplit } from "./split-calculator/equal-split";
 import { ExactSplit } from "./split-calculator/exact-split";
 import { PercentageSplit } from "./split-calculator/percentage-split";
 import { SharesSplit } from "./split-calculator/shares-split";
 import { SplitPreview } from "./split-calculator/split-preview";
+import { logger } from "@/lib/logger";
 
 type GroupExpenseFormDialogProps = {
   open: boolean;
@@ -60,19 +60,19 @@ export const GroupExpenseFormDialog = ({
   onOpenChange,
   defaultGroupId,
 }: GroupExpenseFormDialogProps) => {
-  const queryClient = useQueryClient();
   const { categories } = useCategories();
   const { groups } = useGroups({ limit: 100 });
 
   const [selectedGroupId, setSelectedGroupId] = useState<string>(
     defaultGroupId || "",
   );
-  const [groupMembers, setGroupMembers] = useState<MemberInfo[]>([]);
-  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [splitType, setSplitType] = useState<SplitType>(SplitType.EQUAL);
-  const [participants, setParticipants] = useState<ParticipantInput[]>([]);
-  const [payers, setPayers] = useState<Record<string, number>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [splitValues, setSplitValues] = useState<Record<string, number>>({});
+  const [payerId, setPayerId] = useState<string>("");
+
+  const { members: groupMembers } = useGroupMembers(selectedGroupId);
+  const { createGroupExpense, isCreating } =
+    useCreateGroupExpense(selectedGroupId);
 
   const form = useForm<CreateGroupExpenseInput>({
     resolver: zodResolver(createGroupExpenseSchema),
@@ -80,333 +80,384 @@ export const GroupExpenseFormDialog = ({
     defaultValues: {
       amount: 0,
       description: "",
+      date: new Date(),
       categoryId: "",
       groupId: defaultGroupId || "",
       participants: [],
     },
   });
 
+  const totalAmount = form.watch("amount");
+
+  // Set default payer to current user when members load
   useEffect(() => {
-    const loadGroupMembers = async () => {
-      if (!selectedGroupId) {
-        setGroupMembers([]);
-        return;
+    if (groupMembers.length > 0 && !payerId) {
+      const currentUser = groupMembers.find((m) => m.isCurrentUser);
+      if (currentUser) {
+        setPayerId(currentUser.userId || currentUser.contactId || "");
       }
+    }
+  }, [groupMembers, payerId]);
 
+  const participants = useSplitCalculation(
+    groupMembers,
+    totalAmount,
+    splitType,
+    splitValues,
+    payerId,
+  );
+
+  // Sync calculated participants to form field for validation
+  useEffect(() => {
+    form.setValue("participants", participants, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  }, [participants, form]);
+
+  const handleSplitValuesChange = useCallback(
+    (values: Record<string, number>) => {
+      setSplitValues(values);
+    },
+    [],
+  );
+
+  const handleSplitTypeChange = useCallback((newType: SplitType) => {
+    setSplitType(newType);
+    setSplitValues({});
+  }, []);
+
+  const onSubmit = useCallback(
+    async (data: CreateGroupExpenseInput) => {
       try {
-        const response = await apiClient.get<{ data: any }>(
-          `/api/groups/${selectedGroupId}`,
-        );
-        const group = response.data;
-        const members = getMembersInfo(group, "");
-        setGroupMembers(members);
-        setSelectedMembers(members.map((m) => m.userId || m.contactId || ""));
+        await createGroupExpense(data);
+
+        toast.success("Group expense created successfully");
+        onOpenChange(false);
+
+        form.reset();
+        setSplitValues({});
+        setSplitType(SplitType.EQUAL);
+        // Reset payer to current user
+        const currentUser = groupMembers.find((m) => m.isCurrentUser);
+        if (currentUser) {
+          setPayerId(currentUser.userId || currentUser.contactId || "");
+        }
       } catch (error) {
-        toast.error("Failed to load group members");
+        logger.error("Failed to create group expense", { error });
+        toast.error("Failed to create group expense");
       }
-    };
+    },
+    [createGroupExpense, onOpenChange, form, groupMembers],
+  );
 
-    loadGroupMembers();
-  }, [selectedGroupId]);
+  const isFormValid = useMemo(() => {
+    if (participants.length === 0) return false;
+    if (totalAmount <= 0) return false;
 
-  const getSelectedMembersInfo = () => {
-    return groupMembers.filter((m) =>
-      selectedMembers.includes(m.userId || m.contactId || ""),
-    );
-  };
+    const totalOwed = participants.reduce((sum, p) => sum + p.oweAmount, 0);
+    if (Math.abs(totalOwed - totalAmount) > 0.01) return false;
 
-  const handlePayerChange = (memberId: string, amount: string) => {
-    const numAmount = parseFloat(amount) || 0;
-    const newPayers = { ...payers, [memberId]: numAmount };
-    setPayers(newPayers);
+    const totalPaid = participants.reduce((sum, p) => sum + p.paidAmount, 0);
+    if (Math.abs(totalPaid - totalAmount) > 0.01) return false;
 
-    const updatedParticipants = participants.map((p) => ({
-      ...p,
-      paidAmount: newPayers[p.memberIdOrContact] || 0,
-    }));
-    setParticipants(updatedParticipants);
-  };
-
-  const onSubmit = async (data: CreateGroupExpenseInput) => {
-    try {
-      setIsSubmitting(true);
-
-      const participantsWithPayers = participants.map((p) => ({
-        ...p,
-        paidAmount: payers[p.memberIdOrContact] || 0,
-      }));
-
-      const totalPaid = participantsWithPayers.reduce(
-        (sum, p) => sum + p.paidAmount,
+    if (splitType === SplitType.PERCENTAGE) {
+      const totalPercentage = participants.reduce(
+        (sum, p) => sum + p.splitValue,
         0,
       );
-      if (Math.abs(totalPaid - data.amount) > 0.01) {
-        toast.error("Total paid amount must equal expense amount");
-        return;
-      }
-
-      const payload = {
-        ...data,
-        participants: participantsWithPayers,
-      };
-
-      await apiClient.post("/api/expenses/group", payload);
-
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      queryClient.invalidateQueries({
-        queryKey: ["group-balances", selectedGroupId],
-      });
-
-      toast.success("Group expense created successfully");
-      onOpenChange(false);
-
-      form.reset();
-      setParticipants([]);
-      setPayers({});
-    } catch (error) {
-      toast.error("Failed to create group expense");
-    } finally {
-      setIsSubmitting(false);
+      if (Math.abs(totalPercentage - 100) > 0.01) return false;
     }
-  };
 
-  const totalAmount = form.watch("amount");
-  const selectedMembersInfo = getSelectedMembersInfo();
+    return true;
+  }, [participants, totalAmount, splitType]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Add Group Expense</DialogTitle>
+      <DialogContent className="md:max-w-7xl w-full overflow-hidden p-0 flex flex-col">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
+          <DialogTitle className="text-2xl">Add Group Expense</DialogTitle>
           <DialogDescription>
             Split an expense with your group members
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Amount *</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(parseFloat(e.target.value))
-                        }
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col flex-1 min-h-0"
+          >
+            <div className="flex-1 overflow-y-auto min-h-0">
+              <div className="grid lg:grid-cols-2 gap-0">
+                {/* Left Column - Expense Details */}
+                <div className="p-6 border-r border-border space-y-6">
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground mb-4">
+                      Expense Details
+                    </h3>
+
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="amount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Amount *</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                                className="text-lg"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(parseFloat(e.target.value))
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Date</FormLabel>
-                    <DatePicker
-                      date={
-                        field.value instanceof Date ? field.value : undefined
-                      }
-                      onSelect={field.onChange}
-                      placeholder="Select date"
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g., Dinner at restaurant"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="e.g., Dinner at restaurant"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="date"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                              <FormLabel>Date</FormLabel>
+                              <DatePicker
+                                date={
+                                  field.value instanceof Date
+                                    ? field.value
+                                    : undefined
+                                }
+                                onSelect={field.onChange}
+                                placeholder="Select date"
+                              />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="categoryId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category *</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories?.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <FormField
+                          control={form.control}
+                          name="categoryId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Category *</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select category" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {categories?.map((category) => (
+                                    <SelectItem
+                                      key={category.id}
+                                      value={category.id}
+                                    >
+                                      {category.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
-              <FormField
-                control={form.control}
-                name="groupId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Group *</FormLabel>
-                    <Select
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        setSelectedGroupId(value);
-                      }}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select group" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {groups?.map((group) => (
-                          <SelectItem key={group.id} value={group.id}>
-                            {group.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {groupMembers.length > 0 && (
-              <>
-                <div className="space-y-3">
-                  <FormLabel>Who paid?</FormLabel>
-                  <div className="space-y-2">
-                    {groupMembers.map((member) => {
-                      const memberId = member.userId || member.contactId || "";
-                      return (
-                        <div
-                          key={member.id}
-                          className="flex items-center gap-2"
-                        >
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            placeholder="0.00"
-                            value={payers[memberId] || ""}
-                            onChange={(e) =>
-                              handlePayerChange(memberId, e.target.value)
-                            }
-                            className="flex-1"
-                          />
-                          <span className="text-sm text-muted-foreground w-32">
-                            {member.name}
-                          </span>
-                        </div>
-                      );
-                    })}
+                      <FormField
+                        control={form.control}
+                        name="groupId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Group *</FormLabel>
+                            <Select
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                setSelectedGroupId(value);
+                                setPayerId(""); // Reset payer when group changes
+                              }}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select group" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {groups?.map((group) => (
+                                  <SelectItem key={group.id} value={group.id}>
+                                    {group.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <FormLabel>Split Type</FormLabel>
-                  <Tabs
-                    value={splitType}
-                    onValueChange={(v) => setSplitType(v as SplitType)}
-                  >
-                    <TabsList className="grid w-full grid-cols-4">
-                      <TabsTrigger value={SplitType.EQUAL}>Equal</TabsTrigger>
-                      <TabsTrigger value={SplitType.EXACT}>Exact</TabsTrigger>
-                      <TabsTrigger value={SplitType.PERCENTAGE}>%</TabsTrigger>
-                      <TabsTrigger value={SplitType.SHARES}>Shares</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value={SplitType.EQUAL}>
-                      <EqualSplit
-                        members={selectedMembersInfo}
-                        totalAmount={totalAmount}
+                {/* Right Column - Split Configuration */}
+                <div className="p-6 space-y-6 bg-muted/30 overflow-y-auto max-h-[calc(90vh-120px)]">
+                  {groupMembers.length > 0 ? (
+                    <>
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground mb-1">
+                          Split Configuration
+                        </h3>
+                        <p className="text-xs text-muted-foreground mb-4">
+                          {splitType === SplitType.EXACT
+                            ? "Specify who paid what amounts."
+                            : "Select who paid for this expense."}
+                        </p>
+
+                        {/* Who Paid Selector */}
+                        {splitType !== SplitType.EXACT && (
+                          <div className="mb-4">
+                            <label className="text-sm font-medium mb-2 block">
+                              Who paid?
+                            </label>
+                            <Select
+                              value={payerId}
+                              onValueChange={setPayerId}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select who paid" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {groupMembers.map((member) => (
+                                  <SelectItem
+                                    key={member.userId || member.contactId}
+                                    value={member.userId || member.contactId || ""}
+                                  >
+                                    {member.name}
+                                    {member.isCurrentUser && " (You)"}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
+
+                        <Tabs
+                          onValueChange={(v) =>
+                            handleSplitTypeChange(v as SplitType)
+                          }
+                          value={splitType}
+                          orientation="horizontal"
+                          className="flex-col w-full"
+                        >
+                          <TabsList className="w-full">
+                            <TabsTrigger value={SplitType.EQUAL}>
+                              Equal
+                            </TabsTrigger>
+                            <TabsTrigger value={SplitType.EXACT}>
+                              Exact
+                            </TabsTrigger>
+                            <TabsTrigger value={SplitType.PERCENTAGE}>
+                              %
+                            </TabsTrigger>
+                            <TabsTrigger value={SplitType.SHARES}>
+                              Shares
+                            </TabsTrigger>
+                          </TabsList>
+
+                          <TabsContent value={SplitType.EQUAL}>
+                            <EqualSplit
+                              members={groupMembers}
+                              totalAmount={totalAmount}
+                            />
+                          </TabsContent>
+                          <TabsContent value={SplitType.EXACT}>
+                            <ExactSplit
+                              members={groupMembers}
+                              totalAmount={totalAmount}
+                              onChange={handleSplitValuesChange}
+                            />
+                          </TabsContent>
+                          <TabsContent value={SplitType.PERCENTAGE}>
+                            <PercentageSplit
+                              members={groupMembers}
+                              totalAmount={totalAmount}
+                              onChange={handleSplitValuesChange}
+                            />
+                          </TabsContent>
+                          <TabsContent value={SplitType.SHARES}>
+                            <SharesSplit
+                              members={groupMembers}
+                              totalAmount={totalAmount}
+                              onChange={handleSplitValuesChange}
+                            />
+                          </TabsContent>
+                        </Tabs>
+                      </div>
+
+                      <SplitPreview
+                        members={groupMembers}
                         participants={participants}
-                        onParticipantsChange={setParticipants}
-                      />
-                    </TabsContent>
-                    <TabsContent value={SplitType.EXACT}>
-                      <ExactSplit
-                        members={selectedMembersInfo}
                         totalAmount={totalAmount}
-                        participants={participants}
-                        onParticipantsChange={setParticipants}
                       />
-                    </TabsContent>
-                    <TabsContent value={SplitType.PERCENTAGE}>
-                      <PercentageSplit
-                        members={selectedMembersInfo}
-                        totalAmount={totalAmount}
-                        participants={participants}
-                        onParticipantsChange={setParticipants}
-                      />
-                    </TabsContent>
-                    <TabsContent value={SplitType.SHARES}>
-                      <SharesSplit
-                        members={selectedMembersInfo}
-                        totalAmount={totalAmount}
-                        participants={participants}
-                        onParticipantsChange={setParticipants}
-                      />
-                    </TabsContent>
-                  </Tabs>
+                    </>
+                  ) : (
+                    <div className="flex items-center justify-center h-full min-h-[300px]">
+                      <div className="text-center space-y-2">
+                        <p className="text-muted-foreground">
+                          Select a group to configure split
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
+              </div>
+            </div>
 
-                <SplitPreview
-                  members={selectedMembersInfo}
-                  participants={participants}
-                  totalAmount={totalAmount}
-                />
-              </>
-            )}
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting || participants.length === 0}
-              >
-                {isSubmitting ? "Creating..." : "Create Expense"}
-              </Button>
-            </DialogFooter>
+            {/* Footer with actions */}
+            <div className="border-t px-6 py-4 bg-background shrink-0">
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isCreating || !isFormValid}
+                  className="min-w-[140px]"
+                >
+                  {isCreating ? "Creating..." : "Create Expense"}
+                </Button>
+              </DialogFooter>
+            </div>
           </form>
         </Form>
       </DialogContent>

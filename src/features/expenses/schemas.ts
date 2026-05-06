@@ -75,6 +75,7 @@ export const expenseFiltersSchema = z.object({
   limit: z.coerce.number().int().positive().max(100).optional().default(20),
   categoryId: z.cuid2().optional(),
   accountId: z.cuid2().optional(),
+  groupId: z.cuid2().optional(),
   type: z.enum(ExpenseType).optional(),
   paymentMethod: z.enum(PaymentMethod).optional(),
   startDate: z.union([z.string(), z.date()]).optional(),
@@ -98,8 +99,8 @@ export const createGroupExpenseSchema = z
     amount: z.number().positive('Amount must be greater than 0'),
     description: z.string().max(500, 'Description is too long').trim().optional(),
     date: z.union([z.string(), z.date()]).optional().default(() => new Date()),
-    categoryId: z.cuid2('Invalid category ID'),
-    groupId: z.cuid2('Invalid group ID'),
+    categoryId: z.cuid2('select a category'),
+    groupId: z.cuid2('select a group'),
     participants: z.array(participantSchema).min(1, 'At least one participant is required'),
   })
   .refine(

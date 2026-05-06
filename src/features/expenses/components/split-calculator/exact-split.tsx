@@ -1,28 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { MemberInfo } from "@/features/groups/types";
-import type { ParticipantInput } from "../../schemas";
-import { SplitType } from "@/types/prisma";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { IconCoins } from "@tabler/icons-react";
+import { formatCurrencyWithDecimals } from "@/lib/format";
 
 type ExactSplitProps = {
   members: MemberInfo[];
   totalAmount: number;
-  participants: ParticipantInput[];
-  onParticipantsChange: (participants: ParticipantInput[]) => void;
+  onChange: (amounts: Record<string, number>) => void;
 };
 
-export const ExactSplit = ({
-  members,
-  totalAmount,
-  participants,
-  onParticipantsChange,
-}: ExactSplitProps) => {
+export const ExactSplit = ({ members, totalAmount, onChange }: ExactSplitProps) => {
+  const memberIds = useMemo(
+    () => members.map((m) => m.userId || m.contactId || "").join(","),
+    [members]
+  );
+
   const [amounts, setAmounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -32,30 +30,26 @@ export const ExactSplit = ({
       initialAmounts[memberId] = 0;
     });
     setAmounts(initialAmounts);
-  }, [members]);
+  }, [memberIds]);
 
-  const handleAmountChange = (memberId: string, value: string) => {
+  useEffect(() => {
+    onChange(amounts);
+  }, [amounts, onChange]);
+
+  const handleAmountChange = useCallback((memberId: string, value: string) => {
     const numValue = parseFloat(value) || 0;
-    const newAmounts = { ...amounts, [memberId]: numValue };
-    setAmounts(newAmounts);
+    setAmounts((prev) => ({ ...prev, [memberId]: numValue }));
+  }, []);
 
-    const newParticipants: ParticipantInput[] = members.map((member) => {
-      const memberKey = member.userId || member.contactId || "";
-      return {
-        memberIdOrContact: memberKey,
-        paidAmount: 0,
-        oweAmount: newAmounts[memberKey] || 0,
-        splitType: SplitType.EXACT,
-        splitValue: newAmounts[memberKey] || 0,
-        isUser: member.isCurrentUser,
-      };
-    });
+  const totalPaid = useMemo(
+    () => Object.values(amounts).reduce((sum, val) => sum + val, 0),
+    [amounts]
+  );
 
-    onParticipantsChange(newParticipants);
-  };
-
-  const totalAssigned = Object.values(amounts).reduce((sum, val) => sum + val, 0);
-  const remaining = totalAmount - totalAssigned;
+  const remaining = useMemo(
+    () => totalAmount - totalPaid,
+    [totalAmount, totalPaid]
+  );
 
   if (members.length === 0) {
     return (
@@ -69,24 +63,30 @@ export const ExactSplit = ({
 
   return (
     <Card className="p-6">
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-2">
         <IconCoins className="h-5 w-5 text-primary" />
         <h3 className="font-semibold">Exact Amounts</h3>
       </div>
-      
+      <p className="text-xs text-muted-foreground mb-4">
+        Enter how much each person paid. Expense will be split equally among all members.
+      </p>
+
       <div className="space-y-3 mb-4">
         {members.map((member) => {
           const memberId = member.userId || member.contactId || "";
           return (
             <div key={member.id} className="space-y-2">
-              <Label htmlFor={`amount-${memberId}`}>
-                {member.name}
-                {member.isCurrentUser && (
-                  <Badge variant="secondary" className="text-xs ml-2">
-                    You
-                  </Badge>
-                )}
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor={`amount-${memberId}`}>
+                  {member.name}
+                  {member.isCurrentUser && (
+                    <Badge variant="secondary" className="text-xs ml-2">
+                      You
+                    </Badge>
+                  )}
+                </Label>
+                <span className="text-xs text-muted-foreground">paid</span>
+              </div>
               <Input
                 id={`amount-${memberId}`}
                 type="number"
@@ -103,13 +103,19 @@ export const ExactSplit = ({
 
       <div className="pt-4 border-t">
         <div className="flex items-center justify-between text-sm mb-2">
-          <span className="text-muted-foreground">Total assigned:</span>
-          <span className="font-semibold">${totalAssigned.toFixed(2)}</span>
+          <span className="text-muted-foreground">Total expense:</span>
+          <span className="font-semibold">{formatCurrencyWithDecimals(totalAmount)}</span>
+        </div>
+        <div className="flex items-center justify-between text-sm mb-2">
+          <span className="text-muted-foreground">Total paid:</span>
+          <span className="font-semibold">{formatCurrencyWithDecimals(totalPaid)}</span>
         </div>
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Remaining:</span>
+          <span className="text-muted-foreground">Status:</span>
           <Badge variant={Math.abs(remaining) < 0.01 ? "default" : "destructive"}>
-            ${remaining.toFixed(2)}
+            {Math.abs(remaining) < 0.01
+              ? "Balanced"
+              : `${formatCurrencyWithDecimals(Math.abs(remaining))} ${remaining > 0 ? "short" : "over"}`}
           </Badge>
         </div>
       </div>

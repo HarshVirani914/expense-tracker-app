@@ -12,11 +12,12 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { IconDotsVertical, IconPencil, IconTrash, IconUsers } from "@tabler/icons-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import { useDeleteExpense } from "../hooks/use-delete-expense";
 import { useExpenses } from "../hooks/use-expenses";
 import type { ExpenseFilters, ExpenseWithRelations } from "../types";
+import { formatCurrency } from "@/lib/format";
 
 type ExpenseListProps = {
   onEdit: (expense: ExpenseWithRelations) => void;
@@ -40,7 +41,7 @@ export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
   const { deleteExpense } = useDeleteExpense();
   const { confirm } = useConfirmDialog();
 
-  const handleDelete = async (id: string, description?: string) => {
+  const handleDelete = useCallback(async (id: string, description?: string) => {
     const confirmed = await confirm({
       title: "Delete Expense",
       description: `Are you sure you want to delete ${description ? `"${description}"` : "this expense"}? This action cannot be undone.`,
@@ -57,18 +58,9 @@ export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
         toast.error("Failed to delete expense");
       }
     }
-  };
+  }, [confirm, deleteExpense]);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const columns: ColumnDef<ExpenseWithRelations>[] = [
+  const columns: ColumnDef<ExpenseWithRelations>[] = useMemo(() => [
     {
       accessorKey: "date",
       header: "Date",
@@ -180,7 +172,7 @@ export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
         </DropdownMenu>
       ),
     },
-  ];
+  ], [onEdit, handleDelete]);
 
   return (
     <DataTable

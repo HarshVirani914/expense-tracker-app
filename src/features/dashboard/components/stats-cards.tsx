@@ -2,21 +2,15 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconCurrencyRupee, IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
+import { formatCurrency } from "@/lib/format";
+import { memo } from "react";
 import type { MonthlyStats } from "../types";
 
 type StatsCardsProps = {
   stats: MonthlyStats;
 };
 
-export const StatsCards = ({ stats }: StatsCardsProps) => {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+export const StatsCards = memo(({ stats }: StatsCardsProps) => {
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
@@ -62,4 +56,6 @@ export const StatsCards = ({ stats }: StatsCardsProps) => {
       </Card>
     </div>
   );
-};
+});
+
+StatsCards.displayName = "StatsCards";

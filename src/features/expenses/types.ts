@@ -18,6 +18,11 @@ export type ExpenseWithRelations = Expense & {
     id: string
     name: string
   } | null
+  participants?: {
+    id: string
+    paidAmount: number
+    oweAmount: number
+  }[]
 }
 
 export type CreateExpenseInput = {
@@ -45,6 +50,7 @@ export type UpdateExpenseInput = {
 export type ExpenseFilters = FilterOptions & {
   categoryId?: string
   accountId?: string
+  groupId?: string
   type?: ExpenseType
   paymentMethod?: PaymentMethod
 }

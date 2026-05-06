@@ -20,6 +20,7 @@ export const expenseService = {
         limit = 20,
         categoryId,
         accountId,
+        groupId,
         type,
         paymentMethod,
         startDate,
@@ -35,6 +36,7 @@ export const expenseService = {
         userId,
         ...(categoryId && { categoryId }),
         ...(accountId && { accountId }),
+        ...(groupId && { groupId }),
         ...(type && { type }),
         ...(paymentMethod && { paymentMethod }),
         ...(search && {

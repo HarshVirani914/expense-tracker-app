@@ -1,42 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
+import { useMemo } from "react";
 import type { MemberInfo } from "@/features/groups/types";
-import type { ParticipantInput } from "../../schemas";
-import { SplitType } from "@/types/prisma";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { IconUsersGroup } from "@tabler/icons-react";
+import { formatCurrencyWithDecimals } from "@/lib/format";
 
 type EqualSplitProps = {
   members: MemberInfo[];
   totalAmount: number;
-  participants: ParticipantInput[];
-  onParticipantsChange: (participants: ParticipantInput[]) => void;
 };
 
-export const EqualSplit = ({
-  members,
-  totalAmount,
-  participants,
-  onParticipantsChange,
-}: EqualSplitProps) => {
-  useEffect(() => {
-    if (members.length === 0 || totalAmount <= 0) return;
-
-    const splitAmount = totalAmount / members.length;
-
-    const newParticipants: ParticipantInput[] = members.map((member) => ({
-      memberIdOrContact: member.userId || member.contactId || "",
-      paidAmount: 0,
-      oweAmount: splitAmount,
-      splitType: SplitType.EQUAL,
-      splitValue: 1,
-      isUser: member.isCurrentUser,
-    }));
-
-    onParticipantsChange(newParticipants);
-  }, [members, totalAmount, onParticipantsChange]);
+export const EqualSplit = ({ members, totalAmount }: EqualSplitProps) => {
+  const splitAmount = useMemo(
+    () => (members.length > 0 ? totalAmount / members.length : 0),
+    [totalAmount, members.length],
+  );
 
   if (members.length === 0) {
     return (
@@ -48,33 +28,38 @@ export const EqualSplit = ({
     );
   }
 
-  const splitAmount = totalAmount / members.length;
-
   return (
-    <Card className="p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <IconUsersGroup className="h-5 w-5 text-primary" />
-        <h3 className="font-semibold">Equal Split</h3>
+    <Card className="border-border/50 shadow-sm">
+      <div className="p-4 border-b">
+        <div className="flex items-center gap-2">
+          <IconUsersGroup className="h-4 w-4 text-primary" />
+          <h3 className="font-medium text-sm">Equal Split</h3>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          Amount split equally among all members
+        </p>
       </div>
-      <div className="space-y-2">
-        {members.map((member) => (
-          <div
-            key={member.id}
-            className="flex items-center justify-between py-2 border-b last:border-0"
-          >
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{member.name}</span>
-              {member.isCurrentUser && (
-                <Badge variant="secondary" className="text-xs">
-                  You
-                </Badge>
-              )}
+      <div className="p-4">
+        <div className="space-y-2">
+          {members.map((member) => (
+            <div
+              key={member.id}
+              className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/30"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">{member.name}</span>
+                {member.isCurrentUser && (
+                  <Badge variant="secondary" className="text-xs">
+                    You
+                  </Badge>
+                )}
+              </div>
+              <span className="text-sm font-semibold">
+                {formatCurrencyWithDecimals(splitAmount)}
+              </span>
             </div>
-            <Badge variant="outline">
-              ${splitAmount.toFixed(2)}
-            </Badge>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </Card>
   );
