@@ -302,11 +302,43 @@ export const groupService = {
         throw new Error('Group not found or you do not have permission to delete')
       }
 
-      await prisma.group.delete({
-        where: { id: groupId },
+      await prisma.$transaction(async (tx) => {
+        const expenseIds = await tx.expense.findMany({
+          where: { groupId },
+          select: { id: true },
+        })
+
+        if (expenseIds.length > 0) {
+          await tx.expenseParticipant.deleteMany({
+            where: {
+              expenseId: {
+                in: expenseIds.map((e) => e.id),
+              },
+            },
+          })
+
+          await tx.expense.deleteMany({
+            where: {
+              id: {
+                in: expenseIds.map((e) => e.id),
+              },
+            },
+          })
+        }
+
+        await tx.settlement.deleteMany({
+          where: { groupId },
+        })
+
+        await tx.group.delete({
+          where: { id: groupId },
+        })
       })
 
-      logger.info('Group deleted', { userId, groupId })
+      logger.info('Group deleted with all associated expenses and settlements', {
+        userId,
+        groupId,
+      })
     } catch (error) {
       logger.error('Failed to delete group', { error, userId, groupId })
       throw error

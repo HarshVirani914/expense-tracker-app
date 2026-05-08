@@ -10,54 +10,76 @@ export const dashboardService = {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
       const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
 
-      const [expensesStats, incomeStats, topCategoriesData, recentExpenses, accounts] =
-        await Promise.all([
-          prisma.expense.aggregate({
-            where: {
-              userId,
+      const [
+        personalExpensesStats,
+        groupExpensesParticipants,
+        incomeStats,
+        allExpenses,
+        recentExpenses,
+        accounts,
+      ] = await Promise.all([
+        prisma.expense.aggregate({
+          where: {
+            userId,
+            type: 'EXPENSE',
+            groupId: null,
+            date: {
+              gte: startOfMonth,
+              lte: endOfMonth,
+            },
+          },
+          _sum: {
+            amount: true,
+          },
+        }),
+        prisma.expenseParticipant.aggregate({
+          where: {
+            userId,
+            expense: {
               type: 'EXPENSE',
+              groupId: { not: null },
               date: {
                 gte: startOfMonth,
                 lte: endOfMonth,
               },
             },
-            _sum: {
-              amount: true,
+          },
+          _sum: {
+            paidAmount: true,
+          },
+        }),
+        prisma.expense.aggregate({
+          where: {
+            userId,
+            type: 'INCOME',
+            date: {
+              gte: startOfMonth,
+              lte: endOfMonth,
             },
-          }),
-          prisma.expense.aggregate({
-            where: {
-              userId,
-              type: 'INCOME',
-              date: {
-                gte: startOfMonth,
-                lte: endOfMonth,
-              },
+          },
+          _sum: {
+            amount: true,
+          },
+        }),
+        prisma.expense.findMany({
+          where: {
+            userId,
+            type: 'EXPENSE',
+            date: {
+              gte: startOfMonth,
+              lte: endOfMonth,
             },
-            _sum: {
-              amount: true,
+          },
+          select: {
+            categoryId: true,
+            amount: true,
+            groupId: true,
+            participants: {
+              where: { userId },
+              select: { paidAmount: true },
             },
-          }),
-          prisma.expense.groupBy({
-            by: ['categoryId'],
-            where: {
-              userId,
-              type: 'EXPENSE',
-              date: {
-                gte: startOfMonth,
-                lte: endOfMonth,
-              },
-            },
-            _sum: {
-              amount: true,
-            },
-            orderBy: {
-              _sum: {
-                amount: 'desc',
-              },
-            },
-            take: 5,
-          }),
+          },
+        }),
           prisma.expense.findMany({
             where: { userId },
             include: {
@@ -76,20 +98,37 @@ export const dashboardService = {
           accountService.list(userId),
         ])
 
-      const totalExpenses = Number(expensesStats._sum.amount || 0)
+      const personalExpenses = Number(personalExpensesStats._sum.amount || 0)
+      const groupExpensesPaid = Number(groupExpensesParticipants._sum.paidAmount || 0)
+      const totalExpenses = personalExpenses + groupExpensesPaid
       const totalIncome = Number(incomeStats._sum.amount || 0)
 
+      const categoryTotals = new Map<string, number>()
+      for (const expense of allExpenses) {
+        const amount =
+          expense.groupId && expense.participants.length > 0
+            ? Number(expense.participants[0].paidAmount)
+            : Number(expense.amount)
+
+        const currentTotal = categoryTotals.get(expense.categoryId) || 0
+        categoryTotals.set(expense.categoryId, currentTotal + amount)
+      }
+
+      const sortedCategories = Array.from(categoryTotals.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+
       const categoriesWithNames = await Promise.all(
-        topCategoriesData.map(async (item) => {
+        sortedCategories.map(async ([categoryId, total]) => {
           const category = await prisma.category.findUnique({
-            where: { id: item.categoryId },
+            where: { id: categoryId },
             select: { name: true, color: true },
           })
           return {
-            categoryId: item.categoryId,
+            categoryId,
             name: category?.name || 'Unknown',
             color: category?.color || '#6B7280',
-            total: Number(item._sum.amount || 0),
+            total,
           }
         })
       )

@@ -13,6 +13,9 @@ export const useDeleteSettlement = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settlements'] })
       queryClient.invalidateQueries({ queryKey: ['group-balances'] })
+      queryClient.invalidateQueries({ queryKey: ['outstanding-debts'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['groups'] })
     },
   })
 

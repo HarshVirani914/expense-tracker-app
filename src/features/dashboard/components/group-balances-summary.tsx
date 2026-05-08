@@ -132,7 +132,7 @@ const GroupBalanceItem = ({
 
   return (
     <Link href={`/groups/${groupId}`}>
-      <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors cursor-pointer">
+      <div className="flex items-center justify-between p-3 rounded-lg border hover:border-primary hover:text-primary transition-colors cursor-pointer">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-full bg-primary/10">
             <IconUsers className="h-4 w-4 text-primary" />

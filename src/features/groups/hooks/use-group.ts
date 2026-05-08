@@ -5,7 +5,10 @@ import type { ApiResponse } from '@/types/api'
 
 const GROUP_KEY = ['group'] as const
 
-export const useGroup = (groupId?: string) => {
+export const useGroup = (
+  groupId?: string,
+  options?: { enabled?: boolean }
+) => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [...GROUP_KEY, groupId] as const,
     queryFn: async () => {
@@ -15,7 +18,7 @@ export const useGroup = (groupId?: string) => {
       )
       return response.data
     },
-    enabled: !!groupId,
+    enabled: options?.enabled !== undefined ? options.enabled && !!groupId : !!groupId,
   })
 
   return {

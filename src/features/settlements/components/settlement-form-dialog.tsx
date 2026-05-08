@@ -41,6 +41,11 @@ type SettlementFormDialogProps = {
   onOpenChange: (open: boolean) => void;
   groupId: string;
   members: MemberInfo[];
+  prefilledData?: {
+    payerId: string;
+    receiverId: string;
+    amount: number;
+  };
 };
 
 export const SettlementFormDialog = ({
@@ -48,6 +53,7 @@ export const SettlementFormDialog = ({
   onOpenChange,
   groupId,
   members,
+  prefilledData,
 }: SettlementFormDialogProps) => {
   const { createSettlement, isCreating } = useCreateSettlement();
   const [payerId, setPayerId] = useState("");
@@ -72,8 +78,47 @@ export const SettlementFormDialog = ({
 
   useEffect(() => {
     if (open) {
+      let initialPayerId = "";
+      let initialReceiverId = "";
+      let initialAmount: number | undefined = undefined;
+
+      if (prefilledData) {
+        if (prefilledData.payerId === "currentUser") {
+          const currentUser = members.find((m) => m.isCurrentUser);
+          initialPayerId = currentUser?.userId || currentUser?.contactId || "";
+        } else {
+          initialPayerId = prefilledData.payerId;
+        }
+
+        if (prefilledData.receiverId === "currentUser") {
+          const currentUser = members.find((m) => m.isCurrentUser);
+          initialReceiverId =
+            currentUser?.userId || currentUser?.contactId || "";
+        } else {
+          initialReceiverId = prefilledData.receiverId;
+        }
+
+        initialAmount = prefilledData.amount;
+
+        const payer = members.find(
+          (m) => (m.userId || m.contactId || "") === initialPayerId
+        );
+        const receiver = members.find(
+          (m) => (m.userId || m.contactId || "") === initialReceiverId
+        );
+
+        if (payer) {
+          form.setValue("payerUserId", payer.userId || null);
+          form.setValue("payerContactId", payer.contactId || null);
+        }
+        if (receiver) {
+          form.setValue("receiverUserId", receiver.userId || null);
+          form.setValue("receiverContactId", receiver.contactId || null);
+        }
+      }
+
       form.reset({
-        amount: undefined,
+        amount: initialAmount,
         notes: "",
         groupId,
         date: new Date(),
@@ -82,12 +127,12 @@ export const SettlementFormDialog = ({
         receiverUserId: null,
         receiverContactId: null,
       });
-      setPayerId("");
-      setReceiverId("");
+      setPayerId(initialPayerId);
+      setReceiverId(initialReceiverId);
       setPayerError("");
       setReceiverError("");
     }
-  }, [open, groupId, form]);
+  }, [open, groupId, form, members, prefilledData]);
 
   const onSubmit = async (data: CreateSettlementInput) => {
     try {

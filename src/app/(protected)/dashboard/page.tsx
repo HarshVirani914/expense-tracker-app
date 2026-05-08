@@ -7,6 +7,7 @@ import { QuickActions } from "@/features/dashboard/components/quick-actions";
 import { RecentExpensesList } from "@/features/dashboard/components/recent-expenses-list";
 import { StatsCards } from "@/features/dashboard/components/stats-cards";
 import { useDashboardStats } from "@/features/dashboard/hooks";
+import { OutstandingDebtsWidget } from "@/features/settlements/components/outstanding-debts-widget";
 import { IconLayoutDashboard } from "@tabler/icons-react";
 
 export default function DashboardPage() {
@@ -72,6 +73,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
+        <OutstandingDebtsWidget />
         <AccountBalances accounts={stats.accounts} />
       </div>
     </div>

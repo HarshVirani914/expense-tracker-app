@@ -5,6 +5,9 @@ import type { ApiResponse } from '@/types/api'
 
 const EXPENSES_KEY = ['expenses'] as const
 const GROUP_BALANCES_KEY = ['group-balances'] as const
+const OUTSTANDING_DEBTS_KEY = ['outstanding-debts'] as const
+const DASHBOARD_KEY = ['dashboard'] as const
+const GROUPS_KEY = ['groups'] as const
 
 export const useCreateGroupExpense = (groupId?: string) => {
   const queryClient = useQueryClient()
@@ -19,6 +22,9 @@ export const useCreateGroupExpense = (groupId?: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: EXPENSES_KEY })
+      queryClient.invalidateQueries({ queryKey: OUTSTANDING_DEBTS_KEY })
+      queryClient.invalidateQueries({ queryKey: DASHBOARD_KEY })
+      queryClient.invalidateQueries({ queryKey: GROUPS_KEY })
       if (groupId) {
         queryClient.invalidateQueries({ 
           queryKey: [...GROUP_BALANCES_KEY, groupId] 

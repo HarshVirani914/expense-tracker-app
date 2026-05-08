@@ -17,6 +17,9 @@ export const useCreateSettlement = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['settlements'] })
       queryClient.invalidateQueries({ queryKey: ['group-balances', variables.groupId] })
+      queryClient.invalidateQueries({ queryKey: ['outstanding-debts'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['groups'] })
     },
   })
 

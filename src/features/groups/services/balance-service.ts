@@ -24,6 +24,7 @@ export const balanceService = {
               participants: true,
             },
           },
+          settlements: true,
         },
       })
 
@@ -67,6 +68,26 @@ export const balanceService = {
             balance.totalOwed += Number(participant.oweAmount)
           }
         })
+      })
+
+      group.settlements.forEach((settlement) => {
+        const payerId = settlement.payerUserId || settlement.payerContactId
+        const receiverId = settlement.receiverUserId || settlement.receiverContactId
+        const amount = Number(settlement.amount)
+
+        if (payerId) {
+          const payerBalance = balanceMap.get(payerId)
+          if (payerBalance) {
+            payerBalance.totalPaid += amount
+          }
+        }
+
+        if (receiverId) {
+          const receiverBalance = balanceMap.get(receiverId)
+          if (receiverBalance) {
+            receiverBalance.totalOwed += amount
+          }
+        }
       })
 
       const balances: GroupBalance[] = []
