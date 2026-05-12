@@ -3,15 +3,22 @@
 import { useState } from "react";
 import { AccountList } from "@/features/accounts/components/account-list";
 import { AccountFormDialog } from "@/features/accounts/components/account-form-dialog";
+import { AccountsSummaryCard } from "@/features/accounts/components/accounts-summary-card";
+import { useAccounts } from "@/features/accounts/hooks/use-accounts";
 import type { AccountWithBalance } from "@/features/accounts/types";
 import { Button } from "@/components/ui/button";
-import { IconPlus, IconWallet } from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AccountsPage() {
+  const isMobile = useIsMobile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<
     AccountWithBalance | undefined
   >(undefined);
+
+  const { accounts, isLoading } = useAccounts();
 
   const handleEdit = (account: AccountWithBalance) => {
     setSelectedAccount(account);
@@ -23,37 +30,54 @@ export default function AccountsPage() {
     setSelectedAccount(undefined);
   };
 
-  return (
-    <div className="flex flex-col gap-8">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-primary/10 p-2.5">
-              <IconWallet className="h-6 w-6 text-primary" />
-            </div>
-            <h1 className="text-4xl font-bold tracking-tight">Accounts</h1>
-          </div>
-          <p className="text-muted-foreground text-base pl-[52px]">
-            Manage your accounts and track balances
-          </p>
-        </div>
-        <Button
-          onClick={() => setIsDialogOpen(true)}
-          className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
-          size="lg"
-        >
-          <IconPlus className="h-5 w-5" />
-          Add Account
-        </Button>
-      </div>
+  const handleAddAccount = () => {
+    setIsDialogOpen(true);
+  };
 
-      <AccountList onEdit={handleEdit} />
+  return (
+    <div className="flex flex-col gap-6">
+      {!isMobile && (
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-4xl font-bold tracking-tight">Accounts</h1>
+            <p className="text-muted-foreground text-base">
+              Manage your accounts and track balances
+            </p>
+          </div>
+          <Button
+            onClick={handleAddAccount}
+            className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+            size="lg"
+          >
+            <IconPlus className="h-5 w-5" />
+            Add Account
+          </Button>
+        </div>
+      )}
+
+      {isLoading ? (
+        <Skeleton className="h-48 w-full" />
+      ) : accounts && accounts.length > 0 ? (
+        <AccountsSummaryCard accounts={accounts} />
+      ) : null}
+
+      <AccountList onEdit={handleEdit} onAddAccount={handleAddAccount} />
 
       <AccountFormDialog
         open={isDialogOpen}
         onOpenChange={handleCloseDialog}
         account={selectedAccount}
       />
+
+      {isMobile && accounts && accounts.length > 0 && (
+        <Button
+          onClick={handleAddAccount}
+          size="lg"
+          className="fixed bottom-26 right-6 h-14 w-14 rounded-full shadow-2xl z-40 hover:scale-110 transition-transform"
+        >
+          <IconPlus className="h-6 w-6" />
+        </Button>
+      )}
     </div>
   );
 }

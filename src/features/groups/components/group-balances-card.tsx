@@ -3,13 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import {
-  IconArrowDown,
-  IconArrowUp,
-  IconCash,
-} from "@tabler/icons-react";
+import { IconArrowDown, IconArrowUp, IconCash } from "@tabler/icons-react";
 import type { GroupBalance } from "../types";
 
 type GroupBalancesCardProps = {
@@ -20,6 +17,39 @@ type GroupBalancesCardProps = {
   onQuickSettle: (balance: GroupBalance) => void;
 };
 
+const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+const getAvatarColor = (name: string) => {
+  const colors = [
+    "bg-red-500",
+    "bg-orange-500",
+    "bg-amber-500",
+    "bg-yellow-500",
+    "bg-lime-500",
+    "bg-green-500",
+    "bg-emerald-500",
+    "bg-teal-500",
+    "bg-cyan-500",
+    "bg-sky-500",
+    "bg-blue-500",
+    "bg-indigo-500",
+    "bg-violet-500",
+    "bg-purple-500",
+    "bg-fuchsia-500",
+    "bg-pink-500",
+    "bg-rose-500",
+  ];
+  const index = name.charCodeAt(0) % colors.length;
+  return colors[index];
+};
+
 export const GroupBalancesCard = ({
   balances,
   userBalance,
@@ -27,91 +57,105 @@ export const GroupBalancesCard = ({
   hasExpenses,
   onQuickSettle,
 }: GroupBalancesCardProps) => {
-  return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="text-lg">Balances</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
+  if (isLoading) {
+    return (
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle className="text-lg">Member Balances</CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <Skeleton key={i} className="h-20 w-full" />
             ))}
           </div>
-        ) : balances.length > 0 ? (
-          <div className="space-y-3">
-            {balances.map((balance) => {
-              const owesToUser = balance.owesTo.find(
-                (d) => d.memberId === userBalance?.memberId
-              );
-              const owedByUser = balance.owedBy.find(
-                (c) => c.memberId === userBalance?.memberId
-              );
+        </CardContent>
+      </Card>
+    );
+  }
 
-              return (
-                <div
-                  key={balance.memberId}
-                  className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors"
-                >
-                  <div
-                    className={cn(
-                      "rounded-full p-2.5 shrink-0",
-                      owesToUser
-                        ? "bg-destructive/10 text-destructive"
-                        : owedByUser
-                        ? "bg-green-500/10 text-green-600 dark:text-green-400"
-                        : "bg-muted text-muted-foreground"
-                    )}
-                  >
-                    {owesToUser ? (
-                      <IconArrowUp className="h-4 w-4" />
-                    ) : owedByUser ? (
-                      <IconArrowDown className="h-4 w-4" />
-                    ) : (
-                      <IconCash className="h-4 w-4" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate text-base">{balance.memberName}</p>
-                    {owesToUser && (
-                      <p className="text-sm text-muted-foreground">
-                        Owes you {formatCurrency(owesToUser.amount)}
-                      </p>
-                    )}
-                    {owedByUser && (
-                      <p className="text-sm text-muted-foreground">
-                        You owe {formatCurrency(owedByUser.amount)}
-                      </p>
-                    )}
-                    {!owesToUser && !owedByUser && (
-                      <p className="text-sm text-green-600 dark:text-green-400">
-                        Settled up
-                      </p>
-                    )}
-                  </div>
-
-                  {(owesToUser || owedByUser) && hasExpenses && (
-                    <Button
-                      size="sm"
-                      variant={owedByUser ? "default" : "outline"}
-                      className="gap-1.5 shrink-0 h-9"
-                      onClick={() => onQuickSettle(balance)}
-                    >
-                      <IconCash className="h-3.5 w-3.5" />
-                      Settle
-                    </Button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
+  if (balances.length === 0) {
+    return (
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle className="text-lg">Member Balances</CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="text-center py-12 text-muted-foreground">
             <p>No balance information</p>
           </div>
-        )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="h-full shadow-none">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Member Balances</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {balances.map((balance) => {
+            const owesToUser = balance.owesTo.find(
+              (d) => d.memberId === userBalance?.memberId,
+            );
+            const owedByUser = balance.owedBy.find(
+              (c) => c.memberId === userBalance?.memberId,
+            );
+
+            return (
+              <div
+                key={balance.memberId}
+                className="flex items-center gap-3 p-3 rounded-lg border shadow-none bg-card hover:bg-foreground/5 transition-colors"
+              >
+                <Avatar
+                  className={cn(
+                    "h-10 w-10 shrink-0",
+                    getAvatarColor(balance.memberName),
+                  )}
+                >
+                  <AvatarFallback className="text-white font-semibold bg-transparent">
+                    {getInitials(balance.memberName)}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-base truncate">
+                    {balance.memberName}
+                  </p>
+                  {owesToUser && (
+                    <div className="flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400">
+                      <IconArrowUp className="h-3.5 w-3.5" />
+                      <span>Owes you {formatCurrency(owesToUser.amount)}</span>
+                    </div>
+                  )}
+                  {owedByUser && (
+                    <div className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
+                      <IconArrowDown className="h-3.5 w-3.5" />
+                      <span>You owe {formatCurrency(owedByUser.amount)}</span>
+                    </div>
+                  )}
+                  {!owesToUser && !owedByUser && (
+                    <p className="text-sm text-muted-foreground">Settled up</p>
+                  )}
+                </div>
+
+                {(owesToUser || owedByUser) && hasExpenses && (
+                  <Button
+                    size="sm"
+                    variant={owedByUser ? "default" : "outline"}
+                    className="gap-1.5 shrink-0"
+                    onClick={() => onQuickSettle(balance)}
+                  >
+                    <IconCash className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Settle</span>
+                  </Button>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </CardContent>
     </Card>
   );

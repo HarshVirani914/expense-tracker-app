@@ -10,13 +10,15 @@ import { SettlementFormDialog } from "@/features/settlements/components/settleme
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
 import { GroupHeader } from "@/features/groups/components/group-header";
-import { GroupStatsBar } from "@/features/groups/components/group-stats-bar";
+import { GroupStatsCard } from "@/features/groups/components/group-stats-card";
 import { UserBalanceCard } from "@/features/groups/components/user-balance-card";
 import { GroupBalancesCard } from "@/features/groups/components/group-balances-card";
 import { GroupMembersCard } from "@/features/groups/components/group-members-card";
 import { GroupActivityCard } from "@/features/groups/components/group-activity-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { IconPlus, IconEdit } from "@tabler/icons-react";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -25,6 +27,7 @@ type PageProps = {
 export default function GroupDetailPage({ params }: PageProps) {
   const { id } = use(params);
   const router = useRouter();
+  const isMobile = useIsMobile();
   const { group, isLoading } = useGroup(id);
   const { balances, isLoading: isLoadingBalances } = useGroupBalances(id);
   const { expenses, isLoading: isLoadingExpenses } = useExpenses({
@@ -50,28 +53,23 @@ export default function GroupDetailPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-6 max-w-7xl mx-auto">
-        <Skeleton className="h-24 w-full" />
-        <div className="grid gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-3">
-            <Skeleton className="h-64 w-full" />
-          </div>
-          <div className="lg:col-span-9">
-            <div className="grid gap-6 md:grid-cols-2">
-              <Skeleton className="h-48 w-full" />
-              <Skeleton className="h-48 w-full" />
-            </div>
-          </div>
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-48 w-full" />
+        <div className="grid gap-6 md:grid-cols-2">
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 w-full" />
         </div>
+        <Skeleton className="h-96 w-full" />
       </div>
     );
   }
 
   if (!group) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <h3 className="text-lg font-semibold mb-2">Group not found</h3>
-        <p className="text-muted-foreground mb-4">
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <h3 className="text-xl font-semibold mb-2">Group not found</h3>
+        <p className="text-muted-foreground mb-6 max-w-sm">
           The group you're looking for doesn't exist or you don't have access to
           it.
         </p>
@@ -123,81 +121,52 @@ export default function GroupDetailPage({ params }: PageProps) {
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto">
-      {/* Header */}
+    <div className="flex flex-col gap-6">
       <GroupHeader
         groupName={group.name}
         description={group.description || undefined}
         isAdmin={isAdmin}
+        memberCount={group.members.length}
         onBack={() => router.push("/groups")}
         onAddExpense={() => setIsExpenseDialogOpen(true)}
         onEditGroup={() => setIsEditGroupDialogOpen(true)}
+        isMobile={isMobile}
       />
 
-      {/* Stats Bar - Desktop: Above content, Mobile: Below header */}
-      <div className="lg:hidden">
-        <GroupStatsBar
-          memberCount={group.members.length}
-          expenseCount={group._count?.expenses ?? 0}
-          totalSpent={totalGroupSpent}
+      <GroupStatsCard
+        memberCount={group.members.length}
+        expenseCount={group._count?.expenses ?? 0}
+        totalSpent={totalGroupSpent}
+      />
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <UserBalanceCard
+          userBalance={userBalance}
+          isLoading={isLoadingBalances}
+        />
+
+        <GroupBalancesCard
+          balances={otherBalances}
+          userBalance={userBalance}
+          isLoading={isLoadingBalances}
+          hasExpenses={hasExpenses}
+          onQuickSettle={handleQuickSettle}
         />
       </div>
 
-      {/* Desktop: 3-column layout (sidebar + main), Mobile: stacked */}
-      <div className="grid gap-6 lg:grid-cols-12">
-        {/* Left Sidebar - Desktop only (Context: Stats + Members) */}
-        <div className="hidden lg:block lg:col-span-3 space-y-6">
-          <GroupStatsBar
-            memberCount={group.members.length}
-            expenseCount={group._count?.expenses ?? 0}
-            totalSpent={totalGroupSpent}
-          />
+      <GroupMembersCard
+        members={group.members}
+        showAll={showAllMembers}
+        onToggleShowAll={() => setShowAllMembers(!showAllMembers)}
+      />
 
-          <GroupMembersCard
-            members={group.members}
-            showAll={showAllMembers}
-            onToggleShowAll={() => setShowAllMembers(!showAllMembers)}
-          />
-        </div>
+      <GroupActivityCard
+        expenses={expenses}
+        isLoading={isLoadingExpenses}
+        onAddExpense={() => setIsExpenseDialogOpen(true)}
+        onViewAll={() => router.push(`/expenses?group=${id}`)}
+      />
 
-        {/* Main Content - Balance Cards + Activity */}
-        <div className="lg:col-span-9 space-y-6">
-          {/* Balance Cards - 2-column on md+, stacked on mobile */}
-          <div className="grid gap-6 md:grid-cols-2">
-            <UserBalanceCard
-              userBalance={userBalance}
-              isLoading={isLoadingBalances}
-            />
-
-            <GroupBalancesCard
-              balances={otherBalances}
-              userBalance={userBalance}
-              isLoading={isLoadingBalances}
-              hasExpenses={hasExpenses}
-              onQuickSettle={handleQuickSettle}
-            />
-          </div>
-
-          {/* Members - Mobile/Tablet only (hidden on desktop) */}
-          <div className="lg:hidden">
-            <GroupMembersCard
-              members={group.members}
-              showAll={showAllMembers}
-              onToggleShowAll={() => setShowAllMembers(!showAllMembers)}
-            />
-          </div>
-
-          {/* Activity - Full width */}
-          <GroupActivityCard
-            expenses={expenses}
-            isLoading={isLoadingExpenses}
-            onAddExpense={() => setIsExpenseDialogOpen(true)}
-            onViewAll={() => router.push(`/expenses?groupId=${id}`)}
-          />
-        </div>
-      </div>
-
-      {/* Dialogs */}
       <GroupExpenseFormDialog
         open={isExpenseDialogOpen}
         onOpenChange={setIsExpenseDialogOpen}
@@ -219,6 +188,29 @@ export default function GroupDetailPage({ params }: PageProps) {
         onOpenChange={setIsEditGroupDialogOpen}
         group={group}
       />
+
+      {isMobile && (
+        <>
+          <Button
+            onClick={() => setIsExpenseDialogOpen(true)}
+            size="lg"
+            className="fixed bottom-26 right-6 h-14 w-14 rounded-full shadow-2xl z-40 hover:scale-110 transition-transform"
+          >
+            <IconPlus className="h-6 w-6" />
+          </Button>
+
+          {isAdmin && (
+            <Button
+              onClick={() => setIsEditGroupDialogOpen(true)}
+              size="lg"
+              variant="outline"
+              className="fixed bottom-42 right-7 h-12 w-12 rounded-full shadow-xl z-40 hover:scale-110 transition-transform"
+            >
+              <IconEdit className="h-5 w-5" />
+            </Button>
+          )}
+        </>
+      )}
     </div>
   );
 }

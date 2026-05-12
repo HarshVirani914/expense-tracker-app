@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import type { ApiResponse } from '@/types/api'
+import { GROUP_STATS_KEY } from './use-group-stats'
 
 export const useDeleteGroup = () => {
   const queryClient = useQueryClient()
@@ -12,6 +13,7 @@ export const useDeleteGroup = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups'] })
+      queryClient.invalidateQueries({ queryKey: GROUP_STATS_KEY })
     },
   })
 

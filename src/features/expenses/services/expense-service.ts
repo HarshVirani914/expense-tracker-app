@@ -28,7 +28,10 @@ export const expenseService = {
         userId,
         ...(categoryId && { categoryId }),
         ...(accountId && { accountId }),
-        ...(groupId && { groupId }),
+        ...(groupId && (groupId === 'personal' 
+          ? { groupId: null }
+          : { groupId }
+        )),
         ...(type && { type }),
         ...(paymentMethod && { paymentMethod }),
         ...(search && {
@@ -123,7 +126,10 @@ export const expenseService = {
         userId,
         ...(categoryId && { categoryId }),
         ...(accountId && { accountId }),
-        ...(groupId && { groupId }),
+        ...(groupId && (groupId === 'personal' 
+          ? { groupId: null }
+          : { groupId }
+        )),
         ...(type && { type }),
         ...(paymentMethod && { paymentMethod }),
         ...(search && {

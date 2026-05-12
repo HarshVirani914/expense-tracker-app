@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import type { GroupWithMembers, CreateGroupInput } from '../types'
 import type { ApiResponse } from '@/types/api'
+import { GROUP_STATS_KEY } from './use-group-stats'
 
 export const useCreateGroup = () => {
   const queryClient = useQueryClient()
@@ -16,6 +17,7 @@ export const useCreateGroup = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups'] })
+      queryClient.invalidateQueries({ queryKey: GROUP_STATS_KEY })
     },
   })
 

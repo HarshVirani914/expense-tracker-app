@@ -5,11 +5,120 @@ import type {
   CreateContactInput,
   UpdateContactInput,
   ContactFilters,
+  ContactStats,
+  ContactDeletionCheck,
+  ContactSharedExpense,
 } from '../types'
 import type { PaginatedResponse } from '@/types/api'
 import { Prisma } from '@/generated/prisma/client'
 
 export const contactService = {
+  async getSharedExpenses(
+    userId: string,
+    contactId: string,
+    limit: number = 10
+  ): Promise<ContactSharedExpense[]> {
+    try {
+      const expenses = await prisma.expense.findMany({
+        where: {
+          userId,
+          groupId: { not: null },
+          participants: {
+            some: {
+              contactId,
+            },
+          },
+        },
+        include: {
+          category: true,
+          group: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          participants: {
+            where: {
+              OR: [{ contactId }, { userId }],
+            },
+          },
+        },
+        orderBy: {
+          date: 'desc',
+        },
+        take: limit,
+      })
+
+      return expenses.map((expense) => {
+        const userParticipant = expense.participants.find((p) => !p.contactId)
+        const contactParticipant = expense.participants.find((p) => p.contactId === contactId)
+
+        return {
+          id: expense.id,
+          amount: Number(expense.amount),
+          description: expense.description,
+          date: expense.date,
+          groupId: expense.group?.id || '',
+          groupName: expense.group?.name || '',
+          categoryName: expense.category.name,
+          categoryColor: expense.category.color,
+          userPaid: userParticipant ? Number(userParticipant.paidAmount) : 0,
+          userOwes: userParticipant ? Number(userParticipant.oweAmount) : 0,
+          contactPaid: contactParticipant ? Number(contactParticipant.paidAmount) : 0,
+          contactOwes: contactParticipant ? Number(contactParticipant.oweAmount) : 0,
+        }
+      })
+    } catch (error) {
+      logger.error('Failed to get shared expenses', { error, userId, contactId })
+      throw new Error('Failed to fetch shared expenses')
+    }
+  },
+
+  async getStats(userId: string): Promise<ContactStats> {
+    try {
+      const [totalContacts, contacts] = await Promise.all([
+        prisma.contact.count({
+          where: { userId },
+        }),
+        prisma.contact.findMany({
+          where: { userId },
+          include: {
+            _count: {
+              select: {
+                groupMemberships: true,
+                expenseParticipants: true,
+              },
+            },
+          },
+        }),
+      ])
+
+      const activeContacts = contacts.filter(
+        (c) =>
+          c._count.groupMemberships > 0 || c._count.expenseParticipants > 0
+      ).length
+
+      const totalGroupMemberships = contacts.reduce(
+        (sum, c) => sum + c._count.groupMemberships,
+        0
+      )
+
+      const totalExpenses = contacts.reduce(
+        (sum, c) => sum + c._count.expenseParticipants,
+        0
+      )
+
+      return {
+        totalContacts,
+        activeContacts,
+        totalGroupMemberships,
+        totalExpenses,
+      }
+    } catch (error) {
+      logger.error('Failed to get contact stats', { error, userId })
+      throw new Error('Failed to fetch contact stats')
+    }
+  },
   async list(
     userId: string,
     filters: ContactFilters
@@ -164,7 +273,7 @@ export const contactService = {
     }
   },
 
-  async delete(userId: string, contactId: string): Promise<void> {
+  async checkDeletion(userId: string, contactId: string): Promise<ContactDeletionCheck> {
     try {
       const contact = await prisma.contact.findFirst({
         where: {
@@ -172,12 +281,22 @@ export const contactService = {
           userId,
         },
         include: {
-          _count: {
-            select: {
-              groupMemberships: true,
-              expenseParticipants: true,
+          groupMemberships: {
+            include: {
+              group: true,
             },
           },
+          expenseParticipants: {
+            include: {
+              expense: {
+                include: {
+                  group: true,
+                },
+              },
+            },
+          },
+          settlementsFrom: true,
+          settlementsTo: true,
         },
       })
 
@@ -185,12 +304,75 @@ export const contactService = {
         throw new Error('Contact not found')
       }
 
-      if (
-        contact._count &&
-        (contact._count.groupMemberships > 0 || contact._count.expenseParticipants > 0)
-      ) {
+      const activeGroups = contact.groupMemberships.map((membership) => ({
+        id: membership.group.id,
+        name: membership.group.name,
+      }))
+
+      let totalOwed = 0
+      let totalOwing = 0
+
+      contact.expenseParticipants.forEach((participant) => {
+        const netAmount = Number(participant.paidAmount) - Number(participant.oweAmount)
+        if (netAmount > 0) {
+          totalOwed += netAmount
+        } else if (netAmount < 0) {
+          totalOwing += Math.abs(netAmount)
+        }
+      })
+
+      contact.settlementsFrom.forEach((settlement) => {
+        totalOwing -= Number(settlement.amount)
+      })
+
+      contact.settlementsTo.forEach((settlement) => {
+        totalOwed -= Number(settlement.amount)
+      })
+
+      totalOwed = Math.max(0, totalOwed)
+      totalOwing = Math.max(0, totalOwing)
+
+      const unsettledExpenses = contact.expenseParticipants.filter(
+        (participant) => Number(participant.oweAmount) > 0
+      ).length
+
+      const canDelete = activeGroups.length === 0 && totalOwed === 0 && totalOwing === 0
+
+      return {
+        canDelete,
+        reasons: {
+          activeGroups,
+          unsettledExpenses,
+          totalOwed,
+          totalOwing,
+        },
+      }
+    } catch (error) {
+      logger.error('Failed to check contact deletion', { error, userId, contactId })
+      throw error
+    }
+  },
+
+  async delete(userId: string, contactId: string): Promise<void> {
+    try {
+      const deletionCheck = await this.checkDeletion(userId, contactId)
+
+      if (!deletionCheck.canDelete) {
+        const reasons = []
+        if (deletionCheck.reasons.activeGroups.length > 0) {
+          reasons.push(
+            `part of ${deletionCheck.reasons.activeGroups.length} active group(s)`
+          )
+        }
+        if (deletionCheck.reasons.totalOwed > 0) {
+          reasons.push(`owed ${deletionCheck.reasons.totalOwed} in unsettled expenses`)
+        }
+        if (deletionCheck.reasons.totalOwing > 0) {
+          reasons.push(`owes ${deletionCheck.reasons.totalOwing} in unsettled expenses`)
+        }
+
         throw new Error(
-          'Cannot delete contact with active group memberships or expense participations'
+          `Cannot delete contact: ${reasons.join(', ')}. Please settle all expenses and remove from groups first.`
         )
       }
 

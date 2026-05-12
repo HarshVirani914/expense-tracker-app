@@ -1,9 +1,76 @@
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
-import type { Category, CreateCategoryInput, UpdateCategoryInput } from '../types'
+import type { Category, CreateCategoryInput, UpdateCategoryInput, CategorySpending } from '../types'
 import { DEFAULT_CATEGORIES } from '../types'
 
 export const categoryService = {
+  async getCategorySpending(userId: string, startDate?: Date, endDate?: Date): Promise<CategorySpending[]> {
+    try {
+      const categories = await prisma.category.findMany({
+        where: {
+          OR: [{ userId }, { isDefault: true, userId: null }],
+        },
+        include: {
+          expenses: {
+            where: {
+              userId,
+              type: 'EXPENSE',
+              ...(startDate || endDate
+                ? {
+                  date: {
+                    ...(startDate && { gte: startDate }),
+                    ...(endDate && { lte: endDate }),
+                  },
+                }
+                : {}),
+            },
+            select: {
+              amount: true,
+            },
+          },
+          _count: {
+            select: {
+              expenses: {
+                where: {
+                  userId,
+                  type: 'EXPENSE',
+                  ...(startDate || endDate
+                    ? {
+                      date: {
+                        ...(startDate && { gte: startDate }),
+                        ...(endDate && { lte: endDate }),
+                      },
+                    }
+                    : {}),
+                },
+              },
+            },
+          },
+        },
+      })
+
+      const categorySpending: CategorySpending[] = categories.map((category) => {
+        const totalAmount = category.expenses.reduce(
+          (sum, expense) => sum + Number(expense.amount),
+          0
+        )
+
+        return {
+          categoryId: category.id,
+          categoryName: category.name,
+          categoryColor: category.color,
+          isDefault: category.isDefault,
+          totalAmount,
+          transactionCount: category._count.expenses,
+        }
+      })
+
+      return categorySpending.sort((a, b) => b.totalAmount - a.totalAmount)
+    } catch (error) {
+      logger.error('Failed to get category spending', { error, userId })
+      throw new Error('Failed to fetch category spending')
+    }
+  },
   async list(userId: string): Promise<Category[]> {
     try {
       let categories = await prisma.category.findMany({

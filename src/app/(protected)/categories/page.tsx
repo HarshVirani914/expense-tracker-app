@@ -1,50 +1,92 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CategoryFormDialog } from "@/features/categories/components/category-form-dialog";
-import { CategoryList } from "@/features/categories/components/category-list";
-import type { Category } from "@/features/categories/types";
-import { IconPlus } from "@tabler/icons-react";
+import { CategorySpendingSummaryCard } from "@/features/categories/components/category-spending-summary-card";
+import { CategorySpendingList } from "@/features/categories/components/category-spending-list";
+import { ManageCategoriesSheet } from "@/features/categories/components/manage-categories-sheet";
+import { useCategorySpending } from "@/features/categories/hooks/use-category-spending";
+import { IconSettings, IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CategoryFormDialog } from "@/features/categories/components/category-form-dialog";
 
 export default function CategoriesPage() {
+  const isMobile = useIsMobile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<
-    Category | undefined
-  >(undefined);
 
-  const handleEdit = (category: Category) => {
-    setSelectedCategory(category);
-    setIsDialogOpen(true);
-  };
+  const { categorySpending, isLoading } = useCategorySpending();
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
-    setSelectedCategory(undefined);
   };
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Categories</h1>
+      {!isMobile && (
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-4xl font-bold tracking-tight">Categories</h1>
+            <p className="text-muted-foreground text-base">
+              Track your spending by category
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <ManageCategoriesSheet />
+            <Button
+              onClick={() => setIsDialogOpen(true)}
+              className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+              size="lg"
+            >
+              <IconPlus className="h-5 w-5" />
+              Add Category
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {isLoading ? (
+        <>
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-96 w-full" />
+        </>
+      ) : categorySpending && categorySpending.length > 0 ? (
+        <>
+          <CategorySpendingSummaryCard categorySpending={categorySpending} />
+          <CategorySpendingList categorySpending={categorySpending} />
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
           <p className="text-muted-foreground">
-            Manage your expense categories
+            No spending data available. Add some expenses to see insights.
           </p>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
-          <IconPlus className="h-4 w-4" />
-          Add Category
-        </Button>
-      </div>
+      )}
 
-      <CategoryList onEdit={handleEdit} />
+      <CategoryFormDialog open={isDialogOpen} onOpenChange={handleCloseDialog} />
 
-      <CategoryFormDialog
-        open={isDialogOpen}
-        onOpenChange={handleCloseDialog}
-        category={selectedCategory}
-      />
+      {isMobile && (
+        <div className="fixed bottom-24 right-4 flex flex-col gap-2 z-40">
+          <ManageCategoriesSheet
+            trigger={
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-14 w-14 rounded-full shadow-2xl bg-background hover:scale-110 transition-transform"
+              >
+                <IconSettings className="h-6 w-6" />
+              </Button>
+            }
+          />
+          <Button
+            onClick={() => setIsDialogOpen(true)}
+            size="lg"
+            className="h-14 w-14 rounded-full shadow-2xl hover:scale-110 transition-transform"
+          >
+            <IconPlus className="h-6 w-6" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

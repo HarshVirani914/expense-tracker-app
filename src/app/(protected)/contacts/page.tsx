@@ -1,82 +1,150 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { ContactList } from '@/features/contacts/components/contact-list'
-import { ContactFormDialog } from '@/features/contacts/components/contact-form-dialog'
-import type { ContactWithRelations, ContactFilters } from '@/features/contacts/types'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { IconPlus, IconUserPlus, IconSearch } from '@tabler/icons-react'
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ContactFormDialog } from "@/features/contacts/components/contact-form-dialog";
+import { ContactsGrid } from "@/features/contacts/components/contacts-grid";
+import { ContactsSummaryCard } from "@/features/contacts/components/contacts-summary-card";
+import { ManageContactSheet } from "@/features/contacts/components/manage-contact-sheet";
+import { useContactStats } from "@/features/contacts/hooks/use-contact-stats";
+import { useContacts } from "@/features/contacts/hooks/use-contacts";
+import type {
+  ContactFilters,
+  ContactWithRelations,
+} from "@/features/contacts/types";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { IconPlus, IconSearch } from "@tabler/icons-react";
+import { useState } from "react";
 
 export default function ContactsPage() {
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const isMobile = useIsMobile();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<
     ContactWithRelations | undefined
-  >(undefined)
-  
+  >(undefined);
+
   const [filters, setFilters] = useState<ContactFilters>({
     page: 1,
-    limit: 20,
-    search: '',
-  })
+    limit: 100,
+    search: "",
+  });
+
+  const { stats, isLoading: isStatsLoading } = useContactStats();
+  const { contacts, isLoading: isContactsLoading } = useContacts(filters);
+
+  const handleContactClick = (contact: ContactWithRelations) => {
+    setSelectedContact(contact);
+    setIsSheetOpen(true);
+  };
 
   const handleEdit = (contact: ContactWithRelations) => {
-    setSelectedContact(contact)
-    setIsDialogOpen(true)
-  }
+    setSelectedContact(contact);
+    setIsSheetOpen(false);
+    setIsDialogOpen(true);
+  };
 
   const handleCloseDialog = () => {
-    setIsDialogOpen(false)
-    setSelectedContact(undefined)
-  }
+    setIsDialogOpen(false);
+    setSelectedContact(undefined);
+  };
+
+  const handleCloseSheet = () => {
+    setIsSheetOpen(false);
+    setSelectedContact(undefined);
+  };
 
   const handleSearchChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, search: value, page: 1 }))
-  }
+    setFilters((prev) => ({ ...prev, search: value, page: 1 }));
+  };
+
+  const handleAddContact = () => {
+    setSelectedContact(undefined);
+    setIsDialogOpen(true);
+  };
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-primary/10 p-2.5">
-              <IconUserPlus className="h-6 w-6 text-primary" />
-            </div>
+      {!isMobile && (
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
             <h1 className="text-4xl font-bold tracking-tight">Contacts</h1>
+            <p className="text-muted-foreground text-base">
+              People you split expenses with
+            </p>
           </div>
-          <p className="text-muted-foreground text-base pl-[52px]">
-            Manage people you split expenses with
+          <Button
+            onClick={handleAddContact}
+            className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+            size="lg"
+          >
+            <IconPlus className="h-5 w-5" />
+            Add Contact
+          </Button>
+        </div>
+      )}
+
+      {isStatsLoading ? (
+        <Skeleton className="h-48 w-full" />
+      ) : stats ? (
+        <ContactsSummaryCard stats={stats} />
+      ) : null}
+
+      <div className="relative max-w-sm">
+        <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search contacts..."
+          value={filters.search}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
+      {isContactsLoading ? (
+        <Skeleton className="h-96 w-full" />
+      ) : contacts && contacts.length > 0 ? (
+        <ContactsGrid contacts={contacts} onContactClick={handleContactClick} />
+      ) : (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <p className="text-muted-foreground mb-4">
+            {filters.search
+              ? "No contacts found matching your search."
+              : "No contacts yet. Add your first contact to get started."}
           </p>
+          {!filters.search && (
+            <Button onClick={handleAddContact} size="lg">
+              <IconPlus className="h-5 w-5 mr-2" />
+              Add First Contact
+            </Button>
+          )}
         </div>
-        <Button
-          onClick={() => setIsDialogOpen(true)}
-          className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
-          size="lg"
-        >
-          <IconPlus className="h-5 w-5" />
-          Add Contact
-        </Button>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search contacts..."
-            value={filters.search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-      </div>
-
-      <ContactList onEdit={handleEdit} filters={filters} />
+      )}
 
       <ContactFormDialog
         open={isDialogOpen}
         onOpenChange={handleCloseDialog}
         contact={selectedContact}
       />
+
+      {selectedContact && (
+        <ManageContactSheet
+          contact={selectedContact}
+          isOpen={isSheetOpen}
+          onClose={handleCloseSheet}
+          onEdit={handleEdit}
+        />
+      )}
+
+      {isMobile && (
+        <Button
+          onClick={handleAddContact}
+          size="lg"
+          className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-2xl z-40 hover:scale-110 transition-transform"
+        >
+          <IconPlus className="h-6 w-6" />
+        </Button>
+      )}
     </div>
-  )
+  );
 }

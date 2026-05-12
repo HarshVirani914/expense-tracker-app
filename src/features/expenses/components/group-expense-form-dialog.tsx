@@ -174,7 +174,7 @@ export const GroupExpenseFormDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="md:max-w-7xl w-full overflow-hidden p-0 flex flex-col">
+      <DialogContent className="md:max-w-7xl w-full max-h-[90vh] p-0 flex flex-col">
         <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
           <DialogTitle className="text-2xl">Add Group Expense</DialogTitle>
           <DialogDescription>
@@ -185,12 +185,12 @@ export const GroupExpenseFormDialog = ({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col flex-1 min-h-0"
+            className="flex flex-col flex-1 overflow-hidden"
           >
-            <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="flex-1 overflow-y-auto">
               <div className="grid lg:grid-cols-2 gap-0">
                 {/* Left Column - Expense Details */}
-                <div className="p-6 border-r border-border space-y-6">
+                <div className="p-6 lg:border-r border-border space-y-6">
                   <div>
                     <h3 className="text-sm font-semibold text-foreground mb-4">
                       Expense Details
@@ -326,7 +326,7 @@ export const GroupExpenseFormDialog = ({
                 </div>
 
                 {/* Right Column - Split Configuration */}
-                <div className="p-6 space-y-6 bg-muted/30 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <div className="p-6 space-y-6 bg-muted/30">
                   {groupMembers.length > 0 ? (
                     <>
                       <div>
@@ -345,10 +345,7 @@ export const GroupExpenseFormDialog = ({
                             <label className="text-sm font-medium mb-2 block">
                               Who paid?
                             </label>
-                            <Select
-                              value={payerId}
-                              onValueChange={setPayerId}
-                            >
+                            <Select value={payerId} onValueChange={setPayerId}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select who paid" />
                               </SelectTrigger>
@@ -356,7 +353,9 @@ export const GroupExpenseFormDialog = ({
                                 {groupMembers.map((member) => (
                                   <SelectItem
                                     key={member.userId || member.contactId}
-                                    value={member.userId || member.contactId || ""}
+                                    value={
+                                      member.userId || member.contactId || ""
+                                    }
                                   >
                                     {member.name}
                                     {member.isCurrentUser && " (You)"}
@@ -440,7 +439,7 @@ export const GroupExpenseFormDialog = ({
             </div>
 
             {/* Footer with actions */}
-            <div className="border-t px-6 py-4 bg-background shrink-0">
+            <div className="border-t px-6 py-4 bg-background shrink-0 rounded-b-4xl">
               <DialogFooter>
                 <Button
                   type="button"

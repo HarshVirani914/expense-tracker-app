@@ -1,7 +1,9 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
-import type { ContactWithRelations, CreateContactInput } from '../types'
 import type { ApiResponse } from '@/types/api'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { ContactWithRelations, CreateContactInput } from '../types'
+
+const CONTACT_STATS_KEY = ['contact-stats'] as const
 
 export const useCreateContact = () => {
   const queryClient = useQueryClient()
@@ -16,6 +18,7 @@ export const useCreateContact = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contacts'] })
+      queryClient.invalidateQueries({ queryKey: CONTACT_STATS_KEY })
     },
   })
 

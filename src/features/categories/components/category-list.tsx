@@ -2,20 +2,28 @@
 
 import { useCategories } from "../hooks/use-categories";
 import { useDeleteCategory } from "../hooks/use-delete-category";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { IconEdit, IconTrash, IconTag } from "@tabler/icons-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { IconTag } from "@tabler/icons-react";
 import { toast } from "sonner";
 import type { Category } from "../types";
 import { useConfirmDialog } from "@/components/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CategoryCard } from "./category-card";
 
 type CategoryListProps = {
+  categories: Category[];
   onEdit: (category: Category) => void;
+  onAddCategory?: () => void;
+  isLoading?: boolean;
 };
 
-export const CategoryList = ({ onEdit }: CategoryListProps) => {
-  const { categories, isLoading } = useCategories();
+export const CategoryList = ({
+  categories,
+  onEdit,
+  onAddCategory,
+  isLoading,
+}: CategoryListProps) => {
   const { deleteCategory, isDeleting } = useDeleteCategory();
   const { confirm } = useConfirmDialog();
 
@@ -42,16 +50,9 @@ export const CategoryList = ({ onEdit }: CategoryListProps) => {
 
   if (isLoading) {
     return (
-      <div className="space-y-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-3 py-3 px-4 rounded-lg border bg-card"
-          >
-            <Skeleton className="h-3 w-3 rounded-full" />
-            <Skeleton className="h-4 flex-1 max-w-xs" />
-            <Skeleton className="h-6 w-16" />
-          </div>
+          <Skeleton key={i} className="h-24 w-full" />
         ))}
       </div>
     );
@@ -59,58 +60,35 @@ export const CategoryList = ({ onEdit }: CategoryListProps) => {
 
   if (!categories || categories.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center border rounded-lg border-dashed bg-muted/20">
-        <IconTag className="h-12 w-12 text-muted-foreground/40 mb-3" />
-        <h3 className="font-medium text-base mb-1">No categories yet</h3>
-        <p className="text-muted-foreground text-sm">
-          Create your first category to get started
-        </p>
-      </div>
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-12 px-4 text-center">
+          <div className="rounded-full bg-primary/10 p-6 mb-4">
+            <IconTag className="h-12 w-12 text-primary" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2">No categories yet</h3>
+          <p className="text-muted-foreground max-w-md mb-6">
+            Create your first category to organize your expenses
+          </p>
+          {onAddCategory && (
+            <Button onClick={onAddCategory} size="lg">
+              Add First Category
+            </Button>
+          )}
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {categories.map((category) => (
-        <div
+        <CategoryCard
           key={category.id}
-          className="group flex items-center gap-3 py-3 px-4 rounded-lg border bg-card hover:bg-muted/30 transition-colors"
-        >
-          <div
-            className="h-3 w-3 rounded-full shrink-0"
-            style={{ backgroundColor: category.color }}
-          />
-
-          <span className="font-medium text-sm flex-1">{category.name}</span>
-
-          {category.isDefault && (
-            <Badge variant="secondary" className="text-xs font-normal">
-              System
-            </Badge>
-          )}
-
-          {!category.isDefault && (
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onEdit(category)}
-                className="h-7 w-7"
-              >
-                <IconEdit className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDelete(category.id, category.name)}
-                disabled={isDeleting}
-                className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-              >
-                <IconTrash className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          )}
-        </div>
+          category={category}
+          onEdit={onEdit}
+          onDelete={handleDelete}
+          isDeleting={isDeleting}
+        />
       ))}
     </div>
   );

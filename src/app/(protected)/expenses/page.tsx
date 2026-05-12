@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { ExpenseList } from "@/features/expenses/components/expense-list";
 import { ExpenseFiltersBar } from "@/features/expenses/components/expense-filters";
 import { ExpenseFormDialog } from "@/features/expenses/components/expense-form-dialog";
@@ -17,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ExpensesPage() {
   const isMobile = useIsMobile();
+  const searchParams = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<
     ExpenseWithRelations | undefined
@@ -26,6 +28,21 @@ export default function ExpensesPage() {
     page: 1,
     limit: 20,
   });
+
+  useEffect(() => {
+    const groupId = searchParams.get("group");
+    const categoryId = searchParams.get("category");
+    const accountId = searchParams.get("account");
+
+    if (groupId || categoryId || accountId) {
+      setFilters((prev) => ({
+        ...prev,
+        ...(groupId && { groupId }),
+        ...(categoryId && { categoryId }),
+        ...(accountId && { accountId }),
+      }));
+    }
+  }, [searchParams]);
 
   const { summary, isLoading: isSummaryLoading } = useExpenseSummary(filters);
 
@@ -80,7 +97,7 @@ export default function ExpensesPage() {
         <Button
           onClick={() => setIsDialogOpen(true)}
           size="lg"
-          className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-2xl z-40 hover:scale-110 transition-transform"
+          className="fixed bottom-26 right-6 h-14 w-14 rounded-full shadow-2xl z-40 hover:scale-110 transition-transform"
         >
           <IconPlus className="h-6 w-6" />
         </Button>

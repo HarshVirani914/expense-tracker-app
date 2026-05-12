@@ -8,6 +8,15 @@ export type CategoryWithUsage = Category & {
   }
 }
 
+export type CategorySpending = {
+  categoryId: string
+  categoryName: string
+  categoryColor: string
+  isDefault: boolean
+  totalAmount: number
+  transactionCount: number
+}
+
 export type CreateCategoryInput = {
   name: string
   color: string

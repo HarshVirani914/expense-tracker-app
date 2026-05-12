@@ -14,6 +14,7 @@ import {
 import { DatePicker } from "@/components/ui/date-picker";
 import { IconFilter, IconFilterOff, IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import { useCategories } from "@/features/categories/hooks/use-categories";
+import { useGroups } from "@/features/groups/hooks/use-groups";
 import type { ExpenseFilters } from "../types";
 import { ExpenseType } from "@/types/prisma";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,7 @@ export const ExpenseFiltersBar = ({
 }: ExpenseFiltersProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { categories } = useCategories();
+  const { groups } = useGroups({ page: 1, limit: 100 });
 
   const handleDateChange = (field: "startDate" | "endDate", date: Date | undefined) => {
     onFiltersChange({
@@ -42,6 +44,14 @@ export const ExpenseFiltersBar = ({
     onFiltersChange({
       ...filters,
       categoryId: categoryId === "all" ? undefined : categoryId,
+      page: 1,
+    });
+  };
+
+  const handleGroupChange = (groupId: string | undefined) => {
+    onFiltersChange({
+      ...filters,
+      groupId: groupId === "all" ? undefined : groupId,
       page: 1,
     });
   };
@@ -63,12 +73,14 @@ export const ExpenseFiltersBar = ({
 
   const hasActiveFilters =
     filters.categoryId ||
+    filters.groupId ||
     filters.type ||
     filters.startDate ||
     filters.endDate;
 
   const activeFilterCount = [
     filters.categoryId,
+    filters.groupId,
     filters.type,
     filters.startDate,
     filters.endDate,
@@ -177,6 +189,29 @@ export const ExpenseFiltersBar = ({
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="group" className="text-sm font-medium">
+                Group
+              </Label>
+              <Select
+                value={filters.groupId || "all"}
+                onValueChange={handleGroupChange}
+              >
+                <SelectTrigger id="group">
+                  <SelectValue placeholder="All expenses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All expenses</SelectItem>
+                  <SelectItem value="personal">Personal only</SelectItem>
+                  {groups?.map((group) => (
+                    <SelectItem key={group.id} value={group.id}>
+                      {group.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="type" className="text-sm font-medium">
                 Type
               </Label>
@@ -222,6 +257,13 @@ export const ExpenseFiltersBar = ({
             {filters.categoryId && (
               <Badge variant="secondary" className="gap-1">
                 {categories?.find((c) => c.id === filters.categoryId)?.name}
+              </Badge>
+            )}
+            {filters.groupId && (
+              <Badge variant="secondary" className="gap-1">
+                {filters.groupId === "personal" 
+                  ? "Personal only" 
+                  : groups?.find((g) => g.id === filters.groupId)?.name}
               </Badge>
             )}
             {filters.type && (

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
 import type { CreateGroupExpenseInput } from '../schemas'
 import type { ApiResponse } from '@/types/api'
+import { GROUP_STATS_KEY } from '@/features/groups/hooks/use-group-stats'
 
 const EXPENSES_KEY = ['expenses'] as const
 const GROUP_BALANCES_KEY = ['group-balances'] as const
@@ -25,6 +26,7 @@ export const useCreateGroupExpense = (groupId?: string) => {
       queryClient.invalidateQueries({ queryKey: OUTSTANDING_DEBTS_KEY })
       queryClient.invalidateQueries({ queryKey: DASHBOARD_KEY })
       queryClient.invalidateQueries({ queryKey: GROUPS_KEY })
+      queryClient.invalidateQueries({ queryKey: GROUP_STATS_KEY })
       if (groupId) {
         queryClient.invalidateQueries({ 
           queryKey: [...GROUP_BALANCES_KEY, groupId] 

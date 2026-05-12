@@ -59,4 +59,14 @@ export type AddMemberInput = {
 
 export type GroupFilters = FilterOptions & {
   search?: string
+  contactId?: string
+}
+
+export type GroupStats = {
+  totalGroups: number
+  activeGroups: number
+  totalMembers: number
+  totalExpenses: number
+  totalOwed: number
+  totalOwing: number
 }

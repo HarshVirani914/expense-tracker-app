@@ -6,21 +6,6 @@ import { useGroups } from "../hooks/use-groups";
 import { useDeleteGroup } from "../hooks/use-delete-group";
 import type { GroupWithMembers, GroupFilters } from "../types";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -30,22 +15,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  IconDotsVertical,
-  IconEdit,
-  IconTrash,
-  IconUsers,
-  IconReceipt,
-  IconEye,
-} from "@tabler/icons-react";
+import { IconUsers } from "@tabler/icons-react";
 import { toast } from "sonner";
+import { GroupCard } from "./group-card";
 
 type GroupListProps = {
   onEdit: (group: GroupWithMembers) => void;
   filters: GroupFilters;
 };
+
+const GridSkeleton = () => (
+  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {Array.from({ length: 6 }).map((_, i) => (
+      <Skeleton key={i} className="h-32 w-full" />
+    ))}
+  </div>
+);
 
 export const GroupList = ({ onEdit, filters }: GroupListProps) => {
   const router = useRouter();
@@ -81,24 +67,20 @@ export const GroupList = ({ onEdit, filters }: GroupListProps) => {
   };
 
   if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full" />
-        ))}
-      </div>
-    );
+    return <GridSkeleton />;
   }
 
   if (!groups || groups.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="rounded-full bg-muted p-4 mb-4">
-          <IconUsers className="h-10 w-10 text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="rounded-full bg-primary/10 p-6 mb-4">
+          <IconUsers className="h-12 w-12 text-primary" />
         </div>
-        <h3 className="text-lg font-semibold mb-2">No groups yet</h3>
-        <p className="text-muted-foreground mb-4 max-w-sm">
-          Create your first group to start splitting expenses with others.
+        <h3 className="text-xl font-semibold mb-2">No groups found</h3>
+        <p className="text-muted-foreground mb-6 max-w-sm">
+          {filters.search
+            ? "Try adjusting your search to find what you're looking for."
+            : "Create your first group to start splitting expenses with others."}
         </p>
       </div>
     );
@@ -106,89 +88,16 @@ export const GroupList = ({ onEdit, filters }: GroupListProps) => {
 
   return (
     <>
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Group Name</TableHead>
-              <TableHead>Members</TableHead>
-              <TableHead>Expenses</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="w-[100px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {groups.map((group) => (
-              <TableRow
-                key={group.id}
-                className="cursor-pointer hover:bg-muted/50"
-                onClick={() => handleViewGroup(group.id)}
-              >
-                <TableCell>
-                  <div className="font-medium">{group.name}</div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="gap-1">
-                    <IconUsers className="h-3 w-3" />
-                    {group.members.length}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {group._count && group._count.expenses > 0 ? (
-                    <Badge variant="secondary" className="gap-1">
-                      <IconReceipt className="h-3 w-3" />
-                      {group._count.expenses}
-                    </Badge>
-                  ) : (
-                    <span className="text-muted-foreground text-sm">0</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {group.description ? (
-                    <span className="text-sm text-muted-foreground line-clamp-1">
-                      {group.description}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-muted-foreground italic">
-                      No description
-                    </span>
-                  )}
-                </TableCell>
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleViewGroup(group.id)}
-                    >
-                      <IconEye className="h-4 w-4" />
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <IconDotsVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onEdit(group)}>
-                          <IconEdit className="h-4 w-4 mr-2" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteClick(group)}
-                          className="text-destructive focus:text-destructive"
-                        >
-                          <IconTrash className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {groups.map((group) => (
+          <GroupCard
+            key={group.id}
+            group={group}
+            onView={handleViewGroup}
+            onEdit={onEdit}
+            onDelete={handleDeleteClick}
+          />
+        ))}
       </div>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

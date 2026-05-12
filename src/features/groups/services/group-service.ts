@@ -8,6 +8,7 @@ import type {
   GroupFilters,
   GroupWithMembers,
   UpdateGroupInput,
+  GroupStats,
 } from '../types'
 import { getMembersInfo } from '../utils/member-info'
 import { memberValidationService } from './member-validation-service'
@@ -18,7 +19,7 @@ export const groupService = {
     filters: GroupFilters
   ): Promise<PaginatedResponse<GroupWithMembers>> {
     try {
-      const { page = 1, limit = 20, search, sortBy = 'name', sortOrder = 'asc' } = filters
+      const { page = 1, limit = 20, search, contactId, sortBy = 'name', sortOrder = 'asc' } = filters
 
       const skip = (page - 1) * limit
 
@@ -30,6 +31,16 @@ export const groupService = {
         },
         ...(search && {
           name: { contains: search, mode: 'insensitive' },
+        }),
+        ...(contactId && {
+          members: {
+            some: {
+              OR: [
+                { userId },
+                { contactId },
+              ],
+            },
+          },
         }),
       }
 
@@ -472,4 +483,91 @@ export const groupService = {
   },
 
   getMembersInfo,
+
+  async getStats(userId: string): Promise<GroupStats> {
+    try {
+      const groups = await prisma.group.findMany({
+        where: {
+          members: {
+            some: {
+              userId,
+            },
+          },
+        },
+        include: {
+          members: true,
+          _count: {
+            select: {
+              expenses: true,
+            },
+          },
+          expenses: {
+            include: {
+              participants: {
+                where: {
+                  OR: [
+                    { userId },
+                    {
+                      contact: {
+                        groupMemberships: {
+                          some: {
+                            group: {
+                              members: {
+                                some: {
+                                  userId,
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      })
+
+      const totalGroups = groups.length
+      const activeGroups = groups.filter(g => g._count.expenses > 0).length
+      const totalMembers = new Set(
+        groups.flatMap(g => 
+          g.members.map(m => m.userId || m.contactId)
+        )
+      ).size
+      const totalExpenses = groups.reduce((sum, g) => sum + g._count.expenses, 0)
+
+      let totalOwed = 0
+      let totalOwing = 0
+
+      groups.forEach(group => {
+        group.expenses.forEach(expense => {
+          expense.participants.forEach(participant => {
+            if (!participant.contactId) {
+              const balance = Number(participant.paidAmount) - Number(participant.oweAmount)
+              if (balance > 0) {
+                totalOwed += balance
+              } else if (balance < 0) {
+                totalOwing += Math.abs(balance)
+              }
+            }
+          })
+        })
+      })
+
+      return {
+        totalGroups,
+        activeGroups,
+        totalMembers,
+        totalExpenses,
+        totalOwed,
+        totalOwing,
+      }
+    } catch (error) {
+      logger.error('Failed to get group stats', { error, userId })
+      throw new Error('Failed to fetch group statistics')
+    }
+  },
 }
