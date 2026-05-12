@@ -12,7 +12,7 @@ export const OfflineIndicator = () => {
     const handleOnline = () => {
       setWasOffline(true);
       setIsOffline(false);
-      
+
       setTimeout(() => {
         setWasOffline(false);
       }, 3000);
@@ -41,8 +41,8 @@ export const OfflineIndicator = () => {
         variant={isOffline ? "destructive" : "default"}
         className={`${
           isOffline
-            ? "bg-destructive/10 border-destructive/20"
-            : "bg-green-500/10 border-green-500/20"
+            ? "bg-destructive/50 border-destructive/20"
+            : "bg-green-500/50 border-green-500/20"
         }`}
       >
         {isOffline ? (

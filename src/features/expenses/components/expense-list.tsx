@@ -18,6 +18,10 @@ import { useDeleteExpense } from "../hooks/use-delete-expense";
 import { useExpenses } from "../hooks/use-expenses";
 import type { ExpenseFilters, ExpenseWithRelations } from "../types";
 import { formatCurrency } from "@/lib/format";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ExpenseCard } from "./expense-card";
+import { ExpenseEmptyState } from "./expense-empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type ExpenseListProps = {
   onEdit: (expense: ExpenseWithRelations) => void;
@@ -27,6 +31,7 @@ type ExpenseListProps = {
 export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
   const [page, setPage] = useState(0);
   const pageSize = 20;
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setPage(0);
@@ -173,6 +178,64 @@ export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
       ),
     },
   ], [onEdit, handleDelete]);
+
+  if (isLoading) {
+    if (isMobile) {
+      return (
+        <div className="space-y-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
+        </div>
+      );
+    }
+    return <DataTable columns={columns} data={[]} isLoading={true} />;
+  }
+
+  if (!expenses || expenses.length === 0) {
+    return <ExpenseEmptyState />;
+  }
+
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        <div className="space-y-3">
+          {expenses.map((expense) => (
+            <ExpenseCard
+              key={expense.id}
+              expense={expense}
+              onEdit={onEdit}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+
+        {pagination && pagination.total > pageSize && (
+          <div className="flex items-center justify-between pt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(Math.max(0, page - 1))}
+              disabled={page === 0}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {page + 1} of {Math.ceil(pagination.total / pageSize)}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(page + 1)}
+              disabled={(page + 1) * pageSize >= pagination.total}
+            >
+              Next
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <DataTable

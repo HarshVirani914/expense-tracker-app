@@ -54,3 +54,12 @@ export type ExpenseFilters = FilterOptions & {
   type?: ExpenseType
   paymentMethod?: PaymentMethod
 }
+
+export type ExpenseSummary = {
+  totalExpenses: number
+  totalIncome: number
+  netAmount: number
+  expenseCount: number
+  incomeCount: number
+  totalCount: number
+}

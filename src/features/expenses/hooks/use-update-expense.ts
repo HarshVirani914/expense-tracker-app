@@ -4,6 +4,7 @@ import type { ExpenseWithRelations, UpdateExpenseInput } from '../types'
 import type { ApiResponse } from '@/types/api'
 
 const EXPENSES_KEY = ['expenses'] as const
+const EXPENSE_SUMMARY_KEY = ['expense-summary'] as const
 const ACCOUNTS_KEY = ['accounts'] as const
 const DASHBOARD_KEY = ['dashboard'] as const
 const OUTSTANDING_DEBTS_KEY = ['outstanding-debts'] as const
@@ -23,6 +24,7 @@ export const useUpdateExpense = () => {
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: EXPENSES_KEY })
+      queryClient.invalidateQueries({ queryKey: EXPENSE_SUMMARY_KEY })
       queryClient.invalidateQueries({ queryKey: [...EXPENSES_KEY, variables.id] })
       queryClient.invalidateQueries({ queryKey: ACCOUNTS_KEY })
       queryClient.invalidateQueries({ queryKey: DASHBOARD_KEY })

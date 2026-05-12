@@ -29,7 +29,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
               <Image
                 src="/logo.png"
                 alt="PocketPulse"
-                width={200}
+                width={100}
                 height={32}
                 loading="eager"
                 className="w-auto h-auto"

@@ -1,5 +1,6 @@
 export { useExpenses } from './use-expenses'
 export { useExpense } from './use-expense'
+export { useExpenseSummary } from './use-expense-summary'
 export { useCreateExpense } from './use-create-expense'
 export { useCreateGroupExpense } from './use-create-group-expense'
 export { useUpdateExpense } from './use-update-expense'

@@ -4,14 +4,19 @@ import { useState } from "react";
 import { ExpenseList } from "@/features/expenses/components/expense-list";
 import { ExpenseFiltersBar } from "@/features/expenses/components/expense-filters";
 import { ExpenseFormDialog } from "@/features/expenses/components/expense-form-dialog";
+import { ExpenseSummaryCard } from "@/features/expenses/components/expense-summary-card";
+import { useExpenseSummary } from "@/features/expenses/hooks/use-expense-summary";
 import type {
   ExpenseWithRelations,
   ExpenseFilters,
 } from "@/features/expenses/types";
 import { Button } from "@/components/ui/button";
-import { IconPlus, IconReceipt } from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ExpensesPage() {
+  const isMobile = useIsMobile();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<
     ExpenseWithRelations | undefined
@@ -21,6 +26,8 @@ export default function ExpensesPage() {
     page: 1,
     limit: 20,
   });
+
+  const { summary, isLoading: isSummaryLoading } = useExpenseSummary(filters);
 
   const handleEdit = (expense: ExpenseWithRelations) => {
     setSelectedExpense(expense);
@@ -34,27 +41,30 @@ export default function ExpensesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-primary/10 p-2.5">
-              <IconReceipt className="h-6 w-6 text-primary" />
-            </div>
+      {!isMobile && (
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
             <h1 className="text-4xl font-bold tracking-tight">Expenses</h1>
+            <p className="text-muted-foreground text-base">
+              Track and manage all your expenses
+            </p>
           </div>
-          <p className="text-muted-foreground text-base pl-[52px]">
-            Track and manage all your expenses
-          </p>
+          <Button
+            onClick={() => setIsDialogOpen(true)}
+            className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+            size="lg"
+          >
+            <IconPlus className="h-5 w-5" />
+            Add Expense
+          </Button>
         </div>
-        <Button
-          onClick={() => setIsDialogOpen(true)}
-          className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
-          size="lg"
-        >
-          <IconPlus className="h-5 w-5" />
-          Add Expense
-        </Button>
-      </div>
+      )}
+
+      {isSummaryLoading ? (
+        <Skeleton className="h-48 w-full" />
+      ) : summary ? (
+        <ExpenseSummaryCard {...summary} />
+      ) : null}
 
       <ExpenseFiltersBar filters={filters} onFiltersChange={setFilters} />
 
@@ -65,6 +75,16 @@ export default function ExpensesPage() {
         onOpenChange={handleCloseDialog}
         expense={selectedExpense}
       />
+
+      {isMobile && (
+        <Button
+          onClick={() => setIsDialogOpen(true)}
+          size="lg"
+          className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-2xl z-40 hover:scale-110 transition-transform"
+        >
+          <IconPlus className="h-6 w-6" />
+        </Button>
+      )}
     </div>
   );
 }

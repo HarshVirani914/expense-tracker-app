@@ -7,9 +7,96 @@ import type {
   ExpenseFilters,
   ExpenseWithRelations,
   UpdateExpenseInput,
+  ExpenseSummary,
 } from '../types'
 
 export const expenseService = {
+  async getSummary(userId: string, filters: ExpenseFilters): Promise<ExpenseSummary> {
+    try {
+      const {
+        categoryId,
+        accountId,
+        groupId,
+        type,
+        paymentMethod,
+        startDate,
+        endDate,
+        search,
+      } = filters
+
+      const where: Prisma.ExpenseWhereInput = {
+        userId,
+        ...(categoryId && { categoryId }),
+        ...(accountId && { accountId }),
+        ...(groupId && { groupId }),
+        ...(type && { type }),
+        ...(paymentMethod && { paymentMethod }),
+        ...(search && {
+          OR: [
+            { description: { contains: search, mode: 'insensitive' } },
+            { notes: { contains: search, mode: 'insensitive' } },
+          ],
+        }),
+        ...(startDate || endDate
+          ? {
+            date: {
+              ...(startDate && { gte: new Date(startDate) }),
+              ...(endDate && { lte: new Date(endDate) }),
+            },
+          }
+          : {}),
+      }
+
+      const [expensesAgg, incomeAgg, expenseCount, incomeCount] = await Promise.all([
+        prisma.expense.aggregate({
+          where: {
+            ...where,
+            type: 'EXPENSE',
+          },
+          _sum: {
+            amount: true,
+          },
+        }),
+        prisma.expense.aggregate({
+          where: {
+            ...where,
+            type: 'INCOME',
+          },
+          _sum: {
+            amount: true,
+          },
+        }),
+        prisma.expense.count({
+          where: {
+            ...where,
+            type: 'EXPENSE',
+          },
+        }),
+        prisma.expense.count({
+          where: {
+            ...where,
+            type: 'INCOME',
+          },
+        }),
+      ])
+
+      const totalExpenses = Number(expensesAgg._sum.amount || 0)
+      const totalIncome = Number(incomeAgg._sum.amount || 0)
+
+      return {
+        totalExpenses,
+        totalIncome,
+        netAmount: totalIncome - totalExpenses,
+        expenseCount,
+        incomeCount,
+        totalCount: expenseCount + incomeCount,
+      }
+    } catch (error) {
+      logger.error('Failed to get expense summary', { error, userId, filters })
+      throw new Error('Failed to fetch expense summary')
+    }
+  },
+
   async list(
     userId: string,
     filters: ExpenseFilters
