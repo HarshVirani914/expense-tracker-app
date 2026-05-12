@@ -13,7 +13,7 @@ export const GroupBalancesSummary = () => {
 
   if (groupsLoading) {
     return (
-      <Card>
+      <Card className="shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconUsers className="h-5 w-5" />
@@ -31,7 +31,7 @@ export const GroupBalancesSummary = () => {
 
   if (!groups || groups.length === 0) {
     return (
-      <Card>
+      <Card className="shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconUsers className="h-5 w-5" />
@@ -59,7 +59,7 @@ export const GroupBalancesSummary = () => {
   const activeGroups = groups.slice(0, 3);
 
   return (
-    <Card>
+    <Card className="shadow-none">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <IconUsers className="h-5 w-5" />

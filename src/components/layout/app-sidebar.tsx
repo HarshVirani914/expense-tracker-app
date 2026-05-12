@@ -28,6 +28,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
+import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import Image from "next/image";
 
 const navigation = [
@@ -81,23 +82,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
 
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+                <div className="flex items-center justify-center rounded-lg">
                   <Image
-                    src="/logo.svg"
+                    src="/logo.png"
                     alt="PocketPulse"
-                    width={42}
-                    height={42}
+                    width={200}
+                    height={32}
+                    loading="eager"
+                    className="w-auto h-auto"
                   />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">PocketPulse</span>
-                  <span className="truncate text-xs">Manage your finances</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -142,6 +141,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <div className="flex items-center justify-between w-full px-2">
+              <ThemeSwitcher variant="default" align="start" />
+            </div>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"

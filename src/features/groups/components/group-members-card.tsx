@@ -56,7 +56,7 @@ export const GroupMembersCard = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-rows-2 sm:grid-rows-3 lg:grid-rows-4 xl:grid-rows-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {visibleMembers.map((member) => {
             const name = member.user?.name || member.contact?.name || "Unknown";
             const email = member.user?.email || member.contact?.email;
@@ -66,7 +66,7 @@ export const GroupMembersCard = ({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex flex-col items-center gap-2 p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors cursor-default">
-                      <div className="flex items-center justify-center w-12 rounded-full bg-primary/10 text-primary font-semibold text-base shrink-0">
+                      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary font-semibold text-base shrink-0">
                         {name.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex flex-col items-center gap-1 min-w-0 w-full">

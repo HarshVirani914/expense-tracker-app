@@ -1,33 +1,36 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { ExpenseList } from '@/features/expenses/components/expense-list'
-import { ExpenseFiltersBar } from '@/features/expenses/components/expense-filters'
-import { ExpenseFormDialog } from '@/features/expenses/components/expense-form-dialog'
-import type { ExpenseWithRelations, ExpenseFilters } from '@/features/expenses/types'
-import { Button } from '@/components/ui/button'
-import { IconPlus, IconReceipt } from '@tabler/icons-react'
+import { useState } from "react";
+import { ExpenseList } from "@/features/expenses/components/expense-list";
+import { ExpenseFiltersBar } from "@/features/expenses/components/expense-filters";
+import { ExpenseFormDialog } from "@/features/expenses/components/expense-form-dialog";
+import type {
+  ExpenseWithRelations,
+  ExpenseFilters,
+} from "@/features/expenses/types";
+import { Button } from "@/components/ui/button";
+import { IconPlus, IconReceipt } from "@tabler/icons-react";
 
 export default function ExpensesPage() {
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<
     ExpenseWithRelations | undefined
-  >(undefined)
-  
+  >(undefined);
+
   const [filters, setFilters] = useState<ExpenseFilters>({
     page: 1,
     limit: 20,
-  })
+  });
 
   const handleEdit = (expense: ExpenseWithRelations) => {
-    setSelectedExpense(expense)
-    setIsDialogOpen(true)
-  }
+    setSelectedExpense(expense);
+    setIsDialogOpen(true);
+  };
 
   const handleCloseDialog = () => {
-    setIsDialogOpen(false)
-    setSelectedExpense(undefined)
-  }
+    setIsDialogOpen(false);
+    setSelectedExpense(undefined);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -63,5 +66,5 @@ export default function ExpensesPage() {
         expense={selectedExpense}
       />
     </div>
-  )
+  );
 }

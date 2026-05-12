@@ -27,9 +27,9 @@ export const useCreateExpense = () => {
       queryClient.invalidateQueries({ queryKey: DASHBOARD_KEY })
       queryClient.invalidateQueries({ queryKey: OUTSTANDING_DEBTS_KEY })
       queryClient.invalidateQueries({ queryKey: GROUPS_KEY })
-      if (data.data?.groupId) {
-        queryClient.invalidateQueries({ 
-          queryKey: [...GROUP_BALANCES_KEY, data.data.groupId] 
+      if (data.groupId) {
+        queryClient.invalidateQueries({
+          queryKey: [...GROUP_BALANCES_KEY, data.groupId]
         })
       }
     },

@@ -1,27 +1,27 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { AccountList } from '@/features/accounts/components/account-list'
-import { AccountFormDialog } from '@/features/accounts/components/account-form-dialog'
-import type { AccountWithBalance } from '@/features/accounts/types'
-import { Button } from '@/components/ui/button'
-import { IconPlus, IconWallet } from '@tabler/icons-react'
+import { useState } from "react";
+import { AccountList } from "@/features/accounts/components/account-list";
+import { AccountFormDialog } from "@/features/accounts/components/account-form-dialog";
+import type { AccountWithBalance } from "@/features/accounts/types";
+import { Button } from "@/components/ui/button";
+import { IconPlus, IconWallet } from "@tabler/icons-react";
 
 export default function AccountsPage() {
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<
     AccountWithBalance | undefined
-  >(undefined)
+  >(undefined);
 
   const handleEdit = (account: AccountWithBalance) => {
-    setSelectedAccount(account)
-    setIsDialogOpen(true)
-  }
+    setSelectedAccount(account);
+    setIsDialogOpen(true);
+  };
 
   const handleCloseDialog = () => {
-    setIsDialogOpen(false)
-    setSelectedAccount(undefined)
-  }
+    setIsDialogOpen(false);
+    setSelectedAccount(undefined);
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -55,5 +55,5 @@ export default function AccountsPage() {
         account={selectedAccount}
       />
     </div>
-  )
+  );
 }

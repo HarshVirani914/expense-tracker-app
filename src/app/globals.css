@@ -128,3 +128,16 @@
     @apply font-sans;
   }
 }
+
+@layer utilities {
+
+  .card-hover {
+    @apply hover:shadow-lg hover:-translate-y-0.5 transition-all;
+  }
+
+  .bg-grid-white\/10 {
+    background-image: linear-gradient(to right, rgb(255 255 255 / 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.1) 1px, transparent 1px);
+    background-size: 14px 24px;
+  }
+}

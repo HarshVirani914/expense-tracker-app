@@ -20,61 +20,104 @@ import {
   IconUserCircle,
   IconUsers,
   IconWallet,
+  IconFileInvoice,
+  IconChartBar,
 } from "@tabler/icons-react";
 import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+type QuickAction = {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  onClick: () => void;
+};
 
 export const QuickActions = () => {
   const [expenseDialogOpen, setExpenseDialogOpen] = useState(false);
   const [accountDialogOpen, setAccountDialogOpen] = useState(false);
   const [groupDialogOpen, setGroupDialogOpen] = useState(false);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const isMobile = useIsMobile();
+
+  const actions: QuickAction[] = [
+    {
+      id: "expense",
+      label: "Add Expense",
+      icon: IconReceipt,
+      onClick: () => setExpenseDialogOpen(true),
+    },
+    {
+      id: "group",
+      label: "Create Group",
+      icon: IconUsers,
+      onClick: () => setGroupDialogOpen(true),
+    },
+    {
+      id: "contact",
+      label: "Add Contact",
+      icon: IconUserCircle,
+      onClick: () => setContactDialogOpen(true),
+    },
+    {
+      id: "account",
+      label: "Add Account",
+      icon: IconWallet,
+      onClick: () => setAccountDialogOpen(true),
+    },
+  ];
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
-            size="lg"
-          >
-            <IconPlus className="h-5 w-5" />
-            Create
-            <IconChevronDown className="h-4 w-4 ml-1" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Create New</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setExpenseDialogOpen(true)}
-            className="gap-2 cursor-pointer"
-          >
-            <IconReceipt className="h-4 w-4" />
-            <span>Expense</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => setGroupDialogOpen(true)}
-            className="gap-2 cursor-pointer"
-          >
-            <IconUsers className="h-4 w-4" />
-            <span>Group</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => setContactDialogOpen(true)}
-            className="gap-2 cursor-pointer"
-          >
-            <IconUserCircle className="h-4 w-4" />
-            <span>Contact</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => setAccountDialogOpen(true)}
-            className="gap-2 cursor-pointer"
-          >
-            <IconWallet className="h-4 w-4" />
-            <span>Account</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {isMobile ? (
+        <div className="w-full">
+          <div className="flex gap-3 pb-2 min-w-max px-1">
+            {actions.map((action) => (
+              <button
+                key={action.id}
+                onClick={action.onClick}
+                className="flex flex-col items-center gap-2 rounded-xl bg-card p-4 border shadow-none hover:shadow-sm transition-shadow min-w-[90px]"
+              >
+                <div className="rounded-full bg-primary/10 p-3">
+                  <action.icon className="h-5 w-5 text-primary" />
+                </div>
+                <span className="text-xs font-medium text-center leading-tight">
+                  {action.label.split(" ")[0]}
+                  <br />
+                  {action.label.split(" ").slice(1).join(" ")}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+              size="lg"
+            >
+              <IconPlus className="h-5 w-5" />
+              Create
+              <IconChevronDown className="h-4 w-4 ml-1" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>Create New</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {actions.map((action) => (
+              <DropdownMenuItem
+                key={action.id}
+                onClick={action.onClick}
+                className="gap-2 cursor-pointer"
+              >
+                <action.icon className="h-4 w-4" />
+                <span>{action.label}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       <ExpenseFormDialog
         open={expenseDialogOpen}

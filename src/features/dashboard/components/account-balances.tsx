@@ -25,10 +25,9 @@ const ACCOUNT_ICONS = {
 };
 
 export const AccountBalances = memo(({ accounts }: AccountBalancesProps) => {
-
   if (accounts.length === 0) {
     return (
-      <Card>
+      <Card className="shadow-none mb-3 sm:mb-0">
         <CardHeader>
           <CardTitle>Accounts</CardTitle>
         </CardHeader>
@@ -40,7 +39,7 @@ export const AccountBalances = memo(({ accounts }: AccountBalancesProps) => {
   }
 
   return (
-    <Card>
+    <Card className="shadow-none mb-3 sm:mb-0">
       <CardHeader>
         <CardTitle>Accounts</CardTitle>
       </CardHeader>

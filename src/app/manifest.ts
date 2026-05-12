@@ -1,31 +1,84 @@
-import type { MetadataRoute } from 'next'
+import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "PocketPulse",
+    name: "PocketPulse - Expense Tracker",
     short_name: "PocketPulse",
-    description: "Manage your finances",
-    start_url: "/",
-    orientation: "portrait",
-    scope: "/",
-    lang: "en-US",
-    id: "/",
+    description:
+      "A modern Progressive Web App for tracking expenses, managing budgets, and monitoring financial health across all your devices",
+    start_url: "/dashboard",
+    display: "standalone",
+    background_color: "#ffffff",
+    theme_color: "#000000",
+    orientation: "portrait-primary",
+    categories: ["finance", "productivity", "utilities"],
     icons: [
       {
-        src: "/web-app-manifest-192x192.png",
+        src: "/icons/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-192.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "maskable",
       },
       {
-        src: "/web-app-manifest-512x512.png",
+        src: "/icons/icon-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
       },
     ],
-    theme_color: "#ffffff",
-    background_color: "#ffffff",
-    display: "standalone",
+    screenshots: [],
+    shortcuts: [
+      {
+        name: "Add Expense",
+        short_name: "Expense",
+        description: "Quickly add a new expense",
+        url: "/expenses?create=true",
+        icons: [
+          {
+            src: "/icons/icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+        ],
+      },
+      {
+        name: "View Groups",
+        short_name: "Groups",
+        description: "View and manage expense groups",
+        url: "/groups",
+        icons: [
+          {
+            src: "/icons/icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+        ],
+      },
+      {
+        name: "Dashboard",
+        short_name: "Dashboard",
+        description: "View your financial overview",
+        url: "/dashboard",
+        icons: [
+          {
+            src: "/icons/icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+        ],
+      },
+    ],
   };
 }

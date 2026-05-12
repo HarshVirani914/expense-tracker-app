@@ -39,7 +39,7 @@ export const OutstandingDebtsWidget = () => {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconCash className="h-5 w-5" />
@@ -59,7 +59,7 @@ export const OutstandingDebtsWidget = () => {
 
   if (debts.length === 0) {
     return (
-      <Card>
+      <Card className="shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconCash className="h-5 w-5" />
@@ -94,7 +94,7 @@ export const OutstandingDebtsWidget = () => {
 
   return (
     <>
-      <Card>
+      <Card className="shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconCash className="h-5 w-5" />
