@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { IconEdit, IconTrash, IconAlertCircle } from "@tabler/icons-react"
 import type { BudgetWithSpending } from "../types"
 import { cn } from "@/lib/utils"
+import { formatCurrencyWithDecimals } from "@/lib/format"
 
 type BudgetCardProps = {
   budget: BudgetWithSpending
@@ -73,8 +74,8 @@ export const BudgetCard = ({ budget, onEdit, onDelete }: BudgetCardProps) => {
 
         <div className="space-y-2">
           <div className="flex items-baseline justify-between">
-            <p className="text-2xl font-bold">₹{budget.spent.toFixed(2)}</p>
-            <p className="text-sm text-muted-foreground">of ₹{budget.amount}</p>
+            <p className="text-2xl font-bold">{formatCurrencyWithDecimals(budget.spent)}</p>
+            <p className="text-sm text-muted-foreground">of {formatCurrencyWithDecimals(budget.amount)}</p>
           </div>
 
           <div className="relative w-full h-3 bg-muted rounded-full overflow-hidden">
@@ -92,7 +93,7 @@ export const BudgetCard = ({ budget, onEdit, onDelete }: BudgetCardProps) => {
               'font-medium',
               budget.remaining < 0 ? 'text-destructive' : 'text-muted-foreground'
             )}>
-              {budget.remaining < 0 ? 'Over by' : 'Remaining'}: ₹{Math.abs(budget.remaining).toFixed(2)}
+              {budget.remaining < 0 ? 'Over by' : 'Remaining'}: {formatCurrencyWithDecimals(Math.abs(budget.remaining))}
             </p>
           </div>
         </div>

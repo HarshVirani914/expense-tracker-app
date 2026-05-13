@@ -57,6 +57,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
     "@tailwindcss/postcss": "^4",
     "@tanstack/eslint-plugin-query": "^5.100.9",
     "@types/node": "^20",

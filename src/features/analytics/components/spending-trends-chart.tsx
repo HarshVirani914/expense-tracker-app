@@ -11,6 +11,7 @@ import { IconTrendingUp } from "@tabler/icons-react";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis } from "recharts";
 import type { SpendingTrend } from "../types";
 import { format } from "date-fns";
+import { formatCurrencyCompact } from "@/lib/format";
 
 type SpendingTrendsChartProps = {
   data: SpendingTrend[];
@@ -104,7 +105,7 @@ export const SpendingTrendsChart = ({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`}
+              tickFormatter={(value) => formatCurrencyCompact(value)}
             />
             <ChartTooltip
               cursor={false}

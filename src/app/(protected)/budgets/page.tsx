@@ -9,6 +9,7 @@ import { BudgetFormDialog } from "@/features/budgets/components/budget-form-dial
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { useBudgets, useDeleteBudget } from "@/features/budgets/hooks"
 import type { BudgetWithSpending } from "@/features/budgets/types"
+import { formatCurrencyWithDecimals } from "@/lib/format"
 
 export default function BudgetsPage() {
   const [formOpen, setFormOpen] = useState(false)
@@ -66,14 +67,14 @@ export default function BudgetsPage() {
         <Card className="p-6">
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Total Budgeted</p>
-            <p className="text-3xl font-bold">₹{totalBudgeted.toFixed(2)}</p>
+            <p className="text-3xl font-bold">{formatCurrencyWithDecimals(totalBudgeted)}</p>
           </div>
         </Card>
 
         <Card className="p-6">
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Total Spent</p>
-            <p className="text-3xl font-bold">₹{totalSpent.toFixed(2)}</p>
+            <p className="text-3xl font-bold">{formatCurrencyWithDecimals(totalSpent)}</p>
             <p className="text-sm text-muted-foreground">
               {totalBudgeted > 0 
                 ? `${((totalSpent / totalBudgeted) * 100).toFixed(1)}% of budget`

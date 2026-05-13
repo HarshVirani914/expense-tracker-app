@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import type { BudgetWithCategory, BudgetWithSpending, BudgetAlert, Budget } from '../types'
 import type { CreateBudgetInput, UpdateBudgetInput } from '../schemas'
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, addWeeks, addMonths } from 'date-fns'
+import { formatCurrencyWithDecimals } from '@/lib/format'
 
 export const budgetService = {
   async list(userId: string): Promise<BudgetWithSpending[]> {
@@ -217,7 +218,7 @@ export const budgetService = {
         alerts.push({
           budget,
           alertType: 'exceeded',
-          message: `You've exceeded your ${budget.period.toLowerCase()} budget for ${budget.category.name} by ₹${Math.abs(budget.remaining).toFixed(2)}`,
+          message: `You've exceeded your ${budget.period.toLowerCase()} budget for ${budget.category.name} by ${formatCurrencyWithDecimals(Math.abs(budget.remaining))}`,
         })
       } else if (budget.status === 'warning') {
         alerts.push({

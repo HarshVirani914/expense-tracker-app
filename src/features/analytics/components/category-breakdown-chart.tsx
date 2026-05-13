@@ -11,6 +11,7 @@ import {
 import { IconChartPie } from "@tabler/icons-react";
 import { PieChart, Pie, Label } from "recharts";
 import type { CategoryBreakdown } from "../types";
+import { formatCurrency } from "@/lib/format";
 
 type CategoryBreakdownChartProps = {
   data: CategoryBreakdown[];
@@ -108,7 +109,7 @@ export const CategoryBreakdownChart = ({
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          ₹{totalAmount.toLocaleString()}
+                          {formatCurrency(totalAmount)}
                         </tspan>
                         <tspan
                           x={viewBox.cx}

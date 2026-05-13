@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { IconTrendingUp, IconTrendingDown, IconMinus, IconBulb } from "@tabler/icons-react"
 import type { AnalyticsInsights } from "../types"
+import { formatCurrencyWithDecimals } from "@/lib/format"
 
 type InsightsSummaryProps = {
   insights: AnalyticsInsights | undefined
@@ -76,7 +77,7 @@ export const InsightsSummary = ({ insights, isLoading }: InsightsSummaryProps) =
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">Largest Expense</p>
-            <p className="text-2xl font-bold">₹{insights.largestExpense.toFixed(2)}</p>
+            <p className="text-2xl font-bold">{formatCurrencyWithDecimals(insights.largestExpense)}</p>
           </div>
 
           <div className="space-y-1">
@@ -96,17 +97,17 @@ export const InsightsSummary = ({ insights, isLoading }: InsightsSummaryProps) =
 
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">Avg. Daily</p>
-            <p className="text-xl font-semibold">₹{insights.averageDaily.toFixed(2)}</p>
+            <p className="text-xl font-semibold">{formatCurrencyWithDecimals(insights.averageDaily)}</p>
           </div>
 
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">Avg. Weekly</p>
-            <p className="text-xl font-semibold">₹{insights.averageWeekly.toFixed(2)}</p>
+            <p className="text-xl font-semibold">{formatCurrencyWithDecimals(insights.averageWeekly)}</p>
           </div>
 
           <div className="space-y-1">
             <p className="text-sm text-muted-foreground">Avg. Monthly</p>
-            <p className="text-xl font-semibold">₹{insights.averageMonthly.toFixed(2)}</p>
+            <p className="text-xl font-semibold">{formatCurrencyWithDecimals(insights.averageMonthly)}</p>
           </div>
         </div>
       </div>

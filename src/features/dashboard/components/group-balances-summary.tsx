@@ -7,6 +7,7 @@ import { useGroupBalances } from "@/features/groups/hooks/use-group-balances";
 import { useGroups } from "@/features/groups/hooks/use-groups";
 import { IconArrowRight, IconLoader2, IconUsers } from "@tabler/icons-react";
 import Link from "next/link";
+import { formatCurrency } from "@/lib/format";
 
 export const GroupBalancesSummary = () => {
   const { groups, isLoading: groupsLoading } = useGroups({});
@@ -98,15 +99,6 @@ const GroupBalanceItem = ({
   memberCount: number;
 }) => {
   const { balances, isLoading } = useGroupBalances(groupId);
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
 
   if (isLoading) {
     return (

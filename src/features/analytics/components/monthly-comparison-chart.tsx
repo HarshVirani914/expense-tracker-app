@@ -10,6 +10,7 @@ import {
 import { IconChartBar } from "@tabler/icons-react";
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis } from "recharts";
 import type { MonthlyComparison } from "../types";
+import { formatCurrencyCompact } from "@/lib/format";
 
 type MonthlyComparisonChartProps = {
   data: MonthlyComparison[];
@@ -92,7 +93,7 @@ export const MonthlyComparisonChart = ({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`}
+              tickFormatter={(value) => formatCurrencyCompact(value)}
             />
             <ChartTooltip
               cursor={false}

@@ -26,6 +26,7 @@ import {
 } from "@tabler/icons-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { formatCurrencyWithDecimals } from "@/lib/format";
 
 type SettlementHistoryProps = {
   groupId: string;
@@ -113,7 +114,7 @@ export const SettlementHistory = ({ groupId }: SettlementHistoryProps) => {
                       {format(new Date(settlement.date), "MMM d, yyyy")}
                     </div>
                     <Badge className="bg-green-600">
-                      ${Number(settlement.amount).toFixed(2)}
+                      {formatCurrencyWithDecimals(Number(settlement.amount))}
                     </Badge>
                   </div>
                   {settlement.notes && (
