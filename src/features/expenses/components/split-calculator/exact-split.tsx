@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { MemberInfo } from "@/features/groups/types";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,25 +12,54 @@ import { formatCurrencyWithDecimals } from "@/lib/format";
 type ExactSplitProps = {
   members: MemberInfo[];
   totalAmount: number;
+  initialValues?: Record<string, number>;
   onChange: (amounts: Record<string, number>) => void;
 };
 
-export const ExactSplit = ({ members, totalAmount, onChange }: ExactSplitProps) => {
+export const ExactSplit = ({ 
+  members, 
+  totalAmount, 
+  initialValues = {},
+  onChange 
+}: ExactSplitProps) => {
   const memberIds = useMemo(
     () => members.map((m) => m.userId || m.contactId || "").join(","),
     [members]
   );
 
   const [amounts, setAmounts] = useState<Record<string, number>>({});
+  const hasLoadedInitialValues = useRef(false);
 
+  // Initialize when members change
   useEffect(() => {
-    const initialAmounts: Record<string, number> = {};
+    const newAmounts: Record<string, number> = {};
+    
     members.forEach((member) => {
       const memberId = member.userId || member.contactId || "";
-      initialAmounts[memberId] = 0;
+      newAmounts[memberId] = 0;
     });
-    setAmounts(initialAmounts);
+    
+    setAmounts(newAmounts);
+    hasLoadedInitialValues.current = false; // Reset flag when members change
   }, [memberIds]);
+
+  // Load initial values once when they become available
+  useEffect(() => {
+    if (hasLoadedInitialValues.current) return;
+    
+    const hasValues = Object.keys(initialValues).length > 0 && 
+                     Object.values(initialValues).some(v => v !== 0);
+    
+    if (hasValues) {
+      const newAmounts: Record<string, number> = {};
+      members.forEach((member) => {
+        const memberId = member.userId || member.contactId || "";
+        newAmounts[memberId] = initialValues[memberId] ?? 0;
+      });
+      setAmounts(newAmounts);
+      hasLoadedInitialValues.current = true;
+    }
+  }, [initialValues, members]);
 
   useEffect(() => {
     onChange(amounts);

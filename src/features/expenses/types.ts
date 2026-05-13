@@ -20,8 +20,12 @@ export type ExpenseWithRelations = Expense & {
   } | null
   participants?: {
     id: string
+    userId: string | null
+    contactId: string | null
     paidAmount: number
     oweAmount: number
+    splitType: string
+    splitValue: number
   }[]
 }
 
@@ -62,4 +66,19 @@ export type ExpenseSummary = {
   expenseCount: number
   incomeCount: number
   totalCount: number
+}
+
+export type UpdateGroupExpenseInput = {
+  amount?: number
+  description?: string
+  date?: Date | string
+  categoryId?: string
+  participants?: {
+    memberIdOrContact: string
+    paidAmount: number
+    oweAmount: number
+    splitType: 'EQUAL' | 'EXACT' | 'PERCENTAGE' | 'SHARES'
+    splitValue: number
+    isUser: boolean
+  }[]
 }

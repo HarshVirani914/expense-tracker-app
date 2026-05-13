@@ -160,6 +160,17 @@ export const expenseService = {
                 name: true,
               },
             },
+            participants: {
+              select: {
+                id: true,
+                userId: true,
+                contactId: true,
+                paidAmount: true,
+                oweAmount: true,
+                splitType: true,
+                splitValue: true,
+              },
+            },
           },
           skip,
           take: limit,
@@ -168,10 +179,21 @@ export const expenseService = {
         prisma.expense.count({ where }),
       ])
 
+      // Transform Decimal to number for participants
+      const transformedExpenses = expenses.map(expense => ({
+        ...expense,
+        participants: expense.participants?.map(p => ({
+          ...p,
+          paidAmount: Number(p.paidAmount),
+          oweAmount: Number(p.oweAmount),
+          splitValue: Number(p.splitValue),
+        })),
+      }))
+
       const totalPages = Math.ceil(total / limit)
 
       return {
-        data: expenses,
+        data: transformedExpenses,
         pagination: {
           page,
           limit,
@@ -203,6 +225,17 @@ export const expenseService = {
               name: true,
             },
           },
+          participants: {
+            select: {
+              id: true,
+              userId: true,
+              contactId: true,
+              paidAmount: true,
+              oweAmount: true,
+              splitType: true,
+              splitValue: true,
+            },
+          },
         },
       })
 
@@ -210,7 +243,16 @@ export const expenseService = {
         throw new Error('Expense not found')
       }
 
-      return expense
+      // Transform Decimal to number for participants
+      return {
+        ...expense,
+        participants: expense.participants?.map(p => ({
+          ...p,
+          paidAmount: Number(p.paidAmount),
+          oweAmount: Number(p.oweAmount),
+          splitValue: Number(p.splitValue),
+        })),
+      }
     } catch (error) {
       logger.error('Failed to get expense', { error, userId, expenseId })
       throw error
@@ -358,6 +400,162 @@ export const expenseService = {
       logger.info('Expense deleted', { userId, expenseId })
     } catch (error) {
       logger.error('Failed to delete expense', { error, userId, expenseId })
+      throw error
+    }
+  },
+
+  async updateGroupExpense(
+    userId: string,
+    expenseId: string,
+    data: UpdateExpenseInput & { participants?: Array<{
+      memberIdOrContact: string
+      paidAmount: number
+      oweAmount: number
+      splitType: 'EQUAL' | 'EXACT' | 'PERCENTAGE' | 'SHARES'
+      splitValue: number
+      isUser: boolean
+    }> }
+  ): Promise<ExpenseWithRelations> {
+    try {
+      // Verify expense belongs to user
+      const existingExpense = await prisma.expense.findFirst({
+        where: {
+          id: expenseId,
+          userId,
+          groupId: { not: null },
+        },
+        include: {
+          group: {
+            include: {
+              members: true,
+            },
+          },
+        },
+      })
+
+      if (!existingExpense) {
+        throw new Error('Group expense not found')
+      }
+
+      // Verify user is still a member of the group
+      const isMember = existingExpense.group?.members.some(m => m.userId === userId)
+      if (!isMember) {
+        throw new Error('You are no longer a member of this group')
+      }
+
+      if (data.categoryId) {
+        const category = await prisma.category.findFirst({
+          where: {
+            id: data.categoryId,
+            OR: [{ userId }, { isDefault: true, userId: null }],
+          },
+        })
+
+        if (!category) {
+          throw new Error('Category not found')
+        }
+      }
+
+      if (data.participants && data.amount) {
+        const totalOwed = data.participants.reduce((sum, p) => sum + p.oweAmount, 0)
+        if (Math.abs(totalOwed - data.amount) > 0.01) {
+          throw new Error('Total split amounts must equal expense amount')
+        }
+      }
+
+      const result = await prisma.$transaction(async (tx) => {
+        const expense = await tx.expense.update({
+          where: { id: expenseId },
+          data: {
+            ...(data.amount !== undefined && { amount: data.amount }),
+            ...(data.description !== undefined && { description: data.description }),
+            ...(data.date && { date: new Date(data.date) }),
+            ...(data.categoryId && { categoryId: data.categoryId }),
+          },
+          include: {
+            category: true,
+            account: true,
+            group: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        })
+
+        if (data.participants) {
+          await tx.expenseParticipant.deleteMany({
+            where: { expenseId },
+          })
+
+          const participantData = data.participants.map((p) => ({
+            expenseId: expense.id,
+            userId: p.isUser ? p.memberIdOrContact : null,
+            contactId: !p.isUser ? p.memberIdOrContact : null,
+            paidAmount: p.paidAmount,
+            oweAmount: p.oweAmount,
+            splitType: p.splitType,
+            splitValue: p.splitValue,
+          }))
+
+          await tx.expenseParticipant.createMany({
+            data: participantData,
+          })
+        }
+
+        return expense
+      })
+
+      logger.info('Group expense updated', { userId, expenseId })
+      return result
+    } catch (error) {
+      logger.error('Failed to update group expense', { error, userId, expenseId, data })
+      throw error
+    }
+  },
+
+  async deleteGroupExpense(userId: string, expenseId: string): Promise<void> {
+    try {
+      // Verify expense belongs to user
+      const existingExpense = await prisma.expense.findFirst({
+        where: {
+          id: expenseId,
+          userId,
+          groupId: { not: null },
+        },
+        include: {
+          group: {
+            include: {
+              members: true,
+            },
+          },
+        },
+      })
+
+      if (!existingExpense) {
+        throw new Error('Group expense not found')
+      }
+
+      // Verify user is still a member of the group
+      const isMember = existingExpense.group?.members.some(m => m.userId === userId)
+      if (!isMember) {
+        throw new Error('You are no longer a member of this group')
+      }
+
+      await prisma.$transaction(async (tx) => {
+        await tx.expenseParticipant.deleteMany({
+          where: { expenseId },
+        })
+
+        await tx.expense.delete({
+          where: { id: expenseId },
+        })
+      })
+
+      logger.info('Group expense deleted', { userId, expenseId })
+    } catch (error) {
+      logger.error('Failed to delete group expense', { error, userId, expenseId })
       throw error
     }
   },

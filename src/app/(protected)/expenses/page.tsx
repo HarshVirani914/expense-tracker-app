@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { ExpenseList } from "@/features/expenses/components/expense-list";
 import { ExpenseFiltersBar } from "@/features/expenses/components/expense-filters";
 import { ExpenseFormDialog } from "@/features/expenses/components/expense-form-dialog";
+import { GroupExpenseFormDialog } from "@/features/expenses/components/group-expense-form-dialog";
 import { ExpenseSummaryCard } from "@/features/expenses/components/expense-summary-card";
 import { useExpenseSummary } from "@/features/expenses/hooks/use-expense-summary";
 import type {
@@ -20,6 +21,7 @@ function ExpensesPageContent() {
   const isMobile = useIsMobile();
   const searchParams = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isGroupExpenseDialogOpen, setIsGroupExpenseDialogOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<
     ExpenseWithRelations | undefined
   >(undefined);
@@ -48,11 +50,21 @@ function ExpensesPageContent() {
 
   const handleEdit = (expense: ExpenseWithRelations) => {
     setSelectedExpense(expense);
-    setIsDialogOpen(true);
+    // Open appropriate dialog based on expense type
+    if (expense.groupId) {
+      setIsGroupExpenseDialogOpen(true);
+    } else {
+      setIsDialogOpen(true);
+    }
   };
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
+    setSelectedExpense(undefined);
+  };
+
+  const handleCloseGroupExpenseDialog = () => {
+    setIsGroupExpenseDialogOpen(false);
     setSelectedExpense(undefined);
   };
 
@@ -90,6 +102,13 @@ function ExpensesPageContent() {
       <ExpenseFormDialog
         open={isDialogOpen}
         onOpenChange={handleCloseDialog}
+        expense={selectedExpense}
+      />
+
+      <GroupExpenseFormDialog
+        open={isGroupExpenseDialogOpen}
+        onOpenChange={handleCloseGroupExpenseDialog}
+        defaultGroupId={selectedExpense?.groupId || undefined}
         expense={selectedExpense}
       />
 

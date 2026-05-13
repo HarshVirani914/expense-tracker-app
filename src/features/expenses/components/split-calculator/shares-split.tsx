@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { MemberInfo } from "@/features/groups/types";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,25 +12,54 @@ import { formatCurrencyWithDecimals } from "@/lib/format";
 type SharesSplitProps = {
   members: MemberInfo[];
   totalAmount: number;
+  initialValues?: Record<string, number>;
   onChange: (shares: Record<string, number>) => void;
 };
 
-export const SharesSplit = ({ members, totalAmount, onChange }: SharesSplitProps) => {
+export const SharesSplit = ({ 
+  members, 
+  totalAmount, 
+  initialValues = {},
+  onChange 
+}: SharesSplitProps) => {
   const memberIds = useMemo(
     () => members.map((m) => m.userId || m.contactId || "").join(","),
     [members]
   );
 
   const [shares, setShares] = useState<Record<string, number>>({});
+  const hasLoadedInitialValues = useRef(false);
 
+  // Initialize when members change
   useEffect(() => {
-    const initialShares: Record<string, number> = {};
+    const newShares: Record<string, number> = {};
+    
     members.forEach((member) => {
       const memberId = member.userId || member.contactId || "";
-      initialShares[memberId] = 1;
+      newShares[memberId] = 1;
     });
-    setShares(initialShares);
+    
+    setShares(newShares);
+    hasLoadedInitialValues.current = false; // Reset flag when members change
   }, [memberIds]);
+
+  // Load initial values once when they become available
+  useEffect(() => {
+    if (hasLoadedInitialValues.current) return;
+    
+    const hasValues = Object.keys(initialValues).length > 0 && 
+                     Object.values(initialValues).some(v => v !== 1);
+    
+    if (hasValues) {
+      const newShares: Record<string, number> = {};
+      members.forEach((member) => {
+        const memberId = member.userId || member.contactId || "";
+        newShares[memberId] = initialValues[memberId] ?? 1;
+      });
+      setShares(newShares);
+      hasLoadedInitialValues.current = true;
+    }
+  }, [initialValues, members]);
 
   useEffect(() => {
     onChange(shares);

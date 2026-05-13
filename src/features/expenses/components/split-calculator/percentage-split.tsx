@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { MemberInfo } from "@/features/groups/types";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,12 +12,14 @@ import { formatCurrencyWithDecimals } from "@/lib/format";
 type PercentageSplitProps = {
   members: MemberInfo[];
   totalAmount: number;
+  initialValues?: Record<string, number>;
   onChange: (percentages: Record<string, number>) => void;
 };
 
 export const PercentageSplit = ({
   members,
   totalAmount,
+  initialValues = {},
   onChange,
 }: PercentageSplitProps) => {
   const memberIds = useMemo(
@@ -26,15 +28,38 @@ export const PercentageSplit = ({
   );
 
   const [percentages, setPercentages] = useState<Record<string, number>>({});
-
+  const hasLoadedInitialValues = useRef(false);
+  
+  // Initialize when members change
   useEffect(() => {
-    const initialPercentages: Record<string, number> = {};
+    const newPercentages: Record<string, number> = {};
+    
     members.forEach((member) => {
       const memberId = member.userId || member.contactId || "";
-      initialPercentages[memberId] = 0;
+      newPercentages[memberId] = 0;
     });
-    setPercentages(initialPercentages);
+    
+    setPercentages(newPercentages);
+    hasLoadedInitialValues.current = false; // Reset flag when members change
   }, [memberIds]);
+
+  // Load initial values once when they become available
+  useEffect(() => {
+    if (hasLoadedInitialValues.current) return;
+    
+    const hasValues = Object.keys(initialValues).length > 0 && 
+                     Object.values(initialValues).some(v => v !== 0);
+    
+    if (hasValues) {
+      const newPercentages: Record<string, number> = {};
+      members.forEach((member) => {
+        const memberId = member.userId || member.contactId || "";
+        newPercentages[memberId] = initialValues[memberId] ?? 0;
+      });
+      setPercentages(newPercentages);
+      hasLoadedInitialValues.current = true;
+    }
+  }, [initialValues, members]);
 
   useEffect(() => {
     onChange(percentages);

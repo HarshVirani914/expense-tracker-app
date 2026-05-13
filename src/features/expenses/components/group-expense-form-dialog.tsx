@@ -47,24 +47,30 @@ import { ExactSplit } from "./split-calculator/exact-split";
 import { PercentageSplit } from "./split-calculator/percentage-split";
 import { SharesSplit } from "./split-calculator/shares-split";
 import { SplitPreview } from "./split-calculator/split-preview";
+import { useUpdateGroupExpense } from "../hooks/use-update-group-expense";
+import type { ExpenseWithRelations } from "../types";
 import { logger } from "@/lib/logger";
 
 type GroupExpenseFormDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultGroupId?: string;
+  expense?: ExpenseWithRelations;
 };
 
 export const GroupExpenseFormDialog = ({
   open,
   onOpenChange,
   defaultGroupId,
+  expense,
 }: GroupExpenseFormDialogProps) => {
   const { categories } = useCategories();
   const { groups } = useGroups({ limit: 100 });
 
+  const isEditMode = !!expense;
+
   const [selectedGroupId, setSelectedGroupId] = useState<string>(
-    defaultGroupId || "",
+    expense?.groupId || defaultGroupId || "",
   );
   const [splitType, setSplitType] = useState<SplitType>(SplitType.EQUAL);
   const [splitValues, setSplitValues] = useState<Record<string, number>>({});
@@ -73,11 +79,20 @@ export const GroupExpenseFormDialog = ({
   const { members: groupMembers } = useGroupMembers(selectedGroupId);
   const { createGroupExpense, isCreating } =
     useCreateGroupExpense(selectedGroupId);
+  const { updateGroupExpense, isUpdating } =
+    useUpdateGroupExpense(selectedGroupId);
 
   const form = useForm<CreateGroupExpenseInput>({
     resolver: zodResolver(createGroupExpenseSchema),
     mode: "onSubmit",
-    defaultValues: {
+    defaultValues: expense ? {
+      amount: Number(expense.amount),
+      description: expense.description || "",
+      date: new Date(expense.date),
+      categoryId: expense.categoryId,
+      groupId: expense.groupId || defaultGroupId || "",
+      participants: [],
+    } : {
       amount: 0,
       description: "",
       date: new Date(),
@@ -89,15 +104,91 @@ export const GroupExpenseFormDialog = ({
 
   const totalAmount = form.watch("amount");
 
-  // Set default payer to current user when members load
+  // Reset state when dialog closes or switches mode
   useEffect(() => {
-    if (groupMembers.length > 0 && !payerId) {
-      const currentUser = groupMembers.find((m) => m.isCurrentUser);
-      if (currentUser) {
-        setPayerId(currentUser.userId || currentUser.contactId || "");
+    if (!open) {
+      // Reset all state when dialog closes
+      setSplitType(SplitType.EQUAL);
+      setSplitValues({});
+      setPayerId("");
+      form.reset({
+        amount: 0,
+        description: "",
+        date: new Date(),
+        categoryId: "",
+        groupId: defaultGroupId || "",
+        participants: [],
+      });
+    }
+  }, [open, form, defaultGroupId]);
+
+  // Initialize form with expense data when editing
+  useEffect(() => {
+    if (expense && open && groupMembers.length > 0) {
+      // Reset form with expense data
+      form.reset({
+        amount: Number(expense.amount),
+        description: expense.description || "",
+        date: new Date(expense.date),
+        categoryId: expense.categoryId,
+        groupId: expense.groupId || "",
+        participants: [],
+      });
+      setSelectedGroupId(expense.groupId || "");
+      
+      // Load participants configuration if available
+      if (expense.participants && expense.participants.length > 0) {
+        // Detect split type from first participant
+        const firstParticipant = expense.participants[0];
+        const detectedSplitType = firstParticipant.splitType as SplitType;
+        setSplitType(detectedSplitType);
+        
+        // Find who paid (participant with paidAmount > 0)
+        const payer = expense.participants.find((p) => 
+          Number(p.paidAmount) > 0
+        );
+        
+        if (payer) {
+          const payerMemberId = payer.userId || payer.contactId || "";
+          setPayerId(payerMemberId);
+        }
+        
+        // Load split values for each participant
+        // Create a map of actual member IDs for matching
+        const memberIdMap = new Map<string, string>();
+        groupMembers.forEach(member => {
+          const memberId = member.userId || member.contactId || "";
+          if (memberId) {
+            memberIdMap.set(memberId, memberId);
+          }
+        });
+
+        const loadedSplitValues: Record<string, number> = {};
+        expense.participants.forEach((p) => {
+          const participantId = p.userId || p.contactId || "";
+          // Only load if this participant is still in the group
+          if (participantId && memberIdMap.has(participantId)) {
+            loadedSplitValues[participantId] = Number(p.splitValue);
+          }
+        });
+        
+        // Set split values
+        setSplitValues(loadedSplitValues);
+      }
+    } else if (!expense && open && groupMembers.length > 0) {
+      // Creating new expense - set defaults only once
+      setSplitType(SplitType.EQUAL);
+      setSplitValues({});
+      
+      // Set default payer to current user
+      if (!payerId) {
+        const currentUser = groupMembers.find((m) => m.isCurrentUser);
+        if (currentUser) {
+          setPayerId(currentUser.userId || currentUser.contactId || "");
+        }
       }
     }
-  }, [groupMembers, payerId]);
+  }, [expense, open, form, groupMembers, payerId]);
 
   const participants = useSplitCalculation(
     groupMembers,
@@ -130,25 +221,31 @@ export const GroupExpenseFormDialog = ({
   const onSubmit = useCallback(
     async (data: CreateGroupExpenseInput) => {
       try {
-        await createGroupExpense(data);
-
-        toast.success("Group expense created successfully");
-        onOpenChange(false);
-
-        form.reset();
-        setSplitValues({});
-        setSplitType(SplitType.EQUAL);
-        // Reset payer to current user
-        const currentUser = groupMembers.find((m) => m.isCurrentUser);
-        if (currentUser) {
-          setPayerId(currentUser.userId || currentUser.contactId || "");
+        if (isEditMode && expense) {
+          await updateGroupExpense({
+            id: expense.id,
+            data: {
+              amount: data.amount,
+              description: data.description,
+              date: data.date,
+              categoryId: data.categoryId,
+              participants: data.participants,
+            },
+          });
+          toast.success("Group expense updated successfully");
+        } else {
+          await createGroupExpense(data);
+          toast.success("Group expense created successfully");
         }
+
+        // Close dialog - cleanup will happen in useEffect
+        onOpenChange(false);
       } catch (error) {
-        logger.error("Failed to create group expense", { error });
-        toast.error("Failed to create group expense");
+        logger.error(`Failed to ${isEditMode ? 'update' : 'create'} group expense`, { error });
+        toast.error(`Failed to ${isEditMode ? 'update' : 'create'} group expense`);
       }
     },
-    [createGroupExpense, onOpenChange, form, groupMembers],
+    [isEditMode, expense, updateGroupExpense, createGroupExpense, onOpenChange],
   );
 
   const isFormValid = useMemo(() => {
@@ -176,9 +273,11 @@ export const GroupExpenseFormDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="md:max-w-7xl w-full max-h-[90vh] p-0 flex flex-col">
         <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
-          <DialogTitle className="text-2xl">Add Group Expense</DialogTitle>
+          <DialogTitle className="text-2xl">
+            {isEditMode ? "Edit Group Expense" : "Add Group Expense"}
+          </DialogTitle>
           <DialogDescription>
-            Split an expense with your group members
+            {isEditMode ? "Update expense and split configuration" : "Split an expense with your group members"}
           </DialogDescription>
         </DialogHeader>
 
@@ -302,7 +401,8 @@ export const GroupExpenseFormDialog = ({
                                 setSelectedGroupId(value);
                                 setPayerId(""); // Reset payer when group changes
                               }}
-                              defaultValue={field.value}
+                              value={field.value}
+                              disabled={isEditMode} // Can't change group when editing
                             >
                               <FormControl>
                                 <SelectTrigger>
@@ -399,6 +499,7 @@ export const GroupExpenseFormDialog = ({
                             <ExactSplit
                               members={groupMembers}
                               totalAmount={totalAmount}
+                              initialValues={splitValues}
                               onChange={handleSplitValuesChange}
                             />
                           </TabsContent>
@@ -406,6 +507,7 @@ export const GroupExpenseFormDialog = ({
                             <PercentageSplit
                               members={groupMembers}
                               totalAmount={totalAmount}
+                              initialValues={splitValues}
                               onChange={handleSplitValuesChange}
                             />
                           </TabsContent>
@@ -413,6 +515,7 @@ export const GroupExpenseFormDialog = ({
                             <SharesSplit
                               members={groupMembers}
                               totalAmount={totalAmount}
+                              initialValues={splitValues}
                               onChange={handleSplitValuesChange}
                             />
                           </TabsContent>
@@ -450,10 +553,12 @@ export const GroupExpenseFormDialog = ({
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isCreating || !isFormValid}
+                  disabled={isCreating || isUpdating || !isFormValid}
                   className="min-w-[140px]"
                 >
-                  {isCreating ? "Creating..." : "Create Expense"}
+                  {isCreating || isUpdating 
+                    ? (isEditMode ? "Updating..." : "Creating...") 
+                    : (isEditMode ? "Update Expense" : "Create Expense")}
                 </Button>
               </DialogFooter>
             </div>

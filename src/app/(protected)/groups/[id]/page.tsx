@@ -2,6 +2,8 @@
 
 import { GroupExpenseFormDialog } from "@/features/expenses/components/group-expense-form-dialog";
 import { useExpenses } from "@/features/expenses/hooks/use-expenses";
+import { useDeleteGroupExpense } from "@/features/expenses/hooks/use-delete-group-expense";
+import type { ExpenseWithRelations } from "@/features/expenses/types";
 import { useGroupBalances } from "@/features/groups/hooks/use-group-balances";
 import { GroupFormDialog } from "@/features/groups/components/group-form-dialog";
 import { useGroup } from "@/features/groups/hooks/use-group";
@@ -19,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { IconPlus, IconEdit } from "@tabler/icons-react";
+import { toast } from "sonner";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -36,8 +39,10 @@ export default function GroupDetailPage({ params }: PageProps) {
     sortBy: "date",
     sortOrder: "desc",
   });
+  const { deleteGroupExpense, isDeleting } = useDeleteGroupExpense(id);
 
   const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<ExpenseWithRelations | undefined>(undefined);
   const [isEditGroupDialogOpen, setIsEditGroupDialogOpen] = useState(false);
   const [showAllMembers, setShowAllMembers] = useState(false);
   const [settlementDialog, setSettlementDialog] = useState<{
@@ -120,6 +125,27 @@ export default function GroupDetailPage({ params }: PageProps) {
     }
   };
 
+  const handleEditExpense = (expense: ExpenseWithRelations) => {
+    setEditingExpense(expense);
+    setIsExpenseDialogOpen(true);
+  };
+
+  const handleDeleteExpense = async (expenseId: string) => {
+    try {
+      await deleteGroupExpense(expenseId);
+      toast.success("Expense deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete expense");
+    }
+  };
+
+  const handleCloseExpenseDialog = (open: boolean) => {
+    setIsExpenseDialogOpen(open);
+    if (!open) {
+      setEditingExpense(undefined);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <GroupHeader
@@ -164,13 +190,16 @@ export default function GroupDetailPage({ params }: PageProps) {
         expenses={expenses}
         isLoading={isLoadingExpenses}
         onAddExpense={() => setIsExpenseDialogOpen(true)}
-        onViewAll={() => router.push(`/expenses?group=${id}`)}
+        onViewAll={() => router.push(`/expenses?groupId=${id}`)}
+        onEditExpense={handleEditExpense}
+        onDeleteExpense={handleDeleteExpense}
       />
 
       <GroupExpenseFormDialog
         open={isExpenseDialogOpen}
-        onOpenChange={setIsExpenseDialogOpen}
+        onOpenChange={handleCloseExpenseDialog}
         defaultGroupId={group.id}
+        expense={editingExpense}
       />
 
       <SettlementFormDialog

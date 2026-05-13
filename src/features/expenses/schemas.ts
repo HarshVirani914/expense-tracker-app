@@ -113,9 +113,31 @@ export const createGroupExpenseSchema = z
     }
   )
 
+export const updateGroupExpenseSchema = z
+  .object({
+    amount: z.number().positive('Amount must be greater than 0').optional(),
+    description: z.string().max(500, 'Description is too long').trim().optional(),
+    date: z.union([z.string(), z.date()]).optional(),
+    categoryId: z.cuid2('Invalid category').optional(),
+    participants: z.array(participantSchema).min(1, 'At least one participant is required').optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.participants && data.amount) {
+        const totalOwed = data.participants.reduce((sum, p) => sum + p.oweAmount, 0)
+        return Math.abs(totalOwed - data.amount) < 0.01
+      }
+      return true
+    },
+    {
+      message: 'Total split amounts must equal the expense amount',
+    }
+  )
+
 export type CreateExpenseInput = z.input<typeof createExpenseSchema>
 export type CreateExpenseSchema = z.output<typeof createExpenseSchema>
 export type UpdateExpenseSchema = z.infer<typeof updateExpenseSchema>
 export type ExpenseFiltersSchema = z.infer<typeof expenseFiltersSchema>
 export type ParticipantInput = z.infer<typeof participantSchema>
 export type CreateGroupExpenseInput = z.input<typeof createGroupExpenseSchema>
+export type UpdateGroupExpenseInput = z.input<typeof updateGroupExpenseSchema>

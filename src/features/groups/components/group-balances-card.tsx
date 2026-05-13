@@ -1,12 +1,16 @@
 "use client";
 
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { IconArrowDown, IconArrowUp, IconCash } from "@tabler/icons-react";
+import {
+  IconCash,
+  IconTrendingDown,
+  IconTrendingUp,
+} from "@tabler/icons-react";
 import type { GroupBalance } from "../types";
 
 type GroupBalancesCardProps = {
@@ -124,16 +128,16 @@ export const GroupBalancesCard = ({
                   <p className="font-medium text-base truncate">
                     {balance.memberName}
                   </p>
-                  {owesToUser && (
+                  {owedByUser && (
                     <div className="flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400">
-                      <IconArrowUp className="h-3.5 w-3.5" />
-                      <span>Owes you {formatCurrency(owesToUser.amount)}</span>
+                      <IconTrendingDown className="h-3.5 w-3.5" />
+                      <span>You owe {formatCurrency(owedByUser.amount)}</span>
                     </div>
                   )}
-                  {owedByUser && (
+                  {owesToUser && (
                     <div className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
-                      <IconArrowDown className="h-3.5 w-3.5" />
-                      <span>You owe {formatCurrency(owedByUser.amount)}</span>
+                      <IconTrendingUp className="h-3.5 w-3.5" />
+                      <span>Owes you {formatCurrency(owesToUser.amount)}</span>
                     </div>
                   )}
                   {!owesToUser && !owedByUser && (
