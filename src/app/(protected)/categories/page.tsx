@@ -63,16 +63,19 @@ export default function CategoriesPage() {
         </div>
       )}
 
-      <CategoryFormDialog open={isDialogOpen} onOpenChange={handleCloseDialog} />
+      <CategoryFormDialog
+        open={isDialogOpen}
+        onOpenChange={handleCloseDialog}
+      />
 
       {isMobile && (
-        <div className="fixed bottom-24 right-4 flex flex-col gap-2 z-40">
+        <div className="fixed bottom-26 right-6 flex flex-col gap-2 z-40">
           <ManageCategoriesSheet
             trigger={
               <Button
                 size="lg"
-                variant="outline"
-                className="h-14 w-14 rounded-full shadow-2xl bg-background hover:scale-110 transition-transform"
+                variant="secondary"
+                className="h-14 w-14 rounded-full shadow-2xl hover:scale-110 transition-transform"
               >
                 <IconSettings className="h-6 w-6" />
               </Button>

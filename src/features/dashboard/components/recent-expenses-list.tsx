@@ -83,6 +83,11 @@ export const RecentExpensesList = memo(
                       <p className="font-medium text-sm truncate">
                         {expense.description || "No description"}
                       </p>
+                      {expense.type === "INCOME" && (
+                        <Badge className="text-xs shrink-0 bg-green-600">
+                          Income
+                        </Badge>
+                      )}
                       {expense.group && (
                         <Badge variant="secondary" className="text-xs shrink-0">
                           <IconUsers className="h-2.5 w-2.5 mr-1" />
@@ -136,21 +141,28 @@ export const RecentExpensesList = memo(
                       {expense.description || "No description"}
                     </TableCell>
                     <TableCell>
-                      {expense.group ? (
-                        <Link href={`/groups/${expense.group.id}`}>
-                          <Badge
-                            variant="outline"
-                            className="gap-1 hover:border-primary hover:text-primary cursor-pointer"
-                          >
-                            <IconUsers className="h-3 w-3" />
-                            {expense.group.name}
+                      <div className="flex items-center gap-2">
+                        {expense.type === "INCOME" ? (
+                          <Badge className="bg-green-600 text-xs">
+                            Income
                           </Badge>
-                        </Link>
-                      ) : (
-                        <span className="text-sm text-muted-foreground">
-                          Personal
-                        </span>
-                      )}
+                        ) : (
+                          <Badge variant="destructive" className="text-xs">
+                            Expense
+                          </Badge>
+                        )}
+                        {expense.group && (
+                          <Link href={`/groups/${expense.group.id}`}>
+                            <Badge
+                              variant="outline"
+                              className="gap-1 hover:border-primary hover:text-primary cursor-pointer text-xs"
+                            >
+                              <IconUsers className="h-3 w-3" />
+                              {expense.group.name}
+                            </Badge>
+                          </Link>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge

@@ -27,13 +27,6 @@ export const CategorySpendingSummaryCard = memo(
 
     const stats = [
       {
-        label: "Total Spent",
-        value: formatCurrency(totalSpending),
-        icon: IconTrendingUp,
-        color: "text-primary",
-        bg: "bg-primary/10",
-      },
-      {
         label: "Active Categories",
         value: activeCategories,
         icon: IconTag,

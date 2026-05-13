@@ -100,6 +100,9 @@ export const ExpenseFormDialog = ({
     }
   }, [open, isEditing, expense, form]);
 
+  const watchedType = form.watch('type')
+  const isIncome = watchedType === ExpenseType.INCOME
+
   const onSubmit = async (data: CreateExpenseInput) => {
     try {
       if (isEditing && expense) {
@@ -107,15 +110,15 @@ export const ExpenseFormDialog = ({
           id: expense.id,
           data,
         });
-        toast.success("Expense updated successfully");
+        toast.success(`${isIncome ? 'Income' : 'Expense'} updated successfully`);
       } else {
         await createExpense(data);
-        toast.success("Expense created successfully");
+        toast.success(`${isIncome ? 'Income' : 'Expense'} created successfully`);
       }
       onOpenChange(false);
     } catch {
       toast.error(
-        isEditing ? "Failed to update expense" : "Failed to create expense",
+        isEditing ? `Failed to update ${isIncome ? 'income' : 'expense'}` : `Failed to create ${isIncome ? 'income' : 'expense'}`,
       );
     }
   };
@@ -125,12 +128,12 @@ export const ExpenseFormDialog = ({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Edit Expense" : "Add New Expense"}
+            {isEditing ? `Edit ${isIncome ? 'Income' : 'Expense'}` : `Add New ${isIncome ? 'Income' : 'Expense'}`}
           </DialogTitle>
           <DialogDescription>
             {isEditing
-              ? "Update the expense details below."
-              : "Fill in the details to create a new expense."}
+              ? `Update the ${isIncome ? 'income' : 'expense'} details below.`
+              : `Fill in the details to create a new ${isIncome ? 'income' : 'expense'}.`}
           </DialogDescription>
         </DialogHeader>
 

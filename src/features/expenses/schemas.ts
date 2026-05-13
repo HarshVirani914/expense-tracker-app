@@ -81,6 +81,8 @@ export const expenseFiltersSchema = z.object({
   startDate: z.union([z.string(), z.date()]).optional(),
   endDate: z.union([z.string(), z.date()]).optional(),
   search: z.string().max(200).trim().optional(),
+  minAmount: z.coerce.number().min(0).optional(),
+  maxAmount: z.coerce.number().min(0).optional(),
   sortBy: z.enum(['date', 'amount', 'createdAt']).optional().default('date'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
 })

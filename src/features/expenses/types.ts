@@ -57,6 +57,8 @@ export type ExpenseFilters = FilterOptions & {
   groupId?: string
   type?: ExpenseType
   paymentMethod?: PaymentMethod
+  minAmount?: number
+  maxAmount?: number
 }
 
 export type ExpenseSummary = {

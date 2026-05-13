@@ -11,6 +11,8 @@ import { StatsCards } from "@/features/dashboard/components/stats-cards";
 import { useDashboardStats } from "@/features/dashboard/hooks";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useUser } from "@clerk/nextjs";
+import { BudgetAlertsWidget } from "@/features/budgets/components/budget-alerts-widget";
+import { UpcomingRecurringWidget } from "@/features/recurring-expenses/components/upcoming-recurring-widget";
 
 export default function DashboardPage() {
   const { stats, isLoading, error } = useDashboardStats();
@@ -82,6 +84,11 @@ export default function DashboardPage() {
       {isMobile && <QuickActions />}
 
       <StatsCards stats={stats.currentMonth} />
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <BudgetAlertsWidget />
+        <UpcomingRecurringWidget />
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <RecentExpensesList expenses={stats.recentExpenses} />

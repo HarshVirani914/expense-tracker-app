@@ -22,6 +22,8 @@ export const expenseService = {
         startDate,
         endDate,
         search,
+        minAmount,
+        maxAmount,
       } = filters
 
       const where: Prisma.ExpenseWhereInput = {
@@ -45,6 +47,14 @@ export const expenseService = {
             date: {
               ...(startDate && { gte: new Date(startDate) }),
               ...(endDate && { lte: new Date(endDate) }),
+            },
+          }
+          : {}),
+        ...(minAmount !== undefined || maxAmount !== undefined
+          ? {
+            amount: {
+              ...(minAmount !== undefined && { gte: minAmount }),
+              ...(maxAmount !== undefined && { lte: maxAmount }),
             },
           }
           : {}),
@@ -116,6 +126,8 @@ export const expenseService = {
         startDate,
         endDate,
         search,
+        minAmount,
+        maxAmount,
         sortBy = 'date',
         sortOrder = 'desc',
       } = filters
@@ -143,6 +155,14 @@ export const expenseService = {
             date: {
               ...(startDate && { gte: new Date(startDate) }),
               ...(endDate && { lte: new Date(endDate) }),
+            },
+          }
+          : {}),
+        ...(minAmount !== undefined || maxAmount !== undefined
+          ? {
+            amount: {
+              ...(minAmount !== undefined && { gte: minAmount }),
+              ...(maxAmount !== undefined && { lte: maxAmount }),
             },
           }
           : {}),

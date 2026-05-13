@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -64,6 +65,23 @@ export const ExpenseFiltersBar = ({
     });
   };
 
+  const handleSearchChange = (search: string) => {
+    onFiltersChange({
+      ...filters,
+      search: search || undefined,
+      page: 1,
+    });
+  };
+
+  const handleAmountChange = (field: 'minAmount' | 'maxAmount', value: string) => {
+    const numValue = value ? parseFloat(value) : undefined
+    onFiltersChange({
+      ...filters,
+      [field]: numValue,
+      page: 1,
+    });
+  };
+
   const handleClearFilters = () => {
     onFiltersChange({
       page: 1,
@@ -76,7 +94,10 @@ export const ExpenseFiltersBar = ({
     filters.groupId ||
     filters.type ||
     filters.startDate ||
-    filters.endDate;
+    filters.endDate ||
+    filters.search ||
+    filters.minAmount !== undefined ||
+    filters.maxAmount !== undefined;
 
   const activeFilterCount = [
     filters.categoryId,
@@ -84,6 +105,9 @@ export const ExpenseFiltersBar = ({
     filters.type,
     filters.startDate,
     filters.endDate,
+    filters.search,
+    filters.minAmount !== undefined ? 'minAmount' : null,
+    filters.maxAmount !== undefined ? 'maxAmount' : null,
   ].filter(Boolean).length;
 
   return (
@@ -137,28 +161,41 @@ export const ExpenseFiltersBar = ({
         </div>
 
         {isExpanded && (
-          <div className="grid gap-4 pt-4 border-t md:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-4 pt-4 border-t">
             <div className="space-y-2">
-              <Label htmlFor="start-date" className="text-sm font-medium">
-                From Date
+              <Label htmlFor="search" className="text-sm font-medium">
+                Search
               </Label>
-              <DatePicker
-                date={filters.startDate ? new Date(filters.startDate) : undefined}
-                onSelect={(date) => handleDateChange("startDate", date)}
-                placeholder="Select start date"
+              <Input
+                id="search"
+                placeholder="Search description or notes..."
+                value={filters.search || ''}
+                onChange={(e) => handleSearchChange(e.target.value)}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="end-date" className="text-sm font-medium">
-                To Date
-              </Label>
-              <DatePicker
-                date={filters.endDate ? new Date(filters.endDate) : undefined}
-                onSelect={(date) => handleDateChange("endDate", date)}
-                placeholder="Select end date"
-              />
-            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="space-y-2">
+                <Label htmlFor="start-date" className="text-sm font-medium">
+                  From Date
+                </Label>
+                <DatePicker
+                  date={filters.startDate ? new Date(filters.startDate) : undefined}
+                  onSelect={(date) => handleDateChange("startDate", date)}
+                  placeholder="Select start date"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="end-date" className="text-sm font-medium">
+                  To Date
+                </Label>
+                <DatePicker
+                  date={filters.endDate ? new Date(filters.endDate) : undefined}
+                  onSelect={(date) => handleDateChange("endDate", date)}
+                  placeholder="Select end date"
+                />
+              </div>
 
             <div className="space-y-2">
               <Label htmlFor="category" className="text-sm font-medium">
@@ -239,11 +276,47 @@ export const ExpenseFiltersBar = ({
                 </SelectContent>
               </Select>
             </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="min-amount" className="text-sm font-medium">
+                  Min Amount
+                </Label>
+                <Input
+                  id="min-amount"
+                  type="number"
+                  placeholder="0.00"
+                  step="0.01"
+                  value={filters.minAmount || ''}
+                  onChange={(e) => handleAmountChange('minAmount', e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="max-amount" className="text-sm font-medium">
+                  Max Amount
+                </Label>
+                <Input
+                  id="max-amount"
+                  type="number"
+                  placeholder="0.00"
+                  step="0.01"
+                  value={filters.maxAmount || ''}
+                  onChange={(e) => handleAmountChange('maxAmount', e.target.value)}
+                />
+              </div>
+            </div>
           </div>
         )}
 
         {hasActiveFilters && !isExpanded && (
           <div className="flex flex-wrap gap-2 pt-2 border-t">
+            {filters.search && (
+              <Badge variant="secondary" className="gap-1">
+                Search: {filters.search}
+              </Badge>
+            )}
             {filters.startDate && (
               <Badge variant="secondary" className="gap-1">
                 From: {new Date(filters.startDate).toLocaleDateString()}
@@ -269,6 +342,16 @@ export const ExpenseFiltersBar = ({
             {filters.type && (
               <Badge variant="secondary" className="gap-1">
                 {filters.type === "EXPENSE" ? "Expenses" : "Income"}
+              </Badge>
+            )}
+            {filters.minAmount !== undefined && (
+              <Badge variant="secondary" className="gap-1">
+                Min: ₹{filters.minAmount}
+              </Badge>
+            )}
+            {filters.maxAmount !== undefined && (
+              <Badge variant="secondary" className="gap-1">
+                Max: ₹{filters.maxAmount}
               </Badge>
             )}
           </div>

@@ -47,7 +47,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 pt-6 pb-24 sm:pb-6">
+        <main className="flex flex-1 flex-col gap-4 p-4 pt-6 pb-44 md:pb-6">
           {children}
         </main>
       </SidebarInset>

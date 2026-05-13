@@ -34,6 +34,59 @@ export const useConfirmDialog = () => {
   return context
 }
 
+type ConfirmDialogProps = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onConfirm: () => void | Promise<void>
+  title: string
+  description: string
+  confirmText?: string
+  cancelText?: string
+  variant?: 'default' | 'destructive'
+}
+
+export const ConfirmDialog = ({
+  open,
+  onOpenChange,
+  onConfirm,
+  title,
+  description,
+  confirmText = 'Continue',
+  cancelText = 'Cancel',
+  variant = 'default',
+}: ConfirmDialogProps) => {
+  const handleConfirm = async () => {
+    await onConfirm()
+    onOpenChange(false)
+  }
+
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => onOpenChange(false)}>
+            {cancelText}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleConfirm}
+            className={
+              variant === 'destructive'
+                ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                : ''
+            }
+          >
+            {confirmText}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
 export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [options, setOptions] = useState<ConfirmDialogOptions>({

@@ -12,8 +12,10 @@ import type {
   ExpenseWithRelations,
   ExpenseFilters,
 } from "@/features/expenses/types";
+import { ImportDialog } from "@/features/import-export/components/import-dialog";
+import { ExportDialog } from "@/features/import-export/components/export-dialog";
 import { Button } from "@/components/ui/button";
-import { IconPlus } from "@tabler/icons-react";
+import { IconPlus, IconFileImport, IconFileExport } from "@tabler/icons-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -22,6 +24,8 @@ function ExpensesPageContent() {
   const searchParams = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isGroupExpenseDialogOpen, setIsGroupExpenseDialogOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<
     ExpenseWithRelations | undefined
   >(undefined);
@@ -78,14 +82,34 @@ function ExpensesPageContent() {
               Track and manage all your expenses
             </p>
           </div>
-          <Button
-            onClick={() => setIsDialogOpen(true)}
-            className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
-            size="lg"
-          >
-            <IconPlus className="h-5 w-5" />
-            Add Expense
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setIsImportOpen(true)}
+              variant="outline"
+              size="lg"
+              className="gap-2"
+            >
+              <IconFileImport className="h-5 w-5" />
+              Import
+            </Button>
+            <Button
+              onClick={() => setIsExportOpen(true)}
+              variant="outline"
+              size="lg"
+              className="gap-2"
+            >
+              <IconFileExport className="h-5 w-5" />
+              Export
+            </Button>
+            <Button
+              onClick={() => setIsDialogOpen(true)}
+              className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+              size="lg"
+            >
+              <IconPlus className="h-5 w-5" />
+              Add Expense
+            </Button>
+          </div>
         </div>
       )}
 
@@ -94,6 +118,27 @@ function ExpensesPageContent() {
       ) : summary ? (
         <ExpenseSummaryCard {...summary} />
       ) : null}
+
+      {isMobile && (
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setIsImportOpen(true)}
+            variant="outline"
+            className="flex-1 gap-2"
+          >
+            <IconFileImport className="h-4 w-4" />
+            Import CSV
+          </Button>
+          <Button
+            onClick={() => setIsExportOpen(true)}
+            variant="outline"
+            className="flex-1 gap-2"
+          >
+            <IconFileExport className="h-4 w-4" />
+            Export CSV
+          </Button>
+        </div>
+      )}
 
       <ExpenseFiltersBar filters={filters} onFiltersChange={setFilters} />
 
@@ -111,6 +156,9 @@ function ExpensesPageContent() {
         defaultGroupId={selectedExpense?.groupId || undefined}
         expense={selectedExpense}
       />
+
+      <ImportDialog open={isImportOpen} onOpenChange={setIsImportOpen} />
+      <ExportDialog open={isExportOpen} onOpenChange={setIsExportOpen} />
 
       {isMobile && (
         <Button

@@ -17,6 +17,9 @@ import {
   IconPlus,
   IconReceipt,
   IconUsers,
+  IconChartBar,
+  IconChartPie,
+  IconRepeat,
 } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -84,6 +87,21 @@ const moreNavItems = [
     href: "/categories",
     label: "Categories",
     icon: IconCategory2,
+  },
+  {
+    href: "/analytics",
+    label: "Analytics",
+    icon: IconChartBar,
+  },
+  {
+    href: "/budgets",
+    label: "Budgets",
+    icon: IconChartPie,
+  },
+  {
+    href: "/recurring",
+    label: "Recurring",
+    icon: IconRepeat,
   },
 ];
 
@@ -274,7 +292,7 @@ export const BottomNav = () => {
           <DrawerHeader>
             <DrawerTitle>More Options</DrawerTitle>
             <DrawerDescription id="more-drawer-description">
-              Manage your accounts, contacts, and categories
+              Manage your accounts, contacts, categories, analytics, budgets, and recurring expenses
             </DrawerDescription>
           </DrawerHeader>
           <div className="px-4 pb-4 space-y-1">

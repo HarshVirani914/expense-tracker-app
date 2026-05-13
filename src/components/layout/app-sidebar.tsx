@@ -12,6 +12,8 @@ import {
   IconUsers,
   IconChartBar,
   IconUserCircle,
+  IconChartPie,
+  IconRepeat,
 } from "@tabler/icons-react";
 
 import {
@@ -31,7 +33,13 @@ import { Badge } from "@/components/ui/badge";
 import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import Image from "next/image";
 
-const navigation = [
+const navigation: Array<{
+  name: string
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  disabled: boolean
+  badge?: string
+}> = [
   {
     name: "Dashboard",
     href: "/dashboard",
@@ -72,8 +80,19 @@ const navigation = [
     name: "Analytics",
     href: "/analytics",
     icon: IconChartBar,
-    disabled: true,
-    badge: "Soon",
+    disabled: false,
+  },
+  {
+    name: "Budgets",
+    href: "/budgets",
+    icon: IconChartPie,
+    disabled: false,
+  },
+  {
+    name: "Recurring",
+    href: "/recurring",
+    icon: IconRepeat,
+    disabled: false,
   },
 ];
 
