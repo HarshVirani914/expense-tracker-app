@@ -27,39 +27,54 @@ export const PercentageSplit = ({
     [members]
   );
 
-  const [percentages, setPercentages] = useState<Record<string, number>>({});
   const hasLoadedInitialValues = useRef(false);
-  
-  // Initialize when members change
-  useEffect(() => {
+  const prevMemberIdsRef = useRef(memberIds);
+
+  const [percentages, setPercentages] = useState<Record<string, number>>(() => {
     const newPercentages: Record<string, number> = {};
-    
     members.forEach((member) => {
       const memberId = member.userId || member.contactId || "";
-      newPercentages[memberId] = 0;
+      newPercentages[memberId] = initialValues[memberId] ?? 0;
     });
-    
-    setPercentages(newPercentages);
-    hasLoadedInitialValues.current = false; // Reset flag when members change
-  }, [memberIds]);
+    return newPercentages;
+  });
 
-  // Load initial values once when they become available
   useEffect(() => {
-    if (hasLoadedInitialValues.current) return;
-    
-    const hasValues = Object.keys(initialValues).length > 0 && 
-                     Object.values(initialValues).some(v => v !== 0);
-    
-    if (hasValues) {
-      const newPercentages: Record<string, number> = {};
-      members.forEach((member) => {
-        const memberId = member.userId || member.contactId || "";
-        newPercentages[memberId] = initialValues[memberId] ?? 0;
+    if (memberIds !== prevMemberIdsRef.current) {
+      prevMemberIdsRef.current = memberIds;
+      requestAnimationFrame(() => {
+        const newPercentages: Record<string, number> = {};
+        members.forEach((member) => {
+          const memberId = member.userId || member.contactId || "";
+          newPercentages[memberId] = 0;
+        });
+        setPercentages(newPercentages);
+        hasLoadedInitialValues.current = false;
       });
-      setPercentages(newPercentages);
-      hasLoadedInitialValues.current = true;
+    } else if (!hasLoadedInitialValues.current) {
+      const hasValues = Object.keys(initialValues).length > 0 && 
+                       Object.values(initialValues).some(v => v !== 0);
+      
+      if (hasValues) {
+        requestAnimationFrame(() => {
+          const newPercentages: Record<string, number> = {};
+          let hasChanges = false;
+          members.forEach((member) => {
+            const memberId = member.userId || member.contactId || "";
+            const newValue = initialValues[memberId] ?? 0;
+            newPercentages[memberId] = newValue;
+            if (percentages[memberId] !== newValue) {
+              hasChanges = true;
+            }
+          });
+          if (hasChanges) {
+            setPercentages(newPercentages);
+          }
+          hasLoadedInitialValues.current = true;
+        });
+      }
     }
-  }, [initialValues, members]);
+  }, [memberIds, initialValues, members, percentages]);
 
   useEffect(() => {
     onChange(percentages);

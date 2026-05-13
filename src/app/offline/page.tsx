@@ -20,10 +20,10 @@ export default function OfflinePage() {
             <IconCloudOff className="h-8 w-8 text-muted-foreground" />
           </div>
           <div className="space-y-2">
-            <CardTitle className="text-2xl">You're Offline</CardTitle>
+            <CardTitle className="text-2xl">You&apos;re Offline</CardTitle>
             <CardDescription className="text-base">
-              It looks like you've lost your internet connection. Some features
-              may be limited until you're back online.
+              It looks like you&apos;ve lost your internet connection. Some features
+              may be limited until you&apos;re back online.
             </CardDescription>
           </div>
         </CardHeader>
@@ -50,7 +50,7 @@ export default function OfflinePage() {
             </Button>
           </div>
           <p className="text-xs text-center text-muted-foreground">
-            Your changes will be automatically synced when you're back online
+            Your changes will be automatically synced when you&apos;re back online
           </p>
         </CardContent>
       </Card>

@@ -1,26 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 
 export const useServiceWorker = () => {
   const [registration, setRegistration] =
     useState<ServiceWorkerRegistration | null>(null);
-  const [isSupported, setIsSupported] = useState(false);
+  const isSupported = typeof window !== "undefined" &&
+    "serviceWorker" in navigator &&
+    process.env.NODE_ENV === "production";
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const hasRegistered = useRef(false);
 
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      "serviceWorker" in navigator &&
-      process.env.NODE_ENV === "production"
-    ) {
-      setIsSupported(true);
-      registerServiceWorker();
-    }
-  }, []);
+  const registerServiceWorker = useCallback(async () => {
+    if (hasRegistered.current) return;
+    hasRegistered.current = true;
 
-  const registerServiceWorker = async () => {
     try {
       const reg = await navigator.serviceWorker.register("/sw.js", {
         scope: "/",
@@ -54,7 +49,13 @@ export const useServiceWorker = () => {
     } catch (error) {
       console.error("Service Worker registration failed:", error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (isSupported && !hasRegistered.current) {
+      void registerServiceWorker();
+    }
+  }, [isSupported, registerServiceWorker]);
 
   const updateServiceWorker = async () => {
     if (registration?.waiting) {

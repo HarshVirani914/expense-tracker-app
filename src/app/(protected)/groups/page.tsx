@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useMemo, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { GroupList } from '@/features/groups/components/group-list'
 import { GroupFormDialog } from '@/features/groups/components/group-form-dialog'
@@ -29,16 +29,14 @@ function GroupsPageContent() {
 
   const { stats, isLoading: isStatsLoading } = useGroupStats()
 
-  useEffect(() => {
+  const filtersWithParams = useMemo(() => {
     const contactId = searchParams.get('contact')
     
-    if (contactId) {
-      setFilters((prev) => ({
-        ...prev,
-        contactId,
-      }))
+    return {
+      ...filters,
+      ...(contactId && { contactId }),
     }
-  }, [searchParams])
+  }, [filters, searchParams])
 
   const handleEdit = (group: GroupWithMembers) => {
     setSelectedGroup(group)
@@ -91,7 +89,7 @@ function GroupsPageContent() {
         />
       </div>
 
-      <GroupList onEdit={handleEdit} filters={filters} />
+      <GroupList onEdit={handleEdit} filters={filtersWithParams} />
 
       <GroupFormDialog
         open={isDialogOpen}

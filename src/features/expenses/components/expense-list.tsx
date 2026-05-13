@@ -29,13 +29,22 @@ type ExpenseListProps = {
 };
 
 export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
-  const [page, setPage] = useState(0);
   const pageSize = 20;
   const isMobile = useIsMobile();
 
-  useEffect(() => {
+  const filterKey = useMemo(
+    () =>
+      `${filters.categoryId}-${filters.type}-${filters.startDate}-${filters.endDate}`,
+    [filters.categoryId, filters.type, filters.startDate, filters.endDate]
+  );
+
+  const [filterKeyState, setFilterKeyState] = useState(filterKey);
+  const [page, setPage] = useState(0);
+
+  if (filterKey !== filterKeyState) {
+    setFilterKeyState(filterKey);
     setPage(0);
-  }, [filters.categoryId, filters.type, filters.startDate, filters.endDate]);
+  }
 
   const { expenses, pagination, isLoading } = useExpenses({
     ...filters,

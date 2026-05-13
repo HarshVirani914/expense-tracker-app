@@ -25,7 +25,9 @@ export const ThemeSwitcher = ({
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    setMounted(true);
+    requestAnimationFrame(() => {
+      setMounted(true);
+    });
   }, []);
 
   if (!mounted) {

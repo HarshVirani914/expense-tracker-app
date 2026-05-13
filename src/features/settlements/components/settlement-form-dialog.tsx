@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -60,6 +60,7 @@ export const SettlementFormDialog = ({
   const [receiverId, setReceiverId] = useState("");
   const [payerError, setPayerError] = useState("");
   const [receiverError, setReceiverError] = useState("");
+  const prevOpenRef = useRef(false);
 
   const form = useForm<CreateSettlementInput>({
     resolver: zodResolver(createSettlementSchema),
@@ -77,7 +78,10 @@ export const SettlementFormDialog = ({
   });
 
   useEffect(() => {
-    if (open) {
+    const justOpened = open && !prevOpenRef.current;
+    prevOpenRef.current = open;
+
+    if (justOpened) {
       let initialPayerId = "";
       let initialReceiverId = "";
       let initialAmount: number | undefined = undefined;
@@ -127,10 +131,13 @@ export const SettlementFormDialog = ({
         receiverUserId: null,
         receiverContactId: null,
       });
-      setPayerId(initialPayerId);
-      setReceiverId(initialReceiverId);
-      setPayerError("");
-      setReceiverError("");
+
+      requestAnimationFrame(() => {
+        setPayerId(initialPayerId);
+        setReceiverId(initialReceiverId);
+        setPayerError("");
+        setReceiverError("");
+      });
     }
   }, [open, groupId, form, members, prefilledData]);
 

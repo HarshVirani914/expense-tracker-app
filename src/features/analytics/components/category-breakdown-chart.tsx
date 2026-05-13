@@ -22,6 +22,31 @@ export const CategoryBreakdownChart = ({
   data,
   isLoading,
 }: CategoryBreakdownChartProps) => {
+  const totalAmount = React.useMemo(() => {
+    if (!data || data.length === 0) return 0;
+    return data.reduce((acc, curr) => acc + curr.amount, 0);
+  }, [data]);
+
+  const chartConfig = React.useMemo(() => {
+    if (!data || data.length === 0) return {} as ChartConfig;
+    return data.reduce((config, item, index) => {
+      config[item.name.toLowerCase().replace(/\s+/g, "-")] = {
+        label: item.name,
+        color: item.color || `var(--chart-${(index % 5) + 1})`,
+      };
+      return config;
+    }, {} as ChartConfig);
+  }, [data]);
+
+  const chartData = React.useMemo(() => {
+    if (!data || data.length === 0) return [];
+    return data.map((item, index) => ({
+      category: item.name,
+      amount: item.amount,
+      fill: item.color || `var(--chart-${(index % 5) + 1})`,
+    }));
+  }, [data]);
+
   if (isLoading) {
     return (
       <Card>
@@ -53,24 +78,6 @@ export const CategoryBreakdownChart = ({
       </Card>
     );
   }
-
-  const totalAmount = React.useMemo(() => {
-    return data.reduce((acc, curr) => acc + curr.amount, 0);
-  }, [data]);
-
-  const chartConfig = data.reduce((config, item, index) => {
-    config[item.name.toLowerCase().replace(/\s+/g, "-")] = {
-      label: item.name,
-      color: item.color || `var(--chart-${(index % 5) + 1})`,
-    };
-    return config;
-  }, {} as ChartConfig);
-
-  const chartData = data.map((item, index) => ({
-    category: item.name,
-    amount: item.amount,
-    fill: item.color || `var(--chart-${(index % 5) + 1})`,
-  }));
 
   return (
     <Card>

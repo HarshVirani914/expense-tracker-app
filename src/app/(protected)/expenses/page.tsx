@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ExpenseList } from "@/features/expenses/components/expense-list";
 import { ExpenseFiltersBar } from "@/features/expenses/components/expense-filters";
@@ -35,22 +35,20 @@ function ExpensesPageContent() {
     limit: 20,
   });
 
-  useEffect(() => {
+  const filtersWithParams = useMemo(() => {
     const groupId = searchParams.get("group");
     const categoryId = searchParams.get("category");
     const accountId = searchParams.get("account");
 
-    if (groupId || categoryId || accountId) {
-      setFilters((prev) => ({
-        ...prev,
-        ...(groupId && { groupId }),
-        ...(categoryId && { categoryId }),
-        ...(accountId && { accountId }),
-      }));
-    }
-  }, [searchParams]);
+    return {
+      ...filters,
+      ...(groupId && { groupId }),
+      ...(categoryId && { categoryId }),
+      ...(accountId && { accountId }),
+    };
+  }, [filters, searchParams]);
 
-  const { summary, isLoading: isSummaryLoading } = useExpenseSummary(filters);
+  const { summary, isLoading: isSummaryLoading } = useExpenseSummary(filtersWithParams);
 
   const handleEdit = (expense: ExpenseWithRelations) => {
     setSelectedExpense(expense);
@@ -140,9 +138,9 @@ function ExpensesPageContent() {
         </div>
       )}
 
-      <ExpenseFiltersBar filters={filters} onFiltersChange={setFilters} />
+      <ExpenseFiltersBar filters={filtersWithParams} onFiltersChange={setFilters} />
 
-      <ExpenseList onEdit={handleEdit} filters={filters} />
+      <ExpenseList onEdit={handleEdit} filters={filtersWithParams} />
 
       <ExpenseFormDialog
         open={isDialogOpen}

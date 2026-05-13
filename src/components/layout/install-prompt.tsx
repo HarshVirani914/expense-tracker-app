@@ -20,19 +20,18 @@ export const InstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
+  const [isIOS, setIsIOS] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+  });
+  const [isStandalone, setIsStandalone] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia("(display-mode: standalone)").matches;
+  });
 
   useEffect(() => {
-    const isIOSDevice =
-      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
-      !(window as any).MSStream;
-    const isInStandalone = window.matchMedia(
-      "(display-mode: standalone)"
-    ).matches;
-
-    setIsIOS(isIOSDevice);
-    setIsStandalone(isInStandalone);
+    const isIOSDevice = isIOS;
+    const isInStandalone = isStandalone;
 
     if (isInStandalone) {
       return;
@@ -74,7 +73,7 @@ export const InstallPrompt = () => {
         window.removeEventListener("beforeinstallprompt", handler);
       };
     }
-  }, []);
+  }, [isIOS, isStandalone]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
@@ -126,7 +125,7 @@ export const InstallPrompt = () => {
               <p className="text-sm text-muted-foreground">
                 Tap the share button{" "}
                 <IconShare className="inline h-4 w-4 mx-1" /> at the bottom of
-                your screen, then select <strong>"Add to Home Screen"</strong>{" "}
+                your screen, then select <strong>&quot;Add to Home Screen&quot;</strong>{" "}
                 from the menu.
               </p>
               <Button

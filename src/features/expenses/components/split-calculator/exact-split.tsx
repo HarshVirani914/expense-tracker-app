@@ -27,39 +27,54 @@ export const ExactSplit = ({
     [members]
   );
 
-  const [amounts, setAmounts] = useState<Record<string, number>>({});
   const hasLoadedInitialValues = useRef(false);
+  const prevMemberIdsRef = useRef(memberIds);
 
-  // Initialize when members change
-  useEffect(() => {
+  const [amounts, setAmounts] = useState<Record<string, number>>(() => {
     const newAmounts: Record<string, number> = {};
-    
     members.forEach((member) => {
       const memberId = member.userId || member.contactId || "";
-      newAmounts[memberId] = 0;
+      newAmounts[memberId] = initialValues[memberId] ?? 0;
     });
-    
-    setAmounts(newAmounts);
-    hasLoadedInitialValues.current = false; // Reset flag when members change
-  }, [memberIds]);
+    return newAmounts;
+  });
 
-  // Load initial values once when they become available
   useEffect(() => {
-    if (hasLoadedInitialValues.current) return;
-    
-    const hasValues = Object.keys(initialValues).length > 0 && 
-                     Object.values(initialValues).some(v => v !== 0);
-    
-    if (hasValues) {
-      const newAmounts: Record<string, number> = {};
-      members.forEach((member) => {
-        const memberId = member.userId || member.contactId || "";
-        newAmounts[memberId] = initialValues[memberId] ?? 0;
+    if (memberIds !== prevMemberIdsRef.current) {
+      prevMemberIdsRef.current = memberIds;
+      requestAnimationFrame(() => {
+        const newAmounts: Record<string, number> = {};
+        members.forEach((member) => {
+          const memberId = member.userId || member.contactId || "";
+          newAmounts[memberId] = 0;
+        });
+        setAmounts(newAmounts);
+        hasLoadedInitialValues.current = false;
       });
-      setAmounts(newAmounts);
-      hasLoadedInitialValues.current = true;
+    } else if (!hasLoadedInitialValues.current) {
+      const hasValues = Object.keys(initialValues).length > 0 && 
+                       Object.values(initialValues).some(v => v !== 0);
+      
+      if (hasValues) {
+        requestAnimationFrame(() => {
+          const newAmounts: Record<string, number> = {};
+          let hasChanges = false;
+          members.forEach((member) => {
+            const memberId = member.userId || member.contactId || "";
+            const newValue = initialValues[memberId] ?? 0;
+            newAmounts[memberId] = newValue;
+            if (amounts[memberId] !== newValue) {
+              hasChanges = true;
+            }
+          });
+          if (hasChanges) {
+            setAmounts(newAmounts);
+          }
+          hasLoadedInitialValues.current = true;
+        });
+      }
     }
-  }, [initialValues, members]);
+  }, [memberIds, initialValues, members, amounts]);
 
   useEffect(() => {
     onChange(amounts);

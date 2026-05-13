@@ -5,7 +5,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { IconWifiOff, IconWifi } from "@tabler/icons-react";
 
 export const OfflineIndicator = () => {
-  const [isOffline, setIsOffline] = useState(false);
+  const [isOffline, setIsOffline] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !navigator.onLine;
+  });
   const [wasOffline, setWasOffline] = useState(false);
 
   useEffect(() => {
@@ -21,8 +24,6 @@ export const OfflineIndicator = () => {
     const handleOffline = () => {
       setIsOffline(true);
     };
-
-    setIsOffline(!navigator.onLine);
 
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);

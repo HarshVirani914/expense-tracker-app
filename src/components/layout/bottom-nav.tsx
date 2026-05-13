@@ -24,7 +24,7 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 
 type NavItem = {
   id: number;
@@ -107,35 +107,33 @@ const moreNavItems = [
 
 export const BottomNav = () => {
   const pathname = usePathname();
-  const [active, setActive] = useState(0);
   const [indicatorStyle, setIndicatorStyle] = useState({ width: 0, left: 0 });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<(HTMLAnchorElement | HTMLButtonElement | null)[]>([]);
 
-  const isActive = (href: string) => {
+  const isActive = useCallback((href: string) => {
     if (href === "/dashboard") {
       return pathname === "/dashboard" || pathname === "/";
     }
     return pathname.startsWith(href);
-  };
-
-  // Determine active index based on current pathname
-  useEffect(() => {
-    const activeIndex = mainNavItems.findIndex(
-      (item) => item.type === "link" && isActive(item.href),
-    );
-    if (activeIndex !== -1) {
-      setActive(activeIndex);
-    }
   }, [pathname]);
 
-  // Update indicator position when active changes or resize
+  const active = useMemo(() => {
+    const index = mainNavItems.findIndex(
+      (item) => item.type === "link" && isActive(item.href)
+    );
+    return index !== -1 ? index : 0;
+  }, [isActive]);
+
+  const [manualActive, setManualActive] = useState<number | null>(null);
+  const currentActive = manualActive !== null ? manualActive : active;
+
   useEffect(() => {
     const updateIndicator = () => {
-      if (btnRefs.current[active] && containerRef.current) {
-        const btn = btnRefs.current[active];
+      if (btnRefs.current[currentActive] && containerRef.current) {
+        const btn = btnRefs.current[currentActive];
         const container = containerRef.current;
         if (!btn) return;
         const btnRect = btn.getBoundingClientRect();
@@ -151,10 +149,11 @@ export const BottomNav = () => {
     updateIndicator();
     window.addEventListener("resize", updateIndicator);
     return () => window.removeEventListener("resize", updateIndicator);
-  }, [active]);
+  }, [currentActive]);
 
   const handleItemClick = (index: number, item: NavItem) => {
-    setActive(index);
+    setManualActive(index);
+    setTimeout(() => setManualActive(null), 300);
     if (item.label === "Create") {
       setIsCreateOpen(true);
     } else if (item.label === "More") {

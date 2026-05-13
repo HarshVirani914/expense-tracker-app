@@ -75,7 +75,7 @@ export default function GroupDetailPage({ params }: PageProps) {
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <h3 className="text-xl font-semibold mb-2">Group not found</h3>
         <p className="text-muted-foreground mb-6 max-w-sm">
-          The group you're looking for doesn't exist or you don't have access to
+          The group you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to
           it.
         </p>
         <Button onClick={() => router.push("/groups")}>Back to Groups</Button>
