@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ExpenseList } from "@/features/expenses/components/expense-list";
 import { ExpenseFiltersBar } from "@/features/expenses/components/expense-filters";
@@ -16,7 +16,7 @@ import { IconPlus } from "@tabler/icons-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function ExpensesPage() {
+function ExpensesPageContent() {
   const isMobile = useIsMobile();
   const searchParams = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -103,5 +103,19 @@ export default function ExpensesPage() {
         </Button>
       )}
     </div>
+  );
+}
+
+export default function ExpensesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    }>
+      <ExpensesPageContent />
+    </Suspense>
   );
 }

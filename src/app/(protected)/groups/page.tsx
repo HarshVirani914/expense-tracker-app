@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { GroupList } from '@/features/groups/components/group-list'
 import { GroupFormDialog } from '@/features/groups/components/group-form-dialog'
@@ -13,7 +13,7 @@ import { IconPlus, IconSearch } from '@tabler/icons-react'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { Skeleton } from '@/components/ui/skeleton'
 
-export default function GroupsPage() {
+function GroupsPageContent() {
   const isMobile = useIsMobile()
   const searchParams = useSearchParams()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -109,5 +109,19 @@ export default function GroupsPage() {
         </Button>
       )}
     </div>
+  )
+}
+
+export default function GroupsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    }>
+      <GroupsPageContent />
+    </Suspense>
   )
 }
