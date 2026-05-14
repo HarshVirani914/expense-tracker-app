@@ -5,19 +5,20 @@ import type { ApiResponse } from '@/types/api'
 
 const RECURRING_EXPENSES_KEY = ['recurring-expenses'] as const
 
-export const useRecurringExpenses = () => {
+export const useRecurringExpense = (id: string) => {
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: RECURRING_EXPENSES_KEY,
+    queryKey: [...RECURRING_EXPENSES_KEY, id] as const,
     queryFn: async () => {
-      const response = await apiClient.get<ApiResponse<RecurringExpenseWithRelations[]>>(
-        '/api/recurring-expenses'
+      const response = await apiClient.get<ApiResponse<RecurringExpenseWithRelations>>(
+        `/api/recurring-expenses/${id}`
       )
       return response.data
     },
+    enabled: !!id,
   })
 
   return {
-    recurringExpenses: data,
+    recurringExpense: data,
     isLoading,
     error,
     refetch,

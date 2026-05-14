@@ -1,9 +1,8 @@
-export {
-  useRecurringExpenses,
-  useRecurringExpense,
-  useCreateRecurringExpense,
-  useUpdateRecurringExpense,
-  useDeleteRecurringExpense,
-  useToggleRecurringExpense,
-  useUpcomingRecurringExpenses,
-} from './use-recurring-expenses'
+export { useRecurringExpenses } from './use-recurring-expenses'
+export { useRecurringExpense } from './use-recurring-expense'
+export { useCreateRecurringExpense } from './use-create-recurring-expense'
+export { useUpdateRecurringExpense } from './use-update-recurring-expense'
+export { useDeleteRecurringExpense } from './use-delete-recurring-expense'
+export { useToggleRecurringExpense } from './use-toggle-recurring-expense'
+export { useUpcomingRecurringExpenses } from './use-upcoming-recurring-expenses'
+export { useProcessRecurringExpenses } from './use-process-recurring-expenses'

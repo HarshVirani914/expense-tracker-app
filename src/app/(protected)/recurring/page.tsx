@@ -1,76 +1,109 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { IconPlus } from "@tabler/icons-react"
-import { RecurringExpenseList } from "@/features/recurring-expenses/components/recurring-expense-list"
-import { RecurringExpenseFormDialog } from "@/features/recurring-expenses/components/recurring-expense-form-dialog"
-import { ConfirmDialog } from "@/components/confirm-dialog"
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RecurringExpenseFormDialog } from "@/features/recurring-expenses/components/recurring-expense-form-dialog";
+import { RecurringExpenseList } from "@/features/recurring-expenses/components/recurring-expense-list";
 import {
-  useRecurringExpenses,
   useDeleteRecurringExpense,
+  useProcessRecurringExpenses,
+  useRecurringExpenses,
   useToggleRecurringExpense,
-} from "@/features/recurring-expenses/hooks"
-import type { RecurringExpenseWithRelations } from "@/features/recurring-expenses/types"
+} from "@/features/recurring-expenses/hooks";
+import type { RecurringExpenseWithRelations } from "@/features/recurring-expenses/types";
+import { IconPlus, IconRefresh } from "@tabler/icons-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function RecurringExpensesPage() {
-  const [formOpen, setFormOpen] = useState(false)
+  const [formOpen, setFormOpen] = useState(false);
   const [selectedRecurringExpense, setSelectedRecurringExpense] = useState<
     RecurringExpenseWithRelations | undefined
-  >()
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [recurringExpenseToDelete, setRecurringExpenseToDelete] = useState<string | null>(null)
+  >();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [recurringExpenseToDelete, setRecurringExpenseToDelete] = useState<
+    string | null
+  >(null);
 
-  const { recurringExpenses, isLoading } = useRecurringExpenses()
-  const deleteRecurringExpense = useDeleteRecurringExpense()
-  const toggleRecurringExpense = useToggleRecurringExpense()
+  const { recurringExpenses, isLoading } = useRecurringExpenses();
+  const deleteRecurringExpense = useDeleteRecurringExpense();
+  const toggleRecurringExpense = useToggleRecurringExpense();
+  const { processRecurringExpenses, isProcessing } =
+    useProcessRecurringExpenses();
 
-  const activeExpenses = recurringExpenses?.filter((re) => re.isActive) || []
-  const pausedExpenses = recurringExpenses?.filter((re) => !re.isActive) || []
+  const activeExpenses = recurringExpenses?.filter((re) => re.isActive) || [];
+  const pausedExpenses = recurringExpenses?.filter((re) => !re.isActive) || [];
 
   const handleEdit = (recurringExpense: RecurringExpenseWithRelations) => {
-    setSelectedRecurringExpense(recurringExpense)
-    setFormOpen(true)
-  }
+    setSelectedRecurringExpense(recurringExpense);
+    setFormOpen(true);
+  };
 
   const handleDelete = (id: string) => {
-    setRecurringExpenseToDelete(id)
-    setDeleteDialogOpen(true)
-  }
+    setRecurringExpenseToDelete(id);
+    setDeleteDialogOpen(true);
+  };
 
   const handleToggle = async (id: string) => {
-    await toggleRecurringExpense.mutateAsync(id)
-  }
+    await toggleRecurringExpense.mutateAsync(id);
+  };
 
   const confirmDelete = async () => {
     if (recurringExpenseToDelete) {
-      await deleteRecurringExpense.mutateAsync(recurringExpenseToDelete)
-      setRecurringExpenseToDelete(null)
-      setDeleteDialogOpen(false)
+      await deleteRecurringExpense.mutateAsync(recurringExpenseToDelete);
+      setRecurringExpenseToDelete(null);
+      setDeleteDialogOpen(false);
     }
-  }
+  };
+
+  const handleProcessNow = async () => {
+    try {
+      const result = await processRecurringExpenses();
+      if (result.processed > 0) {
+        toast.success(
+          `Processed ${result.processed} recurring expense${result.processed > 1 ? "s" : ""}`,
+        );
+      } else {
+        toast.info("No recurring expenses due for processing");
+      }
+    } catch {
+      toast.error("Failed to process recurring expenses");
+    }
+  };
 
   const handleFormClose = (open: boolean) => {
-    setFormOpen(open)
+    setFormOpen(open);
     if (!open) {
-      setSelectedRecurringExpense(undefined)
+      setSelectedRecurringExpense(undefined);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col md:flex-row gap-4 items-start md:justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Recurring Expenses</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Recurring Expenses
+          </h1>
           <p className="text-muted-foreground">
             Automate regular transactions that repeat
           </p>
         </div>
-        <Button onClick={() => setFormOpen(true)}>
-          <IconPlus className="h-4 w-4 mr-2" />
-          Add Recurring
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleProcessNow}
+            disabled={isProcessing}
+            variant="outline"
+          >
+            <IconRefresh className="h-4 w-4" />
+            Process Now
+          </Button>
+          <Button onClick={() => setFormOpen(true)}>
+            <IconPlus className="h-4 w-4" />
+            Add Recurring
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="active" className="w-full">
@@ -118,5 +151,5 @@ export default function RecurringExpensesPage() {
         description="Are you sure you want to delete this recurring expense? This action cannot be undone."
       />
     </div>
-  )
+  );
 }

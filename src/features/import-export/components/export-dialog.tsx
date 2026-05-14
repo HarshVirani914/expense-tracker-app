@@ -62,25 +62,30 @@ export const ExportDialog = ({ open, onOpenChange }: ExportDialogProps) => {
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="export-start-date">Start Date</Label>
-              <DatePicker
-                date={
-                  filters.startDate ? new Date(filters.startDate) : undefined
-                }
-                onSelect={(date) => handleDateChange("startDate", date)}
-                placeholder="Select start date"
-              />
-            </div>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Leave dates empty to export all expenses
+            </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="export-start-date">Start Date</Label>
+                <DatePicker
+                  date={
+                    filters.startDate ? new Date(filters.startDate) : undefined
+                  }
+                  onSelect={(date) => handleDateChange("startDate", date)}
+                  placeholder="Select start date"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="export-end-date">End Date</Label>
-              <DatePicker
-                date={filters.endDate ? new Date(filters.endDate) : undefined}
-                onSelect={(date) => handleDateChange("endDate", date)}
-                placeholder="Select end date"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="export-end-date">End Date</Label>
+                <DatePicker
+                  date={filters.endDate ? new Date(filters.endDate) : undefined}
+                  onSelect={(date) => handleDateChange("endDate", date)}
+                  placeholder="Select end date"
+                />
+              </div>
             </div>
           </div>
 

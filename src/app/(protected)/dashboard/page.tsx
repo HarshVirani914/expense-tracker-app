@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AccountBalances } from "@/features/dashboard/components/account-balances";
 import { GroupBalancesSummary } from "@/features/dashboard/components/group-balances-summary";
@@ -13,11 +14,24 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useUser } from "@clerk/nextjs";
 import { BudgetAlertsWidget } from "@/features/budgets/components/budget-alerts-widget";
 import { UpcomingRecurringWidget } from "@/features/recurring-expenses/components/upcoming-recurring-widget";
+import { useProcessRecurringExpenses } from "@/features/recurring-expenses/hooks";
 
 export default function DashboardPage() {
   const { stats, isLoading, error } = useDashboardStats();
   const isMobile = useIsMobile();
   const { user } = useUser();
+  const { processRecurringExpenses } = useProcessRecurringExpenses();
+  const hasProcessedRef = useRef(false);
+
+  // Auto-process recurring expenses when dashboard loads (once per session)
+  useEffect(() => {
+    if (!hasProcessedRef.current && user) {
+      hasProcessedRef.current = true;
+      processRecurringExpenses().catch(() => {
+        // Silently fail - processing errors shouldn't break the dashboard
+      });
+    }
+  }, [user, processRecurringExpenses]);
 
   if (isLoading) {
     return (
