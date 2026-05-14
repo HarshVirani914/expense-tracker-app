@@ -42,7 +42,9 @@ export default function GroupDetailPage({ params }: PageProps) {
   const { deleteGroupExpense, isDeleting } = useDeleteGroupExpense(id);
 
   const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
-  const [editingExpense, setEditingExpense] = useState<ExpenseWithRelations | undefined>(undefined);
+  const [editingExpense, setEditingExpense] = useState<
+    ExpenseWithRelations | undefined
+  >(undefined);
   const [isEditGroupDialogOpen, setIsEditGroupDialogOpen] = useState(false);
   const [showAllMembers, setShowAllMembers] = useState(false);
   const [settlementDialog, setSettlementDialog] = useState<{
@@ -75,8 +77,8 @@ export default function GroupDetailPage({ params }: PageProps) {
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <h3 className="text-xl font-semibold mb-2">Group not found</h3>
         <p className="text-muted-foreground mb-6 max-w-sm">
-          The group you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to
-          it.
+          The group you&apos;re looking for doesn&apos;t exist or you don&apos;t
+          have access to it.
         </p>
         <Button onClick={() => router.push("/groups")}>Back to Groups</Button>
       </div>

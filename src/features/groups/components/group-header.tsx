@@ -54,11 +54,13 @@ export const GroupHeader = ({
               </Badge>
             )}
           </div>
-          
+
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <IconUsers className="h-4 w-4" />
-              <span>{memberCount} {memberCount === 1 ? "member" : "members"}</span>
+              <span>
+                {memberCount} {memberCount === 1 ? "member" : "members"}
+              </span>
             </div>
             {description && (
               <>
@@ -81,11 +83,7 @@ export const GroupHeader = ({
               Add Expense
             </Button>
             {isAdmin && (
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={onEditGroup}
-              >
+              <Button variant="outline" size="lg" onClick={onEditGroup}>
                 <IconEdit className="h-4 w-4" />
               </Button>
             )}

@@ -30,7 +30,7 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
   const [result, setResult] = useState<ImportResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const importExpenses = useImportExpenses();
+  const { importExpenses, isImporting } = useImportExpenses();
   const { downloadTemplate } = useDownloadTemplate();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,7 +45,7 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
     if (!file) return;
 
     try {
-      const importResult = await importExpenses.mutateAsync(file);
+      const importResult = await importExpenses(file);
       setResult(importResult);
 
       if (importResult.failed === 0) {
@@ -183,16 +183,16 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
             type="button"
             variant="outline"
             onClick={handleClose}
-            disabled={importExpenses.isPending}
+            disabled={isImporting}
           >
             {result ? "Close" : "Cancel"}
           </Button>
           {!result && (
             <Button
               onClick={handleImport}
-              disabled={!file || importExpenses.isPending}
+              disabled={!file || isImporting}
             >
-              {importExpenses.isPending ? "Importing..." : "Import"}
+              {isImporting ? "Importing..." : "Import"}
             </Button>
           )}
         </DialogFooter>

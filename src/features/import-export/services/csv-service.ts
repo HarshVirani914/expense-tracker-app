@@ -16,12 +16,12 @@ export const csvService = {
       'EXPENSE',
       'Optional notes',
     ]
-    
+
     const csv = Papa.unparse({
       fields: headers,
       data: [sampleRow],
     })
-    
+
     return csv
   },
 
@@ -71,7 +71,7 @@ export const csvService = {
       const rowNumber = i + 2
       try {
         const validatedRow = csvRowSchema.parse(rows[i])
-        
+
         if (!categoryMap.has(validatedRow.category.toLowerCase())) {
           errors.push({
             row: rowNumber,
@@ -144,7 +144,7 @@ export const csvService = {
     for (let i = 0; i < rows.length; i++) {
       const rowNumber = i + 2
       const hasError = validationResult.errors.some(e => e.row === rowNumber)
-      
+
       if (hasError) continue
 
       const row = rows[i]
