@@ -74,7 +74,7 @@ export const GroupBalancesSummary = () => {
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="flex flex-col gap-3">
           {activeGroups.map((group) => (
             <GroupBalanceItem
               key={group.id}

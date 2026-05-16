@@ -60,15 +60,17 @@ model User {
   defaultCurrency String @default("INR")
 
   // Relations
-  expenses          Expense[]
-  accounts          Account[]
-  categories        Category[]
-  groups            GroupMember[]
-  budgets           Budget[]
-  recurringExpenses RecurringExpense[]
-  contactsCreated   Contact[]          @relation("ContactCreator")
-  settlementsFrom   Settlement[]       @relation("SettlementPayer")
-  settlementsTo     Settlement[]       @relation("SettlementReceiver")
+  expenses           Expense[]
+  accounts           Account[]
+  categories         Category[]
+  groups             GroupMember[]
+  budgets            Budget[]
+  recurringExpenses  RecurringExpense[]
+  contactsCreated    Contact[]           @relation("ContactCreator")
+  settlementsFrom    Settlement[]        @relation("SettlementPayer")
+  settlementsTo      Settlement[]        @relation("SettlementReceiver")
+  aiConversations    AIConversation[]
+  bulkImportSessions BulkImportSession[]
 
   @@map("users")
 }
@@ -128,11 +130,13 @@ model Expense {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category     Category             @relation(fields: [categoryId], references: [id])
-  account      Account?             @relation(fields: [accountId], references: [id], onDelete: SetNull)
-  group        Group?               @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category     Category               @relation(fields: [categoryId], references: [id])
+  account      Account?               @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  group        Group?                 @relation(fields: [groupId], references: [id], onDelete: SetNull)
   participants ExpenseParticipant[]
+  aiSuggestion AIExpenseSuggestion?
+  receiptImage ReceiptImage?
 
   @@index([userId, date])
   @@index([categoryId])
@@ -290,3 +294,64 @@ model RecurringExpense {
 
   @@map("recurring_expenses")
 }
+
+// AI Conversation model - stores chat history
+model AIConversation {
+  id         String   @id @default(cuid())
+  userId     String
+  messages   Json // Array of {role, content}
+  context    Json? // Relevant IDs, filters
+  lastActive DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ai_conversations")
+}
+
+// AI Expense Suggestion model - tracks AI categorization suggestions
+model AIExpenseSuggestion {
+  id                String   @id @default(cuid())
+  expenseId         String?  @unique
+  rawInput          String
+  suggestedCategory String
+  confidence        Float
+  accepted          Boolean  @default(false)
+  correctedCategory String?
+  createdAt         DateTime @default(now())
+
+  expense Expense? @relation(fields: [expenseId], references: [id])
+
+  @@map("ai_expense_suggestions")
+}
+
+// Receipt Image model - stores receipt images and extracted data
+model ReceiptImage {
+  id            String   @id @default(cuid())
+  expenseId     String   @unique
+  imageUrl      String
+  extractedData Json
+  createdAt     DateTime @default(now())
+
+  expense Expense @relation(fields: [expenseId], references: [id])
+
+  @@map("receipt_images")
+}
+
+// Bulk Import Session model - tracks bulk import operations
+model BulkImportSession {
+  id            String   @id @default(cuid())
+  userId        String
+  fileName      String
+  fileType      String
+  mappedData    Json
+  status        String
+  importedCount Int      @default(0)
+  errorCount    Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("bulk_import_sessions")
+}
+

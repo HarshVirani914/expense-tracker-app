@@ -7,19 +7,20 @@
 
 import { config } from 'dotenv'
 import { resolve } from 'path'
+import { logger } from '@/lib/logger'
 
 // Load environment variables from .env.local
 config({ path: resolve(process.cwd(), '.env.local') })
 
 // Verify required environment variables
 if (!process.env.CLERK_SECRET_KEY) {
-  console.error('❌ Error: CLERK_SECRET_KEY not found in .env.local')
-  console.error('Please add your Clerk secret key to .env.local')
+  logger.error('❌ Error: CLERK_SECRET_KEY not found in .env.local')
+  logger.error('Please add your Clerk secret key to .env.local')
   process.exit(1)
 }
 
 if (!process.env.DATABASE_URL) {
-  console.error('❌ Error: DATABASE_URL not found in .env.local')
+  logger.error('❌ Error: DATABASE_URL not found in .env.local')
   process.exit(1)
 }
 
@@ -34,7 +35,7 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
 
 const syncClerkUsers = async () => {
-  console.log('Starting Clerk user sync...\n')
+  logger.info('Starting Clerk user sync...\n')
 
   try {
     // Fetch all users from Clerk
@@ -53,11 +54,11 @@ const syncClerkUsers = async () => {
       hasMore = response.data.length === limit
       offset += limit
 
-      console.log(`Fetched ${allUsers.length} users from Clerk...`)
+      logger.info(`Fetched ${allUsers.length} users from Clerk...`)
     }
 
-    console.log(`\nTotal users found in Clerk: ${allUsers.length}`)
-    console.log('Syncing to database...\n')
+    logger.info(`\nTotal users found in Clerk: ${allUsers.length}`)
+    logger.info('Syncing to database...\n')
 
     let created = 0
     let updated = 0
@@ -68,7 +69,7 @@ const syncClerkUsers = async () => {
       const name = `${clerkUser.firstName ?? ''} ${clerkUser.lastName ?? ''}`.trim() || null
 
       if (!email) {
-        console.log(`⚠ Skipping user ${clerkUser.id} - no email address`)
+        logger.info(`⚠ Skipping user ${clerkUser.id} - no email address`)
         skipped++
         continue
       }
@@ -88,7 +89,7 @@ const syncClerkUsers = async () => {
               name,
             },
           })
-          console.log(`✓ Updated: ${email} (${clerkUser.id})`)
+          logger.info(`✓ Updated: ${email} (${clerkUser.id})`)
           updated++
         } else {
           // Create new user
@@ -99,25 +100,25 @@ const syncClerkUsers = async () => {
               name,
             },
           })
-          console.log(`✓ Created: ${email} (${clerkUser.id})`)
+          logger.info(`✓ Created: ${email} (${clerkUser.id})`)
           created++
         }
       } catch (error: unknown) {
-        console.error(`✗ Error syncing user ${clerkUser.id}:`, error instanceof Error ? error.message : String(error))
+        logger.error(`✗ Error syncing user ${clerkUser.id}:`, error instanceof Error ? error : new Error(String(error)))
         skipped++
       }
     }
 
-    console.log('\n' + '='.repeat(50))
-    console.log('Sync Complete!')
-    console.log('='.repeat(50))
-    console.log(`Created: ${created}`)
-    console.log(`Updated: ${updated}`)
-    console.log(`Skipped: ${skipped}`)
-    console.log(`Total processed: ${allUsers.length}`)
-    console.log('='.repeat(50))
+    logger.info('\n' + '='.repeat(50))
+    logger.info('Sync Complete!')
+    logger.info('='.repeat(50))
+    logger.info(`Created: ${created}`)
+    logger.info(`Updated: ${updated}`)
+    logger.info(`Skipped: ${skipped}`)
+    logger.info(`Total processed: ${allUsers.length}`)
+    logger.info('='.repeat(50))
   } catch (error) {
-    console.error('Error during sync:', error)
+    logger.error('Error during sync:', error instanceof Error ? error : new Error(String(error)))
     process.exit(1)
   } finally {
     await prisma.$disconnect()
@@ -127,10 +128,10 @@ const syncClerkUsers = async () => {
 // Run the sync
 syncClerkUsers()
   .then(() => {
-    console.log('\n✓ Sync completed successfully')
+    logger.info('\n✓ Sync completed successfully')
     process.exit(0)
   })
   .catch((error) => {
-    console.error('\n✗ Sync failed:', error)
+    logger.error('\n✗ Sync failed:', error)
     process.exit(1)
   })

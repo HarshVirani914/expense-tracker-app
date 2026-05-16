@@ -16,7 +16,7 @@ self.addEventListener("install", (event) => {
     caches
       .open(CACHE_NAME)
       .then((cache) => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting())
+      .then(() => self.skipWaiting()),
   );
 });
 
@@ -26,14 +26,14 @@ self.addEventListener("activate", (event) => {
     caches
       .keys()
       .then((cacheNames) =>
-        cacheNames.filter((cacheName) => !currentCaches.includes(cacheName))
+        cacheNames.filter((cacheName) => !currentCaches.includes(cacheName)),
       )
       .then((cachesToDelete) =>
         Promise.all(
-          cachesToDelete.map((cacheToDelete) => caches.delete(cacheToDelete))
-        )
+          cachesToDelete.map((cacheToDelete) => caches.delete(cacheToDelete)),
+        ),
       )
-      .then(() => self.clients.claim())
+      .then(() => self.clients.claim()),
   );
 });
 
@@ -60,9 +60,9 @@ self.addEventListener("fetch", (event) => {
               cache.put(event.request, response.clone());
             }
             return response;
-          })
+          }),
         );
-      })
+      }),
     );
   }
 });
@@ -110,7 +110,7 @@ self.addEventListener("notificationclick", (event) => {
         if (clients.openWindow) {
           return clients.openWindow(urlToOpen);
         }
-      })
+      }),
   );
 });
 

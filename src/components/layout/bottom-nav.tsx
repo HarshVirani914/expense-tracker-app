@@ -12,19 +12,20 @@ import {
   IconAddressBook,
   IconBuildingBank,
   IconCategory2,
-  IconDotsVertical,
-  IconHome,
-  IconPlus,
-  IconReceipt,
-  IconUsers,
   IconChartBar,
   IconChartPie,
+  IconDotsVertical,
+  IconHome,
+  IconMessageChatbot,
+  IconPlus,
+  IconReceipt,
   IconRepeat,
+  IconUsers,
 } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type NavItem = {
   id: number;
@@ -103,6 +104,11 @@ const moreNavItems = [
     label: "Recurring",
     icon: IconRepeat,
   },
+  {
+    href: "/ai",
+    label: "AI",
+    icon: IconMessageChatbot,
+  },
 ];
 
 export const BottomNav = () => {
@@ -113,16 +119,19 @@ export const BottomNav = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<(HTMLAnchorElement | HTMLButtonElement | null)[]>([]);
 
-  const isActive = useCallback((href: string) => {
-    if (href === "/dashboard") {
-      return pathname === "/dashboard" || pathname === "/";
-    }
-    return pathname.startsWith(href);
-  }, [pathname]);
+  const isActive = useCallback(
+    (href: string) => {
+      if (href === "/dashboard") {
+        return pathname === "/dashboard" || pathname === "/";
+      }
+      return pathname.startsWith(href);
+    },
+    [pathname],
+  );
 
   const active = useMemo(() => {
     const index = mainNavItems.findIndex(
-      (item) => item.type === "link" && isActive(item.href)
+      (item) => item.type === "link" && isActive(item.href),
     );
     return index !== -1 ? index : 0;
   }, [isActive]);
@@ -291,7 +300,8 @@ export const BottomNav = () => {
           <DrawerHeader>
             <DrawerTitle>More Options</DrawerTitle>
             <DrawerDescription id="more-drawer-description">
-              Manage your accounts, contacts, categories, analytics, budgets, and recurring expenses
+              Manage your accounts, contacts, categories, analytics, budgets,
+              and recurring expenses
             </DrawerDescription>
           </DrawerHeader>
           <div className="px-4 pb-4 space-y-1">

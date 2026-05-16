@@ -2,6 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useServiceWorker } from "@/hooks/use-service-worker";
+import { logger } from "@/lib/logger";
 
 type ServiceWorkerProviderProps = {
   children: ReactNode;
@@ -25,23 +26,22 @@ export const ServiceWorkerProvider = ({
     if (isSupported && "serviceWorker" in navigator) {
       navigator.serviceWorker.ready
         .then((registration) => {
-          const regWithSync =
-            registration as ServiceWorkerRegistrationWithSync;
+          const regWithSync = registration as ServiceWorkerRegistrationWithSync;
           if (regWithSync.sync) {
             return regWithSync.sync
               .register("sync-expenses")
               .catch((error: unknown) => {
-                console.error(
+                logger.error(
                   "Background sync registration failed:",
-                  error instanceof Error ? error.message : String(error)
+                  error instanceof Error ? error : new Error(String(error)),
                 );
               });
           }
         })
         .catch((error: unknown) => {
-          console.error(
+          logger.error(
             "Service Worker ready failed:",
-            error instanceof Error ? error.message : String(error)
+            error instanceof Error ? error : new Error(String(error)),
           );
         });
     }

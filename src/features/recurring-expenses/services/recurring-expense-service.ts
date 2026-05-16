@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import type { RecurringExpenseWithRelations, UpcomingRecurrence, RecurringExpense } from '../types'
 import type { CreateRecurringExpenseInput, UpdateRecurringExpenseInput } from '../schemas'
 import { addDays, addWeeks, addMonths, addYears, differenceInDays } from 'date-fns'
+import { logger } from '@/lib/logger'
 
 export const recurringExpenseService = {
   calculateNextDate(frequency: string, currentDate: Date, customDays?: number | null): Date {
@@ -229,7 +230,7 @@ export const recurringExpenseService = {
 
         processed++
       } catch (error) {
-        console.error(`Error processing recurring expense ${recurring.id}:`, error)
+        logger.error(`Error processing recurring expense ${recurring.id}:`, error instanceof Error ? error : new Error(String(error)))
         errors++
       }
     }

@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from "@/lib/logger";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 
@@ -47,7 +48,7 @@ export const useServiceWorker = () => {
         }
       });
     } catch (error) {
-      console.error("Service Worker registration failed:", error);
+      logger.error("Service Worker registration failed:", error instanceof Error ? error : new Error(String(error)));
     }
   }, []);
 

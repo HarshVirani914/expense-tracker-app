@@ -1,21 +1,24 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
 import {
-  IconLayoutDashboard,
-  IconReceipt,
-  IconWallet,
-  IconTag,
-  IconUsers,
   IconChartBar,
-  IconUserCircle,
   IconChartPie,
+  IconLayoutDashboard,
+  IconMessageChatbot,
+  IconReceipt,
   IconRepeat,
+  IconTag,
+  IconUserCircle,
+  IconUsers,
+  IconWallet,
 } from "@tabler/icons-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import * as React from "react";
 
+import { ThemeSwitcher } from "@/components/theme/theme-switcher";
+import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
@@ -24,21 +27,19 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuBadge,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { Badge } from "@/components/ui/badge";
-import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import Image from "next/image";
 
 const navigation: Array<{
-  name: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  disabled: boolean
-  badge?: string
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  disabled: boolean;
+  badge?: string;
 }> = [
   {
     name: "Dashboard",
@@ -92,6 +93,12 @@ const navigation: Array<{
     name: "Recurring",
     href: "/recurring",
     icon: IconRepeat,
+    disabled: false,
+  },
+  {
+    name: "AI",
+    href: "/ai",
+    icon: IconMessageChatbot,
     disabled: false,
   },
 ];

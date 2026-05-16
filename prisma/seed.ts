@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import { Contact, PrismaClient } from '../src/generated/prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
+import { logger } from '@/lib/logger'
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
@@ -30,10 +31,10 @@ const getRandomItem = <T>(array: T[]): T => {
 }
 
 const main = async () => {
-  console.log('Starting database seed...')
+  logger.info('Starting database seed...')
 
   // Create default categories
-  console.log('\n📁 Creating default categories...')
+  logger.info('\n📁 Creating default categories...')
   for (const category of DEFAULT_CATEGORIES) {
     const existingCategory = await prisma.category.findFirst({
       where: {
@@ -47,22 +48,22 @@ const main = async () => {
       await prisma.category.create({
         data: category,
       })
-      console.log(`✓ Created default category: ${category.name}`)
+      logger.info(`✓ Created default category: ${category.name}`)
     } else {
-      console.log(`- Category already exists: ${category.name}`)
+      logger.info(`- Category already exists: ${category.name}`)
     }
   }
 
   // Find the existing user
-  console.log('\n👤 Finding existing user...')
+  logger.info('\n👤 Finding existing user...')
   const user = await prisma.user.findFirst()
 
   if (!user) {
-    console.log('❌ No user found. Please create a user first.')
+    logger.info('❌ No user found. Please create a user first.')
     return
   }
 
-  console.log(`✓ Found user: ${user.email}`)
+  logger.info(`✓ Found user: ${user.email}`)
 
   // Get categories for this user
   const categories = await prisma.category.findMany({
@@ -75,7 +76,7 @@ const main = async () => {
   })
 
   // Create accounts
-  console.log('\n💳 Creating accounts...')
+  logger.info('\n💳 Creating accounts...')
   const accounts = []
 
   const accountsData = [
@@ -98,15 +99,15 @@ const main = async () => {
         },
       })
       accounts.push(account)
-      console.log(`✓ Created account: ${account.name}`)
+      logger.info(`✓ Created account: ${account.name}`)
     } else {
       accounts.push(existing)
-      console.log(`- Account already exists: ${existing.name}`)
+      logger.info(`- Account already exists: ${existing.name}`)
     }
   }
 
   // Create contacts
-  console.log('\n👥 Creating contacts...')
+  logger.info('\n👥 Creating contacts...')
   const contacts: Contact[] = []
 
   const contactsData = [
@@ -130,15 +131,15 @@ const main = async () => {
         },
       })
       contacts.push(contact)
-      console.log(`✓ Created contact: ${contact.name}`)
+      logger.info(`✓ Created contact: ${contact.name}`)
     } else {
       contacts.push(existing)
-      console.log(`- Contact already exists: ${existing.name}`)
+      logger.info(`- Contact already exists: ${existing.name}`)
     }
   }
 
   // Create expenses (last 6 months)
-  console.log('\n💸 Creating expenses...')
+  logger.info('\n💸 Creating expenses...')
   const today = new Date()
   const sixMonthsAgo = new Date(today)
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
@@ -185,10 +186,10 @@ const main = async () => {
     expenseCount++
   }
 
-  console.log(`✓ Created ${expenseCount} expenses`)
+  logger.info(`✓ Created ${expenseCount} expenses`)
 
   // Create budgets
-  console.log('\n🎯 Creating budgets...')
+  logger.info('\n🎯 Creating budgets...')
   const budgetsData = [
     { categoryName: 'Food', amount: 15000, period: 'MONTHLY' },
     { categoryName: 'Transportation', amount: 8000, period: 'MONTHLY' },
@@ -214,14 +215,14 @@ const main = async () => {
           categoryId: category.id,
         },
       })
-      console.log(`✓ Created budget for ${budgetData.categoryName}`)
+      logger.info(`✓ Created budget for ${budgetData.categoryName}`)
     } else {
-      console.log(`- Budget already exists for ${budgetData.categoryName}`)
+      logger.info(`- Budget already exists for ${budgetData.categoryName}`)
     }
   }
 
   // Create recurring expenses
-  console.log('\n🔄 Creating recurring expenses...')
+  logger.info('\n🔄 Creating recurring expenses...')
   const recurringData = [
     { description: 'Netflix Subscription', categoryName: 'Entertainment', amount: 649, frequency: 'MONTHLY' as const, dayOfMonth: 5 },
     { description: 'Gym Membership', categoryName: 'Lifestyle', amount: 1500, frequency: 'MONTHLY' as const, dayOfMonth: 1 },
@@ -259,14 +260,14 @@ const main = async () => {
           accountId: account.id,
         },
       })
-      console.log(`✓ Created recurring expense: ${recurringItem.description}`)
+      logger.info(`✓ Created recurring expense: ${recurringItem.description}`)
     } else {
-      console.log(`- Recurring expense already exists: ${recurringItem.description}`)
+      logger.info(`- Recurring expense already exists: ${recurringItem.description}`)
     }
   }
 
   // Create groups
-  console.log('\n👨‍👩‍👧‍👦 Creating groups...')
+  logger.info('\n👨‍👩‍👧‍👦 Creating groups...')
   const groupsData = [
     { name: 'Goa Trip 2026', description: 'Friends trip to Goa', members: [0, 1, 2] },
     { name: 'Office Lunch', description: 'Weekly office lunch expenses', members: [1, 3] },
@@ -352,14 +353,14 @@ const main = async () => {
         }
       }
 
-      console.log(`✓ Created group: ${group.name} with expenses`)
+      logger.info(`✓ Created group: ${group.name} with expenses`)
     } else {
-      console.log(`- Group already exists: ${groupData.name}`)
+      logger.info(`- Group already exists: ${groupData.name}`)
     }
   }
 
   // Create some settlements
-  console.log('\n💰 Creating settlements...')
+  logger.info('\n💰 Creating settlements...')
   const groups = await prisma.group.findMany({
     where: {
       members: {
@@ -395,12 +396,12 @@ const main = async () => {
           payerContactId: member.contactId!,
         },
       })
-      console.log(`✓ Created settlement for group: ${group.name}`)
+      logger.info(`✓ Created settlement for group: ${group.name}`)
     }
   }
 
-  console.log('\n✅ Database seed completed successfully! 🌱')
-  console.log(`
+  logger.info('\n✅ Database seed completed successfully! 🌱')
+  logger.info(`
 📊 Summary:
   - Categories: ${categories.length}
   - Accounts: ${accounts.length}
@@ -414,7 +415,7 @@ const main = async () => {
 
 main()
   .catch((e) => {
-    console.error('Error seeding database:', e)
+    logger.error('Error seeding database:', e)
     process.exit(1)
   })
   .finally(async () => {
