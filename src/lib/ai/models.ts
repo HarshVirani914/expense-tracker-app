@@ -1,5 +1,6 @@
 import { google } from "@ai-sdk/google";
 import { LanguageModel } from "ai";
+import { isProviderRateLimitError } from "@/lib/ai/is-provider-rate-limit-error";
 import { logger } from "../logger";
 
 export const models = {
@@ -53,13 +54,15 @@ export async function withModelFallback<T>(
     } catch (error) {
       errors.push(error as Error);
 
-      // Check if it's a retryable error (503, high demand, rate limit)
+      if (isProviderRateLimitError(error)) {
+        throw error;
+      }
+
       const isRetryable =
         error instanceof Error &&
         (error.message.includes("high demand") ||
           error.message.includes("UNAVAILABLE") ||
-          error.message.includes("503") ||
-          error.message.includes("rate limit"));
+          error.message.includes("503"));
 
       // If it's not retryable or we're on the last model, throw
       if (!isRetryable || i === fallbackChain.length - 1) {

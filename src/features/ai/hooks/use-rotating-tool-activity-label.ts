@@ -25,22 +25,20 @@ export const useRotatingToolActivityLabel = (
       return;
     }
 
-    setLabel(pickRandomToolActivityMessage());
     let cancelled = false;
     let timeoutId: ReturnType<typeof setTimeout>;
 
-    const scheduleNext = () => {
-      const delayMs = 2200 + Math.random() * 3800;
+    const scheduleNextRotation = (delayMs: number) => {
       timeoutId = setTimeout(() => {
         if (cancelled) {
           return;
         }
         setLabel(pickRandomToolActivityMessage());
-        scheduleNext();
+        scheduleNextRotation(2200 + Math.random() * 3800);
       }, delayMs);
     };
 
-    scheduleNext();
+    scheduleNextRotation(0);
 
     return () => {
       cancelled = true;

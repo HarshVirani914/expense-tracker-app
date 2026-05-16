@@ -9,6 +9,8 @@ import {
 import { requireCurrentUser } from "@/lib/auth";
 import { chatService } from "@/features/ai/services/chat-service";
 import { checkRateLimit } from "@/lib/ai/rate-limiter";
+import { CHAT_PROVIDER_RATE_LIMIT_USER_MESSAGE } from "@/lib/ai/chat-rate-limit-messages";
+import { isProviderRateLimitError } from "@/lib/ai/is-provider-rate-limit-error";
 import { logger } from "@/lib/logger";
 import { AppError } from "@/lib/errors";
 import { postRequestBodySchema, type PostRequestBody } from "./schema";
@@ -101,6 +103,9 @@ export async function POST(req: NextRequest) {
         });
       },
       onError: (error) => {
+        if (isProviderRateLimitError(error)) {
+          return CHAT_PROVIDER_RATE_LIMIT_USER_MESSAGE;
+        }
         if (error instanceof Error && error.message?.includes("high demand")) {
           return "The AI service is experiencing high demand. Please try again in a moment.";
         }

@@ -98,29 +98,10 @@ export const useScrollToBottom = () => {
     };
   }, []);
 
-  const onViewportEnter = useCallback(() => {
-    setIsAtBottom(true);
-    isAtBottomRef.current = true;
-  }, []);
-
-  const onViewportLeave = useCallback(() => {
-    setIsAtBottom(false);
-    isAtBottomRef.current = false;
-  }, []);
-
-  const reset = useCallback(() => {
-    setIsAtBottom(true);
-    isAtBottomRef.current = true;
-    isUserScrollingRef.current = false;
-  }, []);
-
   return {
     containerRef,
     endRef,
     isAtBottom,
     scrollToBottom,
-    onViewportEnter,
-    onViewportLeave,
-    reset,
   };
 };
