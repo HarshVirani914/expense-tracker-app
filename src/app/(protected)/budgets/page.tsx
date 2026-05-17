@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card"
 import { IconPlus } from "@tabler/icons-react"
 import { BudgetList } from "@/features/budgets/components/budget-list"
 import { BudgetFormDialog } from "@/features/budgets/components/budget-form-dialog"
+import { FeaturePageHero } from "@/components/layout/feature-page-hero"
 import { ConfirmDialog } from "@/components/confirm-dialog"
 import { useBudgets, useDeleteBudget } from "@/features/budgets/hooks"
 import type { BudgetWithSpending } from "@/features/budgets/types"
@@ -50,18 +51,20 @@ export default function BudgetsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col md:flex-row gap-4 items-start md:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Budgets</h1>
-          <p className="text-muted-foreground">
-            Set spending limits and track your progress
-          </p>
+      <FeaturePageHero className="p-4 sm:p-5">
+        <div className="flex flex-col md:flex-row gap-4 items-start md:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight">Budgets</h1>
+            <p className="text-muted-foreground">
+              Set spending limits and track your progress
+            </p>
+          </div>
+          <Button onClick={() => setFormOpen(true)}>
+            <IconPlus className="h-4 w-4 mr-2" />
+            Add Budget
+          </Button>
         </div>
-        <Button onClick={() => setFormOpen(true)}>
-          <IconPlus className="h-4 w-4 mr-2" />
-          Add Budget
-        </Button>
-      </div>
+      </FeaturePageHero>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="p-6">

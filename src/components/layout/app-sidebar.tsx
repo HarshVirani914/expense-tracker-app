@@ -33,6 +33,8 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { getFeatureAccentByHref, isRouteActive } from "@/lib/feature-accents";
 
 const navigation: Array<{
   name: string;
@@ -135,19 +137,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarMenu>
             {navigation.map((item) => {
-              const isActive = pathname === item.href;
+              const navActive = isRouteActive(pathname, item.href);
+              const accent = getFeatureAccentByHref(item.href);
               const Icon = item.icon;
 
               return (
                 <SidebarMenuItem key={item.name}>
                   <SidebarMenuButton
                     asChild
-                    isActive={isActive}
+                    isActive={navActive}
                     disabled={item.disabled}
                     tooltip={item.name}
                   >
-                    <Link href={item.disabled ? "#" : item.href}>
-                      <Icon />
+                    <Link
+                      href={item.disabled ? "#" : item.href}
+                      className={cn(navActive && accent.navActive)}
+                    >
+                      <Icon
+                        className={cn(
+                          "size-4 shrink-0 transition-colors",
+                          navActive
+                            ? accent.icon
+                            : "text-sidebar-foreground/70 opacity-90 group-hover/menu-button:text-sidebar-foreground",
+                        )}
+                      />
                       <span>{item.name}</span>
                     </Link>
                   </SidebarMenuButton>

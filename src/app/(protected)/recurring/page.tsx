@@ -1,5 +1,6 @@
 "use client";
 
+import { FeaturePageHero } from "@/components/layout/feature-page-hero";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -81,30 +82,32 @@ export default function RecurringExpensesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col md:flex-row gap-4 items-start md:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Recurring Expenses
-          </h1>
-          <p className="text-muted-foreground">
-            Automate regular transactions that repeat
-          </p>
+      <FeaturePageHero className="p-4 sm:p-5">
+        <div className="flex flex-col md:flex-row gap-4 items-start md:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Recurring Expenses
+            </h1>
+            <p className="text-muted-foreground">
+              Automate regular transactions that repeat
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={handleProcessNow}
+              disabled={isProcessing}
+              variant="outline"
+            >
+              <IconRefresh className="h-4 w-4" />
+              Process Now
+            </Button>
+            <Button onClick={() => setFormOpen(true)}>
+              <IconPlus className="h-4 w-4" />
+              Add Recurring
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={handleProcessNow}
-            disabled={isProcessing}
-            variant="outline"
-          >
-            <IconRefresh className="h-4 w-4" />
-            Process Now
-          </Button>
-          <Button onClick={() => setFormOpen(true)}>
-            <IconPlus className="h-4 w-4" />
-            Add Recurring
-          </Button>
-        </div>
-      </div>
+      </FeaturePageHero>
 
       <Tabs defaultValue="active" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">

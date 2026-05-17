@@ -10,6 +10,7 @@ import { GroupBalancesSummary } from "@/features/dashboard/components/group-bala
 import { HeroBalanceCard } from "@/features/dashboard/components/hero-balance-card";
 import { MoneySemanticsHelp } from "@/features/dashboard/components/money-semantics-help";
 import { OutstandingDebtsWidget } from "@/features/dashboard/components/outstanding-debts-widget";
+import { FeaturePageHero } from "@/components/layout/feature-page-hero";
 import { QuickActions } from "@/features/dashboard/components/quick-actions";
 import { RecentExpensesList } from "@/features/dashboard/components/recent-expenses-list";
 import { StatsCards } from "@/features/dashboard/components/stats-cards";
@@ -96,23 +97,25 @@ export default function DashboardPage() {
   return (
     <>
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-1 min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-                Welcome back
-                {user?.firstName ? `, ${user.firstName}` : ""}
-              </h1>
-              <MoneySemanticsHelp />
+        <FeaturePageHero className="p-4 sm:p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1 min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                  Welcome back
+                  {user?.firstName ? `, ${user.firstName}` : ""}
+                </h1>
+                <MoneySemanticsHelp />
+              </div>
+              <p className="text-sm text-muted-foreground sm:text-base">
+                Here&apos;s an overview of your finances.{" "}
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground sm:text-base">
-              Here&apos;s an overview of your finances.{" "}
-            </p>
+            <div className="w-full shrink-0 sm:w-auto flex justify-stretch sm:justify-end min-w-0">
+              <QuickActions />
+            </div>
           </div>
-          <div className="w-full shrink-0 sm:w-auto flex justify-stretch sm:justify-end min-w-0">
-            <QuickActions />
-          </div>
-        </div>
+        </FeaturePageHero>
 
         {showAIPrompts && (
           <Card className="relative overflow-hidden border shadow-none">

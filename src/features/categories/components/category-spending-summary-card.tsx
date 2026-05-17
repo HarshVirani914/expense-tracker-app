@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useFeatureAccent } from "@/hooks/use-feature-accent";
 import { IconTag, IconTrendingUp, IconList } from "@tabler/icons-react";
 import { memo } from "react";
 import type { CategorySpending } from "../types";
@@ -13,6 +14,7 @@ type CategorySpendingSummaryCardProps = {
 
 export const CategorySpendingSummaryCard = memo(
   ({ categorySpending }: CategorySpendingSummaryCardProps) => {
+    const accent = useFeatureAccent();
     const totalSpending = categorySpending.reduce(
       (sum, cat) => sum + cat.totalAmount,
       0,
@@ -43,7 +45,12 @@ export const CategorySpendingSummaryCard = memo(
     ];
 
     return (
-      <Card className="relative overflow-hidden border-0 bg-linear-to-br from-primary/10 via-primary/5 to-background shadow-none">
+      <Card
+        className={cn(
+          "relative overflow-hidden border-0 shadow-none",
+          accent.pageHeroTint,
+        )}
+      >
         <div className="absolute inset-0 bg-grid-white/10 mask-[radial-gradient(white,transparent_70%)]" />
 
         <div className="relative p-6 space-y-6">
@@ -60,8 +67,8 @@ export const CategorySpendingSummaryCard = memo(
                 {activeCategories === 1 ? "category" : "categories"}
               </p>
             </div>
-            <div className="rounded-full bg-primary/10 p-3">
-              <IconTag className="h-6 w-6 text-primary" />
+            <div className={cn("rounded-full p-3", accent.iconBg)}>
+              <IconTag className={cn("h-6 w-6", accent.icon)} />
             </div>
           </div>
 

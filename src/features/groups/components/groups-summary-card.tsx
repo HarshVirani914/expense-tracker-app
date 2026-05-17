@@ -9,8 +9,9 @@ import {
   IconTrendingUp,
   IconTrendingDown,
 } from "@tabler/icons-react";
-import { memo } from "react";
+import { useFeatureAccent } from "@/hooks/use-feature-accent";
 import type { GroupStats } from "../types";
+import { memo } from "react";
 
 type GroupsSummaryCardProps = {
   stats: GroupStats;
@@ -18,9 +19,15 @@ type GroupsSummaryCardProps = {
 
 export const GroupsSummaryCard = memo(({ stats }: GroupsSummaryCardProps) => {
   const hasActivity = stats.totalExpenses > 0;
+  const accent = useFeatureAccent();
 
   return (
-    <Card className="p-6 relative overflow-hidden border-0 bg-linear-to-br from-primary/5 via-primary/3 to-background border-primary/20">
+    <Card
+      className={cn(
+        "relative overflow-hidden border-0 shadow-none",
+        accent.pageHeroTint,
+      )}
+    >
       <div className="absolute inset-0 bg-grid-white/10 mask-[radial-gradient(white,transparent_70%)]" />
 
       <div className="relative p-6 space-y-6">
@@ -36,8 +43,8 @@ export const GroupsSummaryCard = memo(({ stats }: GroupsSummaryCardProps) => {
               {stats.activeGroups} active with expenses
             </p>
           </div>
-          <div className="rounded-full bg-primary/10 p-3">
-            <IconUsers className="h-8 w-8 text-primary" />
+          <div className={cn("rounded-full p-3", accent.iconBg)}>
+            <IconUsers className={cn("h-8 w-8", accent.icon)} />
           </div>
         </div>
 

@@ -7,6 +7,17 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { AccountFormDialog } from "@/features/accounts/components/account-form-dialog";
+import { ContactFormDialog } from "@/features/contacts/components/contact-form-dialog";
+import { ExpenseFormDialog } from "@/features/expenses/components/expense-form-dialog";
+import { GroupFormDialog } from "@/features/groups/components/group-form-dialog";
+import {
+  featureAccents,
+  getAccentIconTileClass,
+  getFeatureAccentByHref,
+  getFeatureAccentForPath,
+  isRouteActive,
+} from "@/lib/feature-accents";
 import { cn } from "@/lib/utils";
 import {
   IconAddressBook,
@@ -28,10 +39,6 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AccountFormDialog } from "@/features/accounts/components/account-form-dialog";
-import { ContactFormDialog } from "@/features/contacts/components/contact-form-dialog";
-import { ExpenseFormDialog } from "@/features/expenses/components/expense-form-dialog";
-import { GroupFormDialog } from "@/features/groups/components/group-form-dialog";
 
 type NavItem = {
   id: number;
@@ -79,41 +86,77 @@ const mainNavItems: NavItem[] = [
   },
 ];
 
-const moreNavItems = [
+type MoreNavLinkItem = {
+  href: string;
+  label: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  featured?: boolean;
+};
+
+type MoreNavSection = {
+  title: string;
+  items: MoreNavLinkItem[];
+};
+
+const moreNavSections: MoreNavSection[] = [
   {
-    href: "/accounts",
-    label: "Accounts",
-    icon: IconBuildingBank,
+    title: "Smart tools",
+    items: [
+      {
+        href: "/ai",
+        label: "AI assistant",
+        description: "Ask questions in plain language",
+        icon: IconMessageChatbot,
+        featured: true,
+      },
+    ],
   },
   {
-    href: "/analytics",
-    label: "Analytics",
-    icon: IconChartBar,
+    title: "Money & budgets",
+    items: [
+      {
+        href: "/accounts",
+        label: "Accounts",
+        description: "Banks, wallets, and cards",
+        icon: IconBuildingBank,
+      },
+      {
+        href: "/budgets",
+        label: "Budgets",
+        description: "Limits by category",
+        icon: IconChartPie,
+      },
+      {
+        href: "/recurring",
+        label: "Recurring",
+        description: "Scheduled expenses",
+        icon: IconRepeat,
+      },
+      {
+        href: "/categories",
+        label: "Categories",
+        description: "Tags for spending",
+        icon: IconCategory2,
+      },
+    ],
   },
   {
-    href: "/budgets",
-    label: "Budgets",
-    icon: IconChartPie,
-  },
-  {
-    href: "/categories",
-    label: "Categories",
-    icon: IconCategory2,
-  },
-  {
-    href: "/contacts",
-    label: "Contacts",
-    icon: IconAddressBook,
-  },
-  {
-    href: "/recurring",
-    label: "Recurring",
-    icon: IconRepeat,
-  },
-  {
-    href: "/ai",
-    label: "AI Assistant",
-    icon: IconMessageChatbot,
+    title: "Insights & people",
+    items: [
+      {
+        href: "/analytics",
+        label: "Analytics",
+        description: "Trends and breakdowns",
+        icon: IconChartBar,
+      },
+      {
+        href: "/contacts",
+        label: "Contacts",
+        description: "People you split with",
+        icon: IconAddressBook,
+      },
+    ],
   },
 ];
 
@@ -132,21 +175,36 @@ export const BottomNav = () => {
   const btnRefs = useRef<(HTMLAnchorElement | HTMLButtonElement | null)[]>([]);
 
   const isActive = useCallback(
-    (href: string) => {
-      if (href === "/dashboard") {
-        return pathname === "/dashboard" || pathname === "/";
-      }
-      return pathname.startsWith(href);
-    },
+    (href: string) => isRouteActive(pathname, href),
     [pathname],
   );
 
+  const routeAccent = useMemo(
+    () => getFeatureAccentForPath(pathname),
+    [pathname],
+  );
+
+  const isMoreRouteActive = useMemo(
+    () =>
+      moreNavSections.some((section) =>
+        section.items.some((item) => isActive(item.href)),
+      ),
+    [isActive],
+  );
+
   const active = useMemo(() => {
-    const index = mainNavItems.findIndex(
+    const mainIndex = mainNavItems.findIndex(
       (item) => item.type === "link" && isActive(item.href),
     );
-    return index !== -1 ? index : 0;
-  }, [isActive]);
+    if (mainIndex !== -1) return mainIndex;
+
+    if (isMoreRouteActive) {
+      const moreIndex = mainNavItems.findIndex((item) => item.label === "More");
+      if (moreIndex !== -1) return moreIndex;
+    }
+
+    return 0;
+  }, [isActive, isMoreRouteActive]);
 
   const [manualActive, setManualActive] = useState<number | null>(null);
   const currentActive = manualActive !== null ? manualActive : active;
@@ -170,7 +228,7 @@ export const BottomNav = () => {
     updateIndicator();
     window.addEventListener("resize", updateIndicator);
     return () => window.removeEventListener("resize", updateIndicator);
-  }, [currentActive]);
+  }, [currentActive, pathname]);
 
   const handleItemClick = (index: number, item: NavItem) => {
     setManualActive(index);
@@ -192,13 +250,20 @@ export const BottomNav = () => {
       >
         <div
           ref={containerRef}
-          className="relative flex items-center justify-between bg-background/95 backdrop-blur-md shadow-xl rounded-full px-2 py-2 border border-border"
+          className={cn(
+            "relative isolate flex items-center justify-between overflow-hidden rounded-full px-2 py-2",
+            "border border-border/45 bg-background/45 dark:border-white/10 dark:bg-background/35",
+            "shadow-lg shadow-black/8 ring-1 ring-inset ring-white/25",
+            "dark:shadow-black/40 dark:ring-white/10",
+            "supports-backdrop-filter:backdrop-blur-2xl",
+          )}
         >
           {mainNavItems.map((item, index) => {
             const IconComponent = item.icon;
             const isItemActive = item.type === "link" && isActive(item.href);
 
             if (item.type === "link") {
+              const itemAccent = getFeatureAccentByHref(item.href);
               return (
                 <Link
                   key={item.id}
@@ -208,9 +273,9 @@ export const BottomNav = () => {
                   }}
                   onClick={() => handleItemClick(index, item)}
                   className={cn(
-                    "relative flex flex-col items-center justify-center flex-1 px-3 py-2.5 text-sm font-medium transition-colors rounded-full",
+                    "relative z-10 flex flex-col items-center justify-center flex-1 px-3 py-2.5 text-sm font-medium transition-colors rounded-full",
                     isItemActive
-                      ? "text-primary"
+                      ? itemAccent.navActive
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
@@ -237,15 +302,17 @@ export const BottomNav = () => {
                 }}
                 onClick={() => handleItemClick(index, item)}
                 className={cn(
-                  "relative flex flex-col items-center justify-center flex-1 px-3 py-2.5 text-sm font-medium transition-colors rounded-full",
+                  "relative z-10 flex flex-col items-center justify-center flex-1 px-3 py-2.5 text-sm font-medium transition-colors rounded-full",
                   item.label === "Create"
                     ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground",
+                    : item.label === "More" && isMoreRouteActive
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <div className="z-10">
                   {item.label === "Create" ? (
-                    <div className="rounded-full bg-primary p-2 shadow-lg">
+                    <div className="rounded-full bg-primary p-2 shadow-none">
                       <IconComponent className="h-5 w-5 text-primary-foreground" />
                     </div>
                   ) : (
@@ -263,7 +330,10 @@ export const BottomNav = () => {
           <motion.div
             animate={indicatorStyle}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="absolute top-1.5 bottom-1.5 rounded-full bg-primary/10 dark:bg-primary/20"
+            className={cn(
+              "pointer-events-none absolute top-1.5 bottom-1.5 z-0 rounded-full",
+              routeAccent.indicatorBg,
+            )}
           />
         </div>
       </nav>
@@ -292,10 +362,15 @@ export const BottomNav = () => {
                 setIsCreateOpen(false);
                 setExpenseDialogOpen(true);
               }}
-              className="flex w-full items-center gap-3 rounded-lg p-4 text-left hover:bg-accent transition-colors"
+              className="group flex w-full items-center gap-3 rounded-lg p-4 text-left transition-colors hover:bg-accent"
             >
-              <div className="rounded-lg bg-primary/10 p-2">
-                <IconReceipt className="h-5 w-5 text-primary" />
+              <div
+                className={cn(
+                  "rounded-lg p-2",
+                  getAccentIconTileClass(featureAccents.expenses),
+                )}
+              >
+                <IconReceipt className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium">Add expense</p>
@@ -310,10 +385,15 @@ export const BottomNav = () => {
                 setIsCreateOpen(false);
                 setGroupDialogOpen(true);
               }}
-              className="flex w-full items-center gap-3 rounded-lg p-4 text-left hover:bg-accent transition-colors"
+              className="group flex w-full items-center gap-3 rounded-lg p-4 text-left transition-colors hover:bg-accent"
             >
-              <div className="rounded-lg bg-primary/10 p-2">
-                <IconUsers className="h-5 w-5 text-primary" />
+              <div
+                className={cn(
+                  "rounded-lg p-2",
+                  getAccentIconTileClass(featureAccents.groups),
+                )}
+              >
+                <IconUsers className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium">Create group</p>
@@ -328,10 +408,15 @@ export const BottomNav = () => {
                 setIsCreateOpen(false);
                 setContactDialogOpen(true);
               }}
-              className="flex w-full items-center gap-3 rounded-lg p-4 text-left hover:bg-accent transition-colors"
+              className="group flex w-full items-center gap-3 rounded-lg p-4 text-left transition-colors hover:bg-accent"
             >
-              <div className="rounded-lg bg-primary/10 p-2">
-                <IconUserCircle className="h-5 w-5 text-primary" />
+              <div
+                className={cn(
+                  "rounded-lg p-2",
+                  getAccentIconTileClass(featureAccents.contacts),
+                )}
+              >
+                <IconUserCircle className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium">Add contact</p>
@@ -346,10 +431,15 @@ export const BottomNav = () => {
                 setIsCreateOpen(false);
                 setAccountDialogOpen(true);
               }}
-              className="flex w-full items-center gap-3 rounded-lg p-4 text-left hover:bg-accent transition-colors"
+              className="group flex w-full items-center gap-3 rounded-lg p-4 text-left transition-colors hover:bg-accent"
             >
-              <div className="rounded-lg bg-primary/10 p-2">
-                <IconWallet className="h-5 w-5 text-primary" />
+              <div
+                className={cn(
+                  "rounded-lg p-2",
+                  getAccentIconTileClass(featureAccents.accounts),
+                )}
+              >
+                <IconWallet className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-medium">Add account</p>
@@ -372,30 +462,78 @@ export const BottomNav = () => {
           }
         }}
       >
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>More Options</DrawerTitle>
-            <DrawerDescription>
-              Accounts, analytics, budgets, and the rest of PocketPulse
+        <DrawerContent className="flex max-h-[90dvh] flex-col">
+          <DrawerHeader className="shrink-0 pb-2 text-left sm:text-left">
+            <DrawerTitle className="text-lg">Explore</DrawerTitle>
+            <DrawerDescription className="text-pretty">
+              Jump to accounts, insights, and tools
             </DrawerDescription>
           </DrawerHeader>
-          <div className="px-4 pb-4 space-y-1">
-            {moreNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsMoreOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg p-4 transition-colors",
-                  isActive(item.href)
-                    ? "bg-primary/10 text-primary"
-                    : "hover:bg-accent",
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            ))}
+          <div className="min-h-0 max-h-[min(65dvh,560px)] px-4 pb-6 [-webkit-overflow-scrolling:touch]">
+            <div className="space-y-5 pr-3">
+              {moreNavSections.map((section) => (
+                <div key={section.title} className="space-y-2.5">
+                  <p className="px-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {section.title}
+                  </p>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {section.items.map((item) => {
+                      const Icon = item.icon;
+                      const active = isActive(item.href);
+                      const accent = getFeatureAccentByHref(item.href);
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setIsMoreOpen(false)}
+                          className={cn(
+                            "group relative flex rounded-2xl border border-border/70 bg-card/50 p-3.5 outline-none transition-all",
+                            "hover:border-border hover:bg-accent/40 active:scale-[0.98]",
+                            "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                            item.featured &&
+                              "col-span-2 flex-row items-center gap-4",
+                            item.featured &&
+                              cn(accent.tileFeatured, accent.tileFeaturedHover),
+                            active && !item.featured && accent.tileActive,
+                            active && item.featured && accent.tileActive,
+                            !item.featured && "flex-col gap-2.5",
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              getAccentIconTileClass(accent),
+                              item.featured
+                                ? "size-12 items-center justify-center rounded-2xl"
+                                : "p-2.5",
+                            )}
+                            aria-hidden
+                          >
+                            <Icon
+                              className={cn(
+                                item.featured ? "size-6" : "size-5",
+                              )}
+                            />
+                          </div>
+                          <div
+                            className={cn(
+                              "min-w-0 flex-1",
+                              !item.featured && "w-full",
+                            )}
+                          >
+                            <span className="block text-sm font-semibold leading-tight text-foreground">
+                              {item.label}
+                            </span>
+                            <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">
+                              {item.description}
+                            </span>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </DrawerContent>
       </Drawer>

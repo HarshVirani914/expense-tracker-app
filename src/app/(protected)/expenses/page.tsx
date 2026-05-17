@@ -12,8 +12,9 @@ import type {
   ExpenseWithRelations,
   ExpenseFilters,
 } from "@/features/expenses/types";
-import { ImportDialog } from "@/features/import-export/components/import-dialog";
+import { FeaturePageHero } from "@/components/layout/feature-page-hero";
 import { ExportDialog } from "@/features/import-export/components/export-dialog";
+import { ImportDialog } from "@/features/import-export/components/import-dialog";
 import { Button } from "@/components/ui/button";
 import { IconPlus, IconFileImport, IconFileExport } from "@tabler/icons-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -73,42 +74,44 @@ function ExpensesPageContent() {
   return (
     <div className="flex flex-col gap-6">
       {!isMobile && (
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-bold tracking-tight">Expenses</h1>
-            <p className="text-muted-foreground text-base">
-              Track and manage all your expenses
-            </p>
+        <FeaturePageHero className="p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <h1 className="text-4xl font-bold tracking-tight">Expenses</h1>
+              <p className="text-muted-foreground text-base">
+                Track and manage all your expenses
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setIsImportOpen(true)}
+                variant="outline"
+                size="lg"
+                className="gap-2"
+              >
+                <IconFileImport className="h-5 w-5" />
+                Import
+              </Button>
+              <Button
+                onClick={() => setIsExportOpen(true)}
+                variant="outline"
+                size="lg"
+                className="gap-2"
+              >
+                <IconFileExport className="h-5 w-5" />
+                Export
+              </Button>
+              <Button
+                onClick={() => setIsDialogOpen(true)}
+                className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+                size="lg"
+              >
+                <IconPlus className="h-5 w-5" />
+                Add Expense
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => setIsImportOpen(true)}
-              variant="outline"
-              size="lg"
-              className="gap-2"
-            >
-              <IconFileImport className="h-5 w-5" />
-              Import
-            </Button>
-            <Button
-              onClick={() => setIsExportOpen(true)}
-              variant="outline"
-              size="lg"
-              className="gap-2"
-            >
-              <IconFileExport className="h-5 w-5" />
-              Export
-            </Button>
-            <Button
-              onClick={() => setIsDialogOpen(true)}
-              className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
-              size="lg"
-            >
-              <IconPlus className="h-5 w-5" />
-              Add Expense
-            </Button>
-          </div>
-        </div>
+        </FeaturePageHero>
       )}
 
       {isSummaryLoading ? (

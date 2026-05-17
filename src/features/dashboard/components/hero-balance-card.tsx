@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useFeatureAccent } from "@/hooks/use-feature-accent";
 import {
   IconTrendingDown,
   IconTrendingUp,
@@ -19,14 +20,20 @@ type HeroBalanceCardProps = {
 export const HeroBalanceCard = memo(
   ({ totalAccountBalance, monthlyNet }: HeroBalanceCardProps) => {
     const isNetPositive = monthlyNet >= 0;
+    const accent = useFeatureAccent();
 
     return (
-      <Card className="relative overflow-hidden border-0 bg-linear-to-br from-primary/10 via-primary/5 to-background shadow-none">
+      <Card
+        className={cn(
+          "relative overflow-hidden border-0 shadow-none",
+          accent.pageHeroTint,
+        )}
+      >
         <div className="absolute inset-0 bg-grid-white/10 mask-[radial-gradient(white,transparent_70%)]" />
 
         <div className="relative p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <IconWallet className="h-5 w-5 shrink-0 text-primary" />
+            <IconWallet className={cn("h-5 w-5 shrink-0", accent.icon)} />
             <div>
               <p className="text-lg font-medium leading-tight">Account balance</p>
               <p className="text-xs text-muted-foreground font-normal">

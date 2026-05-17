@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FeaturePageHero } from "@/components/layout/feature-page-hero";
 import { ContactFormDialog } from "@/features/contacts/components/contact-form-dialog";
 import { ContactsGrid } from "@/features/contacts/components/contacts-grid";
 import { ContactsSummaryCard } from "@/features/contacts/components/contacts-summary-card";
@@ -67,22 +68,24 @@ export default function ContactsPage() {
   return (
     <div className="flex flex-col gap-6">
       {!isMobile && (
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-bold tracking-tight">Contacts</h1>
-            <p className="text-muted-foreground text-base">
-              People you split expenses with
-            </p>
+        <FeaturePageHero className="p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <h1 className="text-4xl font-bold tracking-tight">Contacts</h1>
+              <p className="text-muted-foreground text-base">
+                People you split expenses with
+              </p>
+            </div>
+            <Button
+              onClick={handleAddContact}
+              className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+              size="lg"
+            >
+              <IconPlus className="h-5 w-5" />
+              Add Contact
+            </Button>
           </div>
-          <Button
-            onClick={handleAddContact}
-            className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
-            size="lg"
-          >
-            <IconPlus className="h-5 w-5" />
-            Add Contact
-          </Button>
-        </div>
+        </FeaturePageHero>
       )}
 
       {isStatsLoading ? (

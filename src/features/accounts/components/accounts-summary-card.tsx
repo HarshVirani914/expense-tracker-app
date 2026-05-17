@@ -13,6 +13,7 @@ import {
 import { memo } from "react";
 import type { AccountWithBalance } from "../types";
 import { AccountType } from "@/types/prisma";
+import { useFeatureAccent } from "@/hooks/use-feature-accent";
 
 type AccountsSummaryCardProps = {
   accounts: AccountWithBalance[];
@@ -20,6 +21,7 @@ type AccountsSummaryCardProps = {
 
 export const AccountsSummaryCard = memo(
   ({ accounts }: AccountsSummaryCardProps) => {
+    const accent = useFeatureAccent();
     const totalBalance = accounts.reduce(
       (sum, account) => sum + account.currentBalance,
       0,
@@ -72,7 +74,12 @@ export const AccountsSummaryCard = memo(
     ];
 
     return (
-      <Card className="relative overflow-hidden border-0 bg-linear-to-br from-primary/10 via-primary/5 to-background shadow-none">
+      <Card
+        className={cn(
+          "relative overflow-hidden border-0 shadow-none",
+          accent.pageHeroTint,
+        )}
+      >
         <div className="absolute inset-0 bg-grid-white/10 mask-[radial-gradient(white,transparent_70%)]" />
 
         <div className="relative p-6 space-y-6">
@@ -89,8 +96,8 @@ export const AccountsSummaryCard = memo(
                 {accounts.length === 1 ? "account" : "accounts"}
               </p>
             </div>
-            <div className="rounded-full bg-primary/10 p-3">
-              <IconWallet className="h-6 w-6 text-primary" />
+            <div className={cn("rounded-full p-3", accent.iconBg)}>
+              <IconWallet className={cn("h-6 w-6", accent.icon)} />
             </div>
           </div>
 

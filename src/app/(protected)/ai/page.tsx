@@ -7,7 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FeaturePageHero } from "@/components/layout/feature-page-hero";
 import { AIChat } from "@/features/ai/components/ai-chat";
+import { useFeatureAccent } from "@/hooks/use-feature-accent";
+import { cn } from "@/lib/utils";
 import {
   IconBulb,
   IconFileUpload,
@@ -16,25 +19,29 @@ import {
 } from "@tabler/icons-react";
 
 export default function AIFeaturesPage() {
+  const accent = useFeatureAccent();
+
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-6 w-full max-w-4xl mx-auto pb-6">
-      <div className="shrink-0 space-y-1">
-        <div className="flex items-center gap-2">
-          <IconSparkles
-            className="h-7 w-7 shrink-0 text-purple-600 dark:text-purple-400"
-            aria-hidden
-          />
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            AI Assistant
-          </h1>
+      <FeaturePageHero className="p-4 sm:p-5">
+        <div className="shrink-0 space-y-1">
+          <div className="flex items-center gap-2">
+            <IconSparkles
+              className={cn("h-7 w-7 shrink-0", accent.icon)}
+              aria-hidden
+            />
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              AI Assistant
+            </h1>
+          </div>
+          <p className="text-xs text-muted-foreground sm:text-base">
+            Chat with your financial assistant. It uses the PocketPulse entries
+            you already added (in rupees) to stay on topic. Nothing is changed
+            until you confirm in the chat. If something goes wrong, your saved
+            data in the app stays the same.
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground sm:text-base">
-          Chat with your financial assistant. It uses the PocketPulse entries
-          you already added (in rupees) to stay on topic. Nothing is changed
-          until you confirm in the chat. If something goes wrong, your saved
-          data in the app stays the same.
-        </p>
-      </div>
+      </FeaturePageHero>
 
       <AIChat className="w-full shadow-md" />
 

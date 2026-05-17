@@ -2,6 +2,7 @@
 
 import { useState, useMemo, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { FeaturePageHero } from '@/components/layout/feature-page-hero'
 import { GroupList } from '@/features/groups/components/group-list'
 import { GroupFormDialog } from '@/features/groups/components/group-form-dialog'
 import { GroupsSummaryCard } from '@/features/groups/components/groups-summary-card'
@@ -55,22 +56,24 @@ function GroupsPageContent() {
   return (
     <div className="flex flex-col gap-6">
       {!isMobile && (
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-bold tracking-tight">Groups</h1>
-            <p className="text-muted-foreground text-base">
-              Manage groups and split expenses
-            </p>
+        <FeaturePageHero className="p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <h1 className="text-4xl font-bold tracking-tight">Groups</h1>
+              <p className="text-muted-foreground text-base">
+                Manage groups and split expenses
+              </p>
+            </div>
+            <Button
+              onClick={() => setIsDialogOpen(true)}
+              className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+              size="lg"
+            >
+              <IconPlus className="h-5 w-5" />
+              Create Group
+            </Button>
           </div>
-          <Button
-            onClick={() => setIsDialogOpen(true)}
-            className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
-            size="lg"
-          >
-            <IconPlus className="h-5 w-5" />
-            Create Group
-          </Button>
-        </div>
+        </FeaturePageHero>
       )}
 
       {isStatsLoading ? (

@@ -14,20 +14,24 @@ import { ContactFormDialog } from "@/features/contacts/components/contact-form-d
 import { ExpenseFormDialog } from "@/features/expenses/components/expense-form-dialog";
 import { GroupFormDialog } from "@/features/groups/components/group-form-dialog";
 import {
+  featureAccents,
+  type FeatureAccentId,
+} from "@/lib/feature-accents";
+import { cn } from "@/lib/utils";
+import {
   IconChevronDown,
   IconPlus,
   IconReceipt,
   IconUserCircle,
   IconUsers,
   IconWallet,
-  IconFileInvoice,
-  IconChartBar,
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type QuickAction = {
   id: string;
+  accentId: FeatureAccentId;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   onClick: () => void;
@@ -43,24 +47,28 @@ export const QuickActions = () => {
   const actions: QuickAction[] = [
     {
       id: "expense",
+      accentId: "expenses",
       label: "Add Expense",
       icon: IconReceipt,
       onClick: () => setExpenseDialogOpen(true),
     },
     {
       id: "group",
+      accentId: "groups",
       label: "Create Group",
       icon: IconUsers,
       onClick: () => setGroupDialogOpen(true),
     },
     {
       id: "contact",
+      accentId: "contacts",
       label: "Add Contact",
       icon: IconUserCircle,
       onClick: () => setContactDialogOpen(true),
     },
     {
       id: "account",
+      accentId: "accounts",
       label: "Add Account",
       icon: IconWallet,
       onClick: () => setAccountDialogOpen(true),
@@ -72,22 +80,34 @@ export const QuickActions = () => {
       {isMobile ? (
         <div className="w-full">
           <div className="flex gap-3 pb-2 min-w-max px-1">
-            {actions.map((action) => (
-              <button
-                key={action.id}
-                onClick={action.onClick}
-                className="flex flex-col items-center gap-2 rounded-xl bg-card p-4 border shadow-none hover:shadow-sm transition-shadow w-full"
-              >
-                <div className="rounded-full bg-primary/10 p-3">
-                  <action.icon className="h-5 w-5 text-primary" />
-                </div>
-                <span className="text-xs font-medium text-center leading-tight">
-                  {action.label.split(" ")[0]}
-                  <br />
-                  {action.label.split(" ").slice(1).join(" ")}
-                </span>
-              </button>
-            ))}
+            {actions.map((action) => {
+              const accent = featureAccents[action.accentId];
+              const Icon = action.icon;
+              return (
+                <button
+                  key={action.id}
+                  type="button"
+                  onClick={action.onClick}
+                  className="group flex w-full flex-col items-center gap-2 rounded-xl border border-border/70 bg-card/80 p-4 shadow-none backdrop-blur-sm transition-shadow hover:shadow-sm"
+                >
+                  <div
+                    className={cn(
+                      "flex shrink-0 rounded-full p-3 transition-colors",
+                      accent.iconBg,
+                      accent.icon,
+                      accent.iconBgHover,
+                    )}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <span className="text-xs font-medium text-center leading-tight">
+                    {action.label.split(" ")[0]}
+                    <br />
+                    {action.label.split(" ").slice(1).join(" ")}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       ) : (

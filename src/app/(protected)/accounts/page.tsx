@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { AccountList } from "@/features/accounts/components/account-list";
+import { FeaturePageHero } from "@/components/layout/feature-page-hero";
 import { AccountFormDialog } from "@/features/accounts/components/account-form-dialog";
+import { AccountList } from "@/features/accounts/components/account-list";
 import { AccountsSummaryCard } from "@/features/accounts/components/accounts-summary-card";
 import { useAccounts } from "@/features/accounts/hooks/use-accounts";
 import type { AccountWithBalance } from "@/features/accounts/types";
@@ -37,22 +38,24 @@ export default function AccountsPage() {
   return (
     <div className="flex flex-col gap-6">
       {!isMobile && (
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-bold tracking-tight">Accounts</h1>
-            <p className="text-muted-foreground text-base">
-              Manage your accounts and track balances
-            </p>
+        <FeaturePageHero className="p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <h1 className="text-4xl font-bold tracking-tight">Accounts</h1>
+              <p className="text-muted-foreground text-base">
+                Manage your accounts and track balances
+              </p>
+            </div>
+            <Button
+              onClick={handleAddAccount}
+              className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+              size="lg"
+            >
+              <IconPlus className="h-5 w-5" />
+              Add Account
+            </Button>
           </div>
-          <Button
-            onClick={handleAddAccount}
-            className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
-            size="lg"
-          >
-            <IconPlus className="h-5 w-5" />
-            Add Account
-          </Button>
-        </div>
+        </FeaturePageHero>
       )}
 
       {isLoading ? (

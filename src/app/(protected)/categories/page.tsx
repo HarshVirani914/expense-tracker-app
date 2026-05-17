@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { FeaturePageHero } from "@/components/layout/feature-page-hero";
 import { CategorySpendingSummaryCard } from "@/features/categories/components/category-spending-summary-card";
 import { CategorySpendingList } from "@/features/categories/components/category-spending-list";
 import { ManageCategoriesSheet } from "@/features/categories/components/manage-categories-sheet";
@@ -24,25 +25,27 @@ export default function CategoriesPage() {
   return (
     <div className="flex flex-col gap-6">
       {!isMobile && (
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-bold tracking-tight">Categories</h1>
-            <p className="text-muted-foreground text-base">
-              Track your spending by category
-            </p>
+        <FeaturePageHero className="p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <h1 className="text-4xl font-bold tracking-tight">Categories</h1>
+              <p className="text-muted-foreground text-base">
+                Track your spending by category
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <ManageCategoriesSheet />
+              <Button
+                onClick={() => setIsDialogOpen(true)}
+                className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+                size="lg"
+              >
+                <IconPlus className="h-5 w-5" />
+                Add Category
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <ManageCategoriesSheet />
-            <Button
-              onClick={() => setIsDialogOpen(true)}
-              className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
-              size="lg"
-            >
-              <IconPlus className="h-5 w-5" />
-              Add Category
-            </Button>
-          </div>
-        </div>
+        </FeaturePageHero>
       )}
 
       {isLoading ? (

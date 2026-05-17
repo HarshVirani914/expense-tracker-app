@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useFeatureAccent } from "@/hooks/use-feature-accent";
 import {
   IconCash,
   IconTrendingDown,
@@ -27,9 +28,15 @@ export const ExpenseSummaryCard = memo(
     incomeCount,
   }: ExpenseSummaryCardProps) => {
     const isPositive = netAmount >= 0;
+    const accent = useFeatureAccent();
 
     return (
-      <Card className="relative overflow-hidden border-0 bg-linear-to-br from-primary/10 via-primary/5 to-background shadow-none">
+      <Card
+        className={cn(
+          "relative overflow-hidden border-0 shadow-none",
+          accent.pageHeroTint,
+        )}
+      >
         <div className="absolute inset-0 bg-grid-white/10 mask-[radial-gradient(white,transparent_70%)]" />
 
         <div className="relative p-6 space-y-6">

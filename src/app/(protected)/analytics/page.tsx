@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { FeaturePageHero } from "@/components/layout/feature-page-hero";
 import { Skeleton } from "@/components/ui/skeleton"
 import { TimeRangeSelector } from "@/features/analytics/components/time-range-selector"
 import { SpendingTrendsChart } from "@/features/analytics/components/spending-trends-chart"
@@ -9,7 +9,8 @@ import { MonthlyComparisonChart } from "@/features/analytics/components/monthly-
 import { InsightsSummary } from "@/features/analytics/components/insights-summary"
 import { useAnalytics } from "@/features/analytics/hooks"
 import { MONEY_SEMANTICS } from "@/lib/money-semantics"
-import type { AnalyticsFilters } from "@/features/analytics/types"
+import type { AnalyticsFilters } from "@/features/analytics/types";
+import { useState } from "react";
 
 export default function AnalyticsPage() {
   const [filters, setFilters] = useState<AnalyticsFilters>({
@@ -20,12 +21,14 @@ export default function AnalyticsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-        <p className="text-muted-foreground">
-          {MONEY_SEMANTICS.analyticsPageSubtitle}
-        </p>
-      </div>
+      <FeaturePageHero className="p-4 sm:p-5">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
+          <p className="text-muted-foreground">
+            {MONEY_SEMANTICS.analyticsPageSubtitle}
+          </p>
+        </div>
+      </FeaturePageHero>
 
       <TimeRangeSelector filters={filters} onFiltersChange={setFilters} />
 
