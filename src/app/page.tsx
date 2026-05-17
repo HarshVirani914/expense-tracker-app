@@ -1,12 +1,13 @@
-import { redirect } from 'next/navigation'
-import { auth } from '@clerk/nextjs/server'
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { HomeAuthGate } from "./home-auth-gate";
 
 export default async function Home() {
-  const { userId } = await auth()
+  const { userId } = await auth();
 
   if (userId) {
-    redirect('/dashboard')
+    redirect("/dashboard");
   }
 
-  redirect('/sign-in')
+  return <HomeAuthGate />;
 }
