@@ -109,6 +109,7 @@ model Account {
   expenses          Expense[]
   recurringExpenses RecurringExpense[]
 
+  @@index([userId])
   @@map("accounts")
 }
 
@@ -139,6 +140,7 @@ model Expense {
   receiptImage ReceiptImage?
 
   @@index([userId, date])
+  @@index([userId, type, date])
   @@index([categoryId])
   @@index([groupId])
   @@map("expenses")
@@ -160,6 +162,7 @@ model Contact {
   settlementsFrom     Settlement[]         @relation("SettlementContactPayer")
   settlementsTo       Settlement[]         @relation("SettlementContactReceiver")
 
+  @@index([userId])
   @@map("contacts")
 }
 
@@ -193,6 +196,8 @@ model GroupMember {
 
   @@unique([groupId, userId])
   @@unique([groupId, contactId])
+  @@index([groupId])
+  @@index([userId])
   @@map("group_members")
 }
 
@@ -216,6 +221,9 @@ model ExpenseParticipant {
   expense Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
   contact Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
+  @@index([expenseId])
+  @@index([userId])
+  @@index([contactId])
   @@map("expense_participants")
 }
 
@@ -244,6 +252,7 @@ model Settlement {
   receiverUser    User?    @relation("SettlementReceiver", fields: [receiverUserId], references: [id], onDelete: Cascade)
   receiverContact Contact? @relation("SettlementContactReceiver", fields: [receiverContactId], references: [id], onDelete: Cascade)
 
+  @@index([groupId])
   @@map("settlements")
 }
 
@@ -265,6 +274,7 @@ model Budget {
   category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([userId, categoryId, period])
+  @@index([userId])
   @@map("budgets")
 }
 
@@ -292,6 +302,7 @@ model RecurringExpense {
   category Category @relation(fields: [categoryId], references: [id])
   account  Account? @relation(fields: [accountId], references: [id])
 
+  @@index([userId])
   @@map("recurring_expenses")
 }
 
@@ -306,6 +317,7 @@ model AIConversation {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("ai_conversations")
 }
 
@@ -352,6 +364,7 @@ model BulkImportSession {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("bulk_import_sessions")
 }
 

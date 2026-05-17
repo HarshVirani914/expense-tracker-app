@@ -118,20 +118,28 @@ export const dashboardService = {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5)
 
-      const categoriesWithNames = await Promise.all(
-        sortedCategories.map(async ([categoryId, total]) => {
-          const category = await prisma.category.findUnique({
-            where: { id: categoryId },
-            select: { name: true, color: true },
-          })
-          return {
-            categoryId,
-            name: category?.name || 'Unknown',
-            color: category?.color || '#6B7280',
-            total,
-          }
-        })
-      )
+      const topCategoryIds = sortedCategories.map(([categoryId]) => categoryId)
+      const categoriesById =
+        topCategoryIds.length === 0
+          ? new Map<string, { name: string; color: string }>()
+          : new Map(
+              (
+                await prisma.category.findMany({
+                  where: { id: { in: topCategoryIds } },
+                  select: { id: true, name: true, color: true },
+                })
+              ).map((c) => [c.id, { name: c.name, color: c.color }]),
+            )
+
+      const categoriesWithNames = sortedCategories.map(([categoryId, total]) => {
+        const category = categoriesById.get(categoryId)
+        return {
+          categoryId,
+          name: category?.name ?? 'Unknown',
+          color: category?.color ?? '#6B7280',
+          total,
+        }
+      })
 
       return {
         currentMonth: {
