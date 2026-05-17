@@ -13,9 +13,9 @@ interface SyncManager {
   register(tag: string): Promise<void>;
 }
 
-interface ServiceWorkerRegistrationWithSync extends ServiceWorkerRegistration {
+type ServiceWorkerRegistrationWithSync = ServiceWorkerRegistration & {
   sync?: SyncManager;
-}
+};
 
 export const ServiceWorkerProvider = ({
   children,

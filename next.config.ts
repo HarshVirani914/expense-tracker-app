@@ -1,4 +1,21 @@
 import type { NextConfig } from "next";
+import withSerwistInit from "@serwist/next";
+import { spawnSync } from "node:child_process";
+
+const revision =
+  process.env.VERCEL_GIT_COMMIT_SHA?.trim() ||
+  spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf-8" })
+    .stdout?.trim() ||
+  "unknown";
+
+const withSerwist = withSerwistInit({
+  swSrc: "src/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV !== "production",
+  cacheOnNavigation: true,
+  reloadOnOnline: true,
+  additionalPrecacheEntries: [{ url: "/offline", revision }],
+});
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
@@ -46,4 +63,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);
