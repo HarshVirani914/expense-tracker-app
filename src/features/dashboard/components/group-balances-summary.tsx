@@ -17,7 +17,7 @@ export const GroupBalancesSummary = () => {
       <Card className="shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconUsers className="h-5 w-5" />
+            <IconUsers className="h-5 w-5 text-primary" />
             Group Balances
           </CardTitle>
         </CardHeader>
@@ -35,7 +35,7 @@ export const GroupBalancesSummary = () => {
       <Card className="shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconUsers className="h-5 w-5" />
+            <IconUsers className="h-5 w-5 text-primary" />
             Group Balances
           </CardTitle>
         </CardHeader>
@@ -63,7 +63,7 @@ export const GroupBalancesSummary = () => {
     <Card className="shadow-none">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
-          <IconUsers className="h-5 w-5" />
+          <IconUsers className="h-5 w-5 text-primary" />
           Group Balances
         </CardTitle>
         <Button asChild variant="ghost" size="sm">

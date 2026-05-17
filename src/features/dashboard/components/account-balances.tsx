@@ -29,7 +29,10 @@ export const AccountBalances = memo(({ accounts }: AccountBalancesProps) => {
     return (
       <Card className="shadow-none mb-3 sm:mb-0">
         <CardHeader>
-          <CardTitle>Accounts</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <IconWallet className="h-5 w-5 shrink-0 text-primary" />
+            Accounts
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">No accounts yet.</p>
@@ -41,7 +44,10 @@ export const AccountBalances = memo(({ accounts }: AccountBalancesProps) => {
   return (
     <Card className="shadow-none mb-3 sm:mb-0">
       <CardHeader>
-        <CardTitle>Accounts</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <IconWallet className="h-5 w-5 shrink-0 text-primary" />
+          Accounts
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

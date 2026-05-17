@@ -15,7 +15,6 @@ import { StatsCards } from "@/features/dashboard/components/stats-cards";
 import { useDashboardStats } from "@/features/dashboard/hooks";
 import { UpcomingRecurringWidget } from "@/features/recurring-expenses/components/upcoming-recurring-widget";
 import { useProcessRecurringExpenses } from "@/features/recurring-expenses/hooks";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useUser } from "@clerk/nextjs";
 import { IconMessageChatbot, IconSparkles } from "@tabler/icons-react";
 import Link from "next/link";
@@ -23,7 +22,6 @@ import { useEffect, useRef, useState } from "react";
 
 export default function DashboardPage() {
   const { stats, isLoading, error } = useDashboardStats();
-  const isMobile = useIsMobile();
   const { user } = useUser();
   const { processRecurringExpenses } = useProcessRecurringExpenses();
   const hasProcessedRef = useRef(false);
@@ -41,15 +39,15 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6">
-        {!isMobile && (
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-4 w-96" />
-            </div>
-            <Skeleton className="h-10 w-32" />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-9 w-48 sm:h-10 lg:h-11" />
+            <Skeleton className="h-4 w-full max-w-md" />
           </div>
-        )}
+          <Skeleton className="h-10 w-full sm:w-36 shrink-0" />
+        </div>
+
+        <Skeleton className="h-28 w-full" />
 
         <Skeleton className="h-40 w-full" />
 
@@ -59,9 +57,21 @@ export default function DashboardPage() {
           <Skeleton className="h-32 sm:col-span-2 lg:col-span-1" />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Skeleton className="h-96" />
-          <Skeleton className="h-96" />
+        <div className="grid gap-6 sm:grid-cols-2">
+          <Skeleton className="h-52" />
+          <Skeleton className="h-52" />
+        </div>
+
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:gap-6">
+          <div className="flex flex-col gap-6 lg:col-span-2">
+            <Skeleton className="h-80 w-full" />
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-72 w-full" />
+          </div>
+          <div className="flex flex-col gap-6">
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-64 w-full" />
+          </div>
         </div>
       </div>
     );
@@ -77,23 +87,28 @@ export default function DashboardPage() {
     );
   }
 
+  const totalAccountBalance = stats.accounts.reduce(
+    (sum, account) => sum + account.currentBalance,
+    0,
+  );
+
   return (
     <>
       <div className="flex flex-col gap-6">
-        {!isMobile && (
-          <div className="flex flex-col md:flex-row gap-4 items-start md:justify-between">
-            <div className="space-y-1">
-              <h1 className="text-4xl font-bold tracking-tight">
-                Welcome back! {user?.firstName || ""} 👋
-              </h1>
-
-              <p className="text-muted-foreground text-base">
-                Here&apos;s an overview of your finances
-              </p>
-            </div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1 min-w-0">
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+              Welcome back
+              {user?.firstName ? `, ${user.firstName}` : ""}
+            </h1>
+            <p className="text-sm text-muted-foreground sm:text-base">
+              Here&apos;s an overview of your finances
+            </p>
+          </div>
+          <div className="w-full shrink-0 sm:w-auto flex justify-stretch sm:justify-end min-w-0">
             <QuickActions />
           </div>
-        )}
+        </div>
 
         {showAIPrompts && (
           <Card className="relative overflow-hidden border shadow-none">
@@ -137,30 +152,27 @@ export default function DashboardPage() {
         )}
 
         <HeroBalanceCard
-          balance={stats.currentMonth.netBalance}
-          income={stats.currentMonth.totalIncome}
-          expenses={stats.currentMonth.totalExpenses}
+          totalAccountBalance={totalAccountBalance}
+          monthlyNet={stats.currentMonth.netBalance}
         />
-
-        {isMobile && <QuickActions />}
 
         <StatsCards stats={stats.currentMonth} />
 
-        <AIInsightsWidget />
-
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2">
           <BudgetAlertsWidget />
           <UpcomingRecurringWidget />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <RecentExpensesList expenses={stats.recentExpenses} />
-          <GroupBalancesSummary />
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          <OutstandingDebtsWidget />
-          <AccountBalances accounts={stats.accounts} />
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:items-start">
+          <div className="flex flex-col gap-6 min-w-0 lg:col-span-2">
+            <RecentExpensesList expenses={stats.recentExpenses} />
+            <AIInsightsWidget />
+            <OutstandingDebtsWidget />
+          </div>
+          <aside className="flex flex-col gap-6 min-w-0">
+            <GroupBalancesSummary />
+            <AccountBalances accounts={stats.accounts} />
+          </aside>
         </div>
       </div>
 

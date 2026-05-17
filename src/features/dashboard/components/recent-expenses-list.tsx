@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table";
 import type { ExpenseWithRelations } from "@/features/expenses/types";
 import { format, formatDistanceToNow } from "date-fns";
-import { IconUsers, IconArrowRight } from "@tabler/icons-react";
+import { IconUsers, IconArrowRight, IconReceipt } from "@tabler/icons-react";
 import Link from "next/link";
 import { memo } from "react";
 import { formatCurrency } from "@/lib/format";
@@ -32,12 +32,15 @@ export const RecentExpensesList = memo(
       return (
         <Card className="shadow-none">
           <CardHeader>
-            <CardTitle>Recent Expenses</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <IconReceipt className="h-5 w-5 shrink-0 text-primary" />
+              Recent Expenses
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <div className="rounded-full bg-muted p-3 mb-3">
-                <IconUsers className="h-6 w-6 text-muted-foreground" />
+                <IconReceipt className="h-6 w-6 text-muted-foreground" />
               </div>
               <p className="text-sm text-muted-foreground">No expenses yet.</p>
               <p className="text-xs text-muted-foreground mt-1">
@@ -52,7 +55,10 @@ export const RecentExpensesList = memo(
     return (
       <Card className="shadow-none">
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle>Recent Expenses</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <IconReceipt className="h-5 w-5 shrink-0 text-primary" />
+            Recent Expenses
+          </CardTitle>
           <Link href="/expenses">
             <Button variant="ghost" size="sm" className="gap-1">
               View All

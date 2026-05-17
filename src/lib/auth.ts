@@ -2,10 +2,16 @@ import { clerkClient, currentUser } from '@clerk/nextjs/server'
 import { prisma } from './prisma'
 import { logger } from './logger'
 
+const isPrismaUniqueViolation = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  'code' in error &&
+  (error as { code: string }).code === 'P2002'
+
 /**
  * Gets the current authenticated user from database
  * Creates the user if they don't exist (fallback sync)
- * 
+ *
  * @returns User from database or null if not authenticated
  */
 export const getCurrentUser = async () => {
@@ -15,21 +21,40 @@ export const getCurrentUser = async () => {
     return null
   }
 
-  // Try to find existing user
   let user = await prisma.user.findUnique({
     where: { clerkId: clerkUser.id },
   })
 
-  // If user doesn't exist, create them (fallback in case webhook failed)
-  if (!user) {
-    const email = clerkUser.emailAddresses[0]?.emailAddress
-    const name = `${clerkUser.firstName ?? ''} ${clerkUser.lastName ?? ''}`.trim() || null
+  if (user) {
+    return user
+  }
 
-    if (!email) {
-      logger.error('User email not found', undefined, { clerkId: clerkUser.id })
-      throw new Error('User email not found')
-    }
+  const email = clerkUser.emailAddresses[0]?.emailAddress
+  const name =
+    `${clerkUser.firstName ?? ''} ${clerkUser.lastName ?? ''}`.trim() || null
 
+  if (!email) {
+    logger.error('User email not found', undefined, { clerkId: clerkUser.id })
+    throw new Error('User email not found')
+  }
+
+  const existingByEmail = await prisma.user.findUnique({
+    where: { email },
+  })
+
+  if (existingByEmail) {
+    user = await prisma.user.update({
+      where: { id: existingByEmail.id },
+      data: { clerkId: clerkUser.id, name },
+    })
+    logger.info('User reconciled: clerkId updated for existing email', {
+      clerkId: clerkUser.id,
+      email,
+    })
+    return user
+  }
+
+  try {
     user = await prisma.user.create({
       data: {
         clerkId: clerkUser.id,
@@ -37,14 +62,26 @@ export const getCurrentUser = async () => {
         name,
       },
     })
-
-    logger.info('User created via fallback sync', { 
-      clerkId: clerkUser.id, 
-      email 
+    logger.info('User created via fallback sync', {
+      clerkId: clerkUser.id,
+      email,
     })
+    return user
+  } catch (error) {
+    if (isPrismaUniqueViolation(error)) {
+      user = await prisma.user.findUnique({
+        where: { clerkId: clerkUser.id },
+      })
+      if (user) {
+        return user
+      }
+      user = await prisma.user.findUnique({ where: { email } })
+      if (user) {
+        return user
+      }
+    }
+    throw error
   }
-
-  return user
 }
 
 /**
@@ -80,16 +117,42 @@ export const getOrCreateUserByClerkId = async (clerkId: string) => {
     throw new Error('User email not found')
   }
 
-  user = await prisma.user.create({
-    data: {
-      clerkId: clerkUser.id,
-      email,
-      name,
-    },
+  const existingByEmail = await prisma.user.findUnique({
+    where: { email },
   })
 
-  log.info('User created via Clerk API', { email })
-  return user
+  if (existingByEmail) {
+    user = await prisma.user.update({
+      where: { id: existingByEmail.id },
+      data: { clerkId: clerkUser.id, name },
+    })
+    log.info('User reconciled by email (getOrCreateUserByClerkId)', { email })
+    return user
+  }
+
+  try {
+    user = await prisma.user.create({
+      data: {
+        clerkId: clerkUser.id,
+        email,
+        name,
+      },
+    })
+    log.info('User created via Clerk API', { email })
+    return user
+  } catch (error) {
+    if (isPrismaUniqueViolation(error)) {
+      user = await prisma.user.findUnique({ where: { clerkId } })
+      if (user) {
+        return user
+      }
+      user = await prisma.user.findUnique({ where: { email } })
+      if (user) {
+        return user
+      }
+    }
+    throw error
+  }
 }
 
 /**

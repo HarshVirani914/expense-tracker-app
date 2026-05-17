@@ -42,7 +42,7 @@ export const OutstandingDebtsWidget = () => {
       <Card className="shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconCash className="h-5 w-5" />
+            <IconCash className="h-5 w-5 text-primary" />
             Outstanding Debts
           </CardTitle>
         </CardHeader>
@@ -97,7 +97,7 @@ export const OutstandingDebtsWidget = () => {
       <Card className="shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <IconCash className="h-5 w-5" />
+            <IconCash className="h-5 w-5 text-primary" />
             Outstanding Debts
             <Badge variant="secondary" className="ml-auto">
               {debts.length}

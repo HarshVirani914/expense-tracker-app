@@ -76,7 +76,7 @@ export const QuickActions = () => {
               <button
                 key={action.id}
                 onClick={action.onClick}
-                className="flex flex-col items-center gap-2 rounded-xl bg-card p-4 border shadow-none hover:shadow-sm transition-shadow min-w-[90px]"
+                className="flex flex-col items-center gap-2 rounded-xl bg-card p-4 border shadow-none hover:shadow-sm transition-shadow w-full"
               >
                 <div className="rounded-full bg-primary/10 p-3">
                   <action.icon className="h-5 w-5 text-primary" />

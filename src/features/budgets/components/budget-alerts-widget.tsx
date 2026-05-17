@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { IconAlertTriangle, IconAlertCircle } from "@tabler/icons-react";
+import { IconAlertTriangle, IconAlertCircle, IconChartPie } from "@tabler/icons-react";
 import { useBudgetAlerts } from "../hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -13,7 +13,10 @@ export const BudgetAlertsWidget = () => {
     return (
       <Card className="p-6">
         <div className="space-y-4">
-          <Skeleton className="h-6 w-32" />
+          <div className="flex items-center gap-2">
+            <IconChartPie className="h-5 w-5 shrink-0 text-primary" />
+            <Skeleton className="h-6 w-32" />
+          </div>
           <Skeleton className="h-20" />
         </div>
       </Card>
@@ -24,7 +27,10 @@ export const BudgetAlertsWidget = () => {
     return (
       <Card className="p-6">
         <div className="space-y-2">
-          <h3 className="font-semibold text-lg">Budget Alerts</h3>
+          <div className="flex items-center gap-2">
+            <IconChartPie className="h-5 w-5 shrink-0 text-primary" />
+            <h3 className="font-semibold text-lg">Budget Alerts</h3>
+          </div>
           <p className="text-sm text-muted-foreground">
             All budgets are on track
           </p>
@@ -36,8 +42,11 @@ export const BudgetAlertsWidget = () => {
   return (
     <Card className="p-6">
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-lg">Budget Alerts</h3>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <IconChartPie className="h-5 w-5 shrink-0 text-primary" />
+            <h3 className="font-semibold text-lg">Budget Alerts</h3>
+          </div>
           <Badge variant="destructive">{alerts.length}</Badge>
         </div>
 

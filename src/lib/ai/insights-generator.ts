@@ -57,6 +57,8 @@ export const generateSpendingInsights = async (userId: string) => {
         output: Output.object({ schema: InsightsSchema }),
         prompt: `You're a friendly financial advisor analyzing spending patterns for a user. Review their expense data and provide 3-5 conversational, actionable insights.
 
+Currency (critical): Every monetary value in the data below is in Indian Rupees (INR only), not US dollars or any other currency. When you write insights, always refer to amounts as rupees or use the ₹ prefix (e.g. ₹1,200). Never assume USD or interpret values as dollars.
+
 Current Month Data:
 ${JSON.stringify(thisMonth.map(i => ({
       category: categoryMap[i.categoryId],
@@ -72,7 +74,7 @@ ${JSON.stringify(lastMonth.map(i => ({
 
 Guidelines:
 - Write in a friendly, conversational tone like talking to a friend
-- Be specific with numbers and percentages but explain them naturally
+- Be specific with numbers and percentages but explain them naturally; amounts are always INR (rupees)
 - Focus on meaningful changes (>20%) and patterns
 - Celebrate positive behaviors and gently highlight concerns
 - Provide practical, actionable advice

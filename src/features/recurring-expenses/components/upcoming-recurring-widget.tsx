@@ -14,7 +14,10 @@ export const UpcomingRecurringWidget = () => {
     return (
       <Card className="p-6">
         <div className="space-y-4">
-          <Skeleton className="h-6 w-48" />
+          <div className="flex items-center gap-2">
+            <IconCalendarEvent className="h-5 w-5 shrink-0 text-primary" />
+            <Skeleton className="h-6 w-48" />
+          </div>
           <Skeleton className="h-20" />
         </div>
       </Card>
@@ -26,7 +29,7 @@ export const UpcomingRecurringWidget = () => {
       <Card className="p-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <IconCalendarEvent className="h-5 w-5 text-primary" />
+            <IconCalendarEvent className="h-5 w-5 shrink-0 text-primary" />
             <h3 className="font-semibold text-lg">Upcoming Recurring</h3>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -42,7 +45,7 @@ export const UpcomingRecurringWidget = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <IconCalendarEvent className="h-5 w-5 text-primary" />
+            <IconCalendarEvent className="h-5 w-5 shrink-0 text-primary" />
             <h3 className="font-semibold text-lg">Upcoming Recurring</h3>
           </div>
           <Badge>{upcoming.length}</Badge>

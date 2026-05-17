@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { getAIInsights } from "@/app/actions/insights";
 import {
   Card,
@@ -16,6 +17,7 @@ import {
   IconAlertCircle,
   IconAlertTriangle,
   IconInfoCircle,
+  IconBulb,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,15 +29,103 @@ interface Insight {
   actionable?: string;
 }
 
+const INSIGHTS_STORAGE_VERSION = "v1";
+
+const getInsightsStorageKey = (userId: string) =>
+  `pp-ai-spending-insights:${INSIGHTS_STORAGE_VERSION}:${userId}`;
+
+const readCachedInsights = (userId: string): Insight[] => {
+  if (typeof window === "undefined") {
+    return [];
+  }
+  try {
+    const raw = localStorage.getItem(getInsightsStorageKey(userId));
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw) as { insights?: Insight[] };
+    return Array.isArray(parsed.insights) ? parsed.insights : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeCachedInsights = (userId: string, insights: Insight[]) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    localStorage.setItem(
+      getInsightsStorageKey(userId),
+      JSON.stringify({
+        insights,
+        cachedAt: new Date().toISOString(),
+      }),
+    );
+  } catch {
+    // Quota exceeded or private mode
+  }
+};
+
+const clearCachedInsightsForUser = (userId: string) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    localStorage.removeItem(getInsightsStorageKey(userId));
+  } catch {
+    // noop
+  }
+};
+
 export const AIInsightsWidget = () => {
+  const { user, isLoaded } = useUser();
   const [insights, setInsights] = useState<Insight[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const previousUserIdRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
+    const userId = user?.id;
+    const previousId = previousUserIdRef.current;
+
+    if (previousId !== undefined && userId === undefined) {
+      clearCachedInsightsForUser(previousId);
+      setInsights([]);
+    }
+
+    if (!userId) {
+      previousUserIdRef.current = userId;
+      return;
+    }
+
+    previousUserIdRef.current = userId;
+
+    const cached = readCachedInsights(userId);
+    if (cached.length > 0) {
+      const frameId = requestAnimationFrame(() => {
+        if (previousUserIdRef.current !== userId) {
+          return;
+        }
+        setInsights(cached);
+      });
+      return () => cancelAnimationFrame(frameId);
+    }
+
+    return undefined;
+  }, [isLoaded, user?.id]);
 
   const handleLoadInsights = async () => {
+    if (!user?.id) {
+      return;
+    }
     setIsLoading(true);
     try {
       const data = await getAIInsights();
       setInsights(data);
+      writeCachedInsights(user.id, data);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to load insights",
@@ -83,14 +173,14 @@ export const AIInsightsWidget = () => {
           </div>
           <Button
             onClick={handleLoadInsights}
-            disabled={isLoading}
+            disabled={isLoading || !user?.id}
             variant="outline"
             size="sm"
           >
             {isLoading
               ? "Analyzing..."
               : insights.length > 0
-                ? "Refresh"
+                ? "Regenerate"
                 : "Analyze"}
           </Button>
         </div>
@@ -110,7 +200,12 @@ export const AIInsightsWidget = () => {
             <p className="text-sm text-muted-foreground mb-4">
               Get AI-powered insights about your spending habits and patterns
             </p>
-            <Button onClick={handleLoadInsights} size="sm" className="gap-2">
+            <Button
+              onClick={handleLoadInsights}
+              size="sm"
+              className="gap-2"
+              disabled={!user?.id}
+            >
               <IconSparkles className="w-4 h-4" />
               Generate Insights
             </Button>
@@ -121,7 +216,7 @@ export const AIInsightsWidget = () => {
               const config = getSeverityConfig(insight.severity);
               return (
                 <div
-                  key={idx}
+                  key={`${insight.title}-${idx}`}
                   className="flex items-start gap-3 p-4 rounded-lg border bg-card"
                 >
                   <div className={`shrink-0 mt-0.5 ${config.iconClassName}`}>
@@ -145,7 +240,10 @@ export const AIInsightsWidget = () => {
                     {insight.actionable && (
                       <div className="pt-2 mt-2 border-t">
                         <p className="text-xs font-medium flex items-start gap-1.5">
-                          <span className="text-base">💡</span>
+                          <IconBulb
+                            className="w-4 h-4 shrink-0 mt-0.5 text-muted-foreground"
+                            aria-hidden
+                          />
                           <span className="flex-1 text-muted-foreground">
                             {insight.actionable}
                           </span>

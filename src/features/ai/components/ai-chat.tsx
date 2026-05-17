@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useChat } from "@ai-sdk/react";
 import {
   IconAlertCircle,
+  IconHelp,
+  IconPlus,
   IconProgressX,
   IconSend,
   IconX,
@@ -16,6 +18,11 @@ import {
 } from "ai";
 import { ArrowDown } from "lucide-react";
 import { useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 import { useRotatingToolActivityLabel } from "@/features/ai/hooks/use-rotating-tool-activity-label";
 import type { ChatMessage } from "@/lib/ai/chat-message";
@@ -25,7 +32,11 @@ import { AIChatThinkingIndicator } from "@/features/ai/components/ai-chat-thinki
 import { ChatMessageRow } from "@/features/ai/components/chat-message-row";
 import { cn } from "@/lib/utils";
 
-export const AIChat = () => {
+type AIChatProps = {
+  className?: string;
+};
+
+export const AIChat = ({ className }: AIChatProps) => {
   const [input, setInput] = useState("");
   const [chatId] = useState(() => crypto.randomUUID());
 
@@ -37,6 +48,7 @@ export const AIChat = () => {
     sendMessage,
     stop,
     addToolApprovalResponse,
+    setMessages,
   } = useChat<ChatMessage>({
     id: chatId,
     generateId: () => crypto.randomUUID(),
@@ -86,6 +98,28 @@ export const AIChat = () => {
     scrollToBottom("smooth");
   };
 
+  const handleSendText = async (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || isBusy) {
+      return;
+    }
+    clearError();
+    await sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: trimmed }],
+    });
+    scrollToBottom("smooth");
+  };
+
+  const handleNewConversation = () => {
+    if (isBusy || messages.length === 0) {
+      return;
+    }
+    clearError();
+    setInput("");
+    setMessages([]);
+  };
+
   const handleDismissError = () => {
     clearError();
   };
@@ -98,14 +132,72 @@ export const AIChat = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-[500px] rounded-lg border bg-card relative">
-      <div className="relative flex-1 overflow-hidden">
+    <div
+      className={cn(
+        "flex flex-col min-h-[min(520px,calc(100dvh-14rem))] md:min-h-[min(640px,calc(100dvh-12rem))] rounded-xl border bg-card shadow-sm relative overflow-hidden",
+        className,
+      )}
+    >
+      <header className="shrink-0 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between border-b bg-muted/25 px-4 py-3">
+        <div className="min-w-0 space-y-0.5">
+          <p className="text-sm font-semibold leading-tight">
+            Financial assistant
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Reads your accounts and expenses in this app to answer in context.
+            Confirm any actions before they are saved.
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2 self-stretch sm:self-auto">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-9 shrink-0 text-muted-foreground"
+                aria-label="How to use this assistant"
+              >
+                <IconHelp className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent
+              side="bottom"
+              align="end"
+              className="max-w-xs text-xs"
+            >
+              Ask in plain language. The assistant can summarize spending,
+              search expenses, and help draft new entries. Sensitive actions may
+              ask you to approve before applying.
+            </TooltipContent>
+          </Tooltip>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-1.5 shrink-0"
+            onClick={handleNewConversation}
+            disabled={isBusy || messages.length === 0}
+            aria-label="Start a new conversation"
+          >
+            <IconPlus className="size-3.5" />
+            New chat
+          </Button>
+        </div>
+      </header>
+
+      <div className="relative flex-1 min-h-0 overflow-hidden">
         <div
           ref={containerRef}
-          className="absolute inset-0 overflow-y-auto p-4"
+          className="absolute inset-0 overflow-y-auto p-4 sm:p-5 scroll-smooth"
         >
           <div className="space-y-4 min-h-full">
-            {messages.length === 0 && <AIChatEmptyState />}
+            {messages.length === 0 && (
+              <AIChatEmptyState
+                onStarterSelect={handleSendText}
+                isDisabled={isBusy}
+              />
+            )}
 
             {messages.map((message) => (
               <ChatMessageRow
@@ -129,9 +221,9 @@ export const AIChat = () => {
         </div>
 
         <button
-          aria-label="Scroll to bottom"
+          aria-label="Scroll to latest messages"
           className={cn(
-            "absolute bottom-20 left-1/2 z-10 flex -translate-x-1/2 items-center justify-center rounded-full border border-border/50 bg-card/90 shadow-lg backdrop-blur-lg transition-all duration-200 h-8 w-8",
+            "absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center justify-center rounded-full border border-border/50 bg-card/95 shadow-md backdrop-blur-md transition-all duration-200 h-9 w-9",
             isAtBottom
               ? "pointer-events-none scale-90 opacity-0"
               : "pointer-events-auto scale-100 opacity-100",
@@ -143,7 +235,7 @@ export const AIChat = () => {
         </button>
       </div>
 
-      <div className="border-t px-4 pt-3 pb-0 space-y-3">
+      <div className="shrink-0 border-t bg-card px-4 pt-3 pb-0 space-y-2">
         {chatErrorDisplay && (
           <Alert
             variant={
@@ -167,36 +259,48 @@ export const AIChat = () => {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="pb-4 flex gap-2 items-center">
-        <Textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask about your expenses..."
-          disabled={isBusy}
-          className="min-h-[44px] max-h-[120px] resize-none"
-          rows={1}
-        />
-        {status === "streaming" ? (
-          <Button
-            type="button"
-            onClick={stop}
-            variant="outline"
-            size="icon"
-            className="shrink-0"
-          >
-            <IconProgressX className="h-4 w-4" />
-          </Button>
-        ) : (
-          <Button
-            type="submit"
-            disabled={isBusy || !input.trim()}
-            size="icon"
-            className="shrink-0"
-          >
-            <IconSend className="h-4 w-4" />
-          </Button>
-        )}
+        <form
+          onSubmit={handleSubmit}
+          className="flex gap-2 items-start pb-3"
+          aria-label="Message the assistant"
+        >
+          <div className="flex-1 space-y-1.5 min-w-0">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Message your assistant..."
+              disabled={isBusy}
+              className="min-h-[48px] max-h-[160px] resize-none text-sm"
+              rows={1}
+              aria-label="Message"
+            />
+            <p className="text-[11px] text-muted-foreground px-0.5">
+              Enter to send · Shift+Enter for a new line
+            </p>
+          </div>
+          {status === "streaming" ? (
+            <Button
+              type="button"
+              onClick={stop}
+              variant="outline"
+              size="icon"
+              className="shrink-0 size-11"
+              aria-label="Stop generating"
+            >
+              <IconProgressX className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              disabled={isBusy || !input.trim()}
+              size="icon"
+              className="shrink-0 size-11"
+              aria-label="Send message"
+            >
+              <IconSend className="h-4 w-4" />
+            </Button>
+          )}
         </form>
       </div>
     </div>
