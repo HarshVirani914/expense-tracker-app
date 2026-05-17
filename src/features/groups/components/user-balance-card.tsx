@@ -1,8 +1,9 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/format";
+import { MONEY_SEMANTICS } from "@/lib/money-semantics";
 import { cn } from "@/lib/utils";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
 import type { GroupBalance } from "../types";
@@ -20,7 +21,12 @@ export const UserBalanceCard = ({
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle className="text-lg">Your Balance</CardTitle>
+          <CardTitle className="text-lg">
+            Your balance in this group
+          </CardTitle>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.groupYourBalanceInGroup} {MONEY_SEMANTICS.groupPaidVsShareCaptions}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-32 w-full" />
@@ -33,7 +39,12 @@ export const UserBalanceCard = ({
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle className="text-lg">Your Balance</CardTitle>
+          <CardTitle className="text-lg">
+            Your balance in this group
+          </CardTitle>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.groupYourBalanceInGroup} {MONEY_SEMANTICS.groupPaidVsShareCaptions}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-12 text-muted-foreground">
@@ -51,24 +62,27 @@ export const UserBalanceCard = ({
   return (
     <Card className="h-full shadow-none overflow-hidden">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Your Balance</CardTitle>
+        <CardTitle className="text-lg">Your balance in this group</CardTitle>
+        <CardDescription className="text-xs">
+          {MONEY_SEMANTICS.groupYourBalanceInGroup}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-3">
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-baseline gap-2 flex-wrap">
             <span className="text-sm text-muted-foreground font-medium">
-              Net Balance
+              Net in this group
             </span>
             {isOwed && (
               <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
                 <IconTrendingUp className="h-3 w-3" />
-                <span>Owed to you</span>
+                <span>Net owed to you</span>
               </div>
             )}
             {owes && (
               <div className="flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
                 <IconTrendingDown className="h-3 w-3" />
-                <span>You owe</span>
+                <span>Net you owe</span>
               </div>
             )}
           </div>
@@ -94,7 +108,7 @@ export const UserBalanceCard = ({
         <div className="grid grid-cols-2 gap-4 pt-4 border-t">
           <div className="space-y-1.5">
             <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-              You Paid
+              Total you paid
             </div>
             <div className="text-xl font-semibold">
               {formatCurrency(userBalance.totalPaid)}
@@ -102,7 +116,7 @@ export const UserBalanceCard = ({
           </div>
           <div className="space-y-1.5">
             <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-              Your Share
+              Your share (splits)
             </div>
             <div className="text-xl font-semibold">
               {formatCurrency(userBalance.totalOwed)}

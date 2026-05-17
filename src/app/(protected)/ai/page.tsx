@@ -28,9 +28,11 @@ export default function AIFeaturesPage() {
             AI Assistant
           </h1>
         </div>
-        <p className="text-sm text-muted-foreground sm:text-base">
-          Chat with your financial assistant. It uses your PocketPulse data to
-          stay on topic—review any suggested actions before you confirm them.
+        <p className="text-xs text-muted-foreground sm:text-base">
+          Chat with your financial assistant. It uses the PocketPulse entries
+          you already added (in rupees) to stay on topic. Nothing is changed
+          until you confirm in the chat. If something goes wrong, your saved
+          data in the app stays the same.
         </p>
       </div>
 

@@ -1,8 +1,9 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { AccountWithBalance } from "@/features/accounts/types";
+import { MONEY_SEMANTICS } from "@/lib/money-semantics";
 import {
   IconWallet,
   IconCreditCard,
@@ -33,6 +34,9 @@ export const AccountBalances = memo(({ accounts }: AccountBalancesProps) => {
             <IconWallet className="h-5 w-5 shrink-0 text-primary" />
             Accounts
           </CardTitle>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.accountsCardSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">No accounts yet.</p>
@@ -48,6 +52,9 @@ export const AccountBalances = memo(({ accounts }: AccountBalancesProps) => {
           <IconWallet className="h-5 w-5 shrink-0 text-primary" />
           Accounts
         </CardTitle>
+        <CardDescription className="text-xs">
+          {MONEY_SEMANTICS.accountsCardSubtitle}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

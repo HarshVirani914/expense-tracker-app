@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,16 +23,63 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { ExpenseWithRelations } from "@/features/expenses/types";
 import { formatCurrency } from "@/lib/format";
+import { MONEY_SEMANTICS } from "@/lib/money-semantics";
 import { format } from "date-fns";
-import { 
-  IconPlus, 
-  IconReceipt, 
-  IconArrowRight, 
-  IconDotsVertical, 
-  IconEdit, 
-  IconTrash 
+import {
+  IconPlus,
+  IconReceipt,
+  IconArrowRight,
+  IconDotsVertical,
+  IconEdit,
+  IconTrash,
 } from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
+
+const SPLIT_TYPE_LABELS: Record<string, string> = {
+  EQUAL: "Equal split",
+  EXACT: "Exact amounts",
+  PERCENTAGE: "Percentage split",
+  SHARES: "Share split",
+};
+
+type ParticipantRow = NonNullable<
+  ExpenseWithRelations["participants"]
+>[number];
+
+const getSplitSummary = (
+  participants: ExpenseWithRelations["participants"],
+) => {
+  if (!participants?.length) {
+    return null;
+  }
+  const types = [...new Set(participants.map((p) => p.splitType))];
+  if (types.length > 1) {
+    return "Mixed split types";
+  }
+  const only = types[0];
+  if (!only) return null;
+  return SPLIT_TYPE_LABELS[only] ?? String(only);
+};
+
+const getPayerSummary = (
+  participants: NonNullable<ExpenseWithRelations["participants"]>,
+  getParticipantDisplayName: (p: ParticipantRow) => string,
+) => {
+  const payers = participants.filter((p) => p.paidAmount > 0.01);
+  if (payers.length === 0) {
+    return "No payer recorded";
+  }
+  if (payers.length === 1) {
+    return `${getParticipantDisplayName(payers[0])} paid`;
+  }
+  if (payers.length === 2) {
+    return `${getParticipantDisplayName(payers[0])} and ${getParticipantDisplayName(payers[1])} paid`;
+  }
+  return `${payers.length} people paid`;
+};
+
+const defaultParticipantName = (p: ParticipantRow) =>
+  p.contact?.name ??
+  (p.userId ? "Member" : p.contactId ? "Contact" : "Someone");
 
 type GroupActivityCardProps = {
   expenses: ExpenseWithRelations[] | undefined;
@@ -41,6 +88,7 @@ type GroupActivityCardProps = {
   onViewAll: () => void;
   onEditExpense: (expense: ExpenseWithRelations) => void;
   onDeleteExpense: (expenseId: string) => void;
+  getParticipantDisplayName?: (participant: ParticipantRow) => string;
 };
 
 export const GroupActivityCard = ({
@@ -50,9 +98,12 @@ export const GroupActivityCard = ({
   onViewAll,
   onEditExpense,
   onDeleteExpense,
+  getParticipantDisplayName: getParticipantDisplayNameProp,
 }: GroupActivityCardProps) => {
   const [deleteExpenseId, setDeleteExpenseId] = useState<string | null>(null);
-  
+
+  const resolveName =
+    getParticipantDisplayNameProp ?? defaultParticipantName;
   const handleDeleteConfirm = () => {
     if (deleteExpenseId) {
       onDeleteExpense(deleteExpenseId);
@@ -63,7 +114,10 @@ export const GroupActivityCard = ({
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Recent Activity</CardTitle>
+          <CardTitle className="text-lg">Recent activity</CardTitle>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.groupActivityCardSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -80,7 +134,10 @@ export const GroupActivityCard = ({
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Recent Activity</CardTitle>
+          <CardTitle className="text-lg">Recent activity</CardTitle>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.groupActivityCardSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-16">
@@ -105,8 +162,13 @@ export const GroupActivityCard = ({
     <>
       <Card className="shadow-none">
         <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Recent Activity</CardTitle>
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <CardTitle className="text-lg">Recent activity</CardTitle>
+              <CardDescription className="text-xs mt-1">
+                {MONEY_SEMANTICS.groupActivityCardSubtitle}
+              </CardDescription>
+            </div>
             {expenses.length >= 10 && (
               <Button
                 variant="ghost"
@@ -123,6 +185,21 @@ export const GroupActivityCard = ({
         <CardContent>
           <div className="space-y-2">
             {expenses.map((expense) => {
+              const participants = expense.participants;
+              const splitSummary = getSplitSummary(participants);
+              const payerSummary =
+                participants && participants.length > 0
+                  ? getPayerSummary(participants, resolveName)
+                  : null;
+              const metaParts = [payerSummary, splitSummary].filter(
+                Boolean,
+              ) as string[];
+              const billTotal = formatCurrency(Number(expense.amount));
+              const spokenSummary =
+                metaParts.length > 0
+                  ? `Full bill ${billTotal}. ${metaParts.join(". ")}.`
+                  : `Full bill ${billTotal}.`;
+
               return (
                 <div
                   key={expense.id}
@@ -157,29 +234,36 @@ export const GroupActivityCard = ({
                       <span className="text-xs text-muted-foreground">
                         {format(new Date(expense.date), "MMM d, yyyy")}
                       </span>
-                      {expense.participants && expense.participants.length > 1 && (
+                      {participants && participants.length > 1 && (
                         <>
-                          <span className="text-xs text-muted-foreground">•</span>
                           <span className="text-xs text-muted-foreground">
-                            {expense.participants.length} people
+                            •
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {participants.length} on split
                           </span>
                         </>
                       )}
                     </div>
+                    {metaParts.length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {metaParts.join(" · ")}
+                      </p>
+                    )}
                   </div>
 
                   <div className="text-right shrink-0 flex items-center gap-2">
                     <div className="font-semibold text-xl">
-                      {formatCurrency(Number(expense.amount))}
+                      <span className="sr-only">{spokenSummary}</span>
+                      <span aria-hidden="true">{billTotal}</span>
                     </div>
-                    
                     {/* All expenses belong to the user, show edit/delete for all */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="h-11 w-11 min-h-11 min-w-11 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <IconDotsVertical className="h-4 w-4" />

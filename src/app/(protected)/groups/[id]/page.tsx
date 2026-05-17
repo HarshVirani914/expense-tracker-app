@@ -10,7 +10,7 @@ import { useGroup } from "@/features/groups/hooks/use-group";
 import { getMembersInfo } from "@/features/groups/utils/member-info";
 import { SettlementFormDialog } from "@/features/settlements/components/settlement-form-dialog";
 import { useRouter } from "next/navigation";
-import { use, useState } from "react";
+import { use, useMemo, useState } from "react";
 import { GroupHeader } from "@/features/groups/components/group-header";
 import { GroupStatsCard } from "@/features/groups/components/group-stats-card";
 import { UserBalanceCard } from "@/features/groups/components/user-balance-card";
@@ -57,6 +57,34 @@ export default function GroupDetailPage({ params }: PageProps) {
   }>({
     open: false,
   });
+
+  const getParticipantDisplayName = useMemo(() => {
+    const memberList = group?.members ?? [];
+    const byUserId: Record<string, string> = {};
+    const byContactId: Record<string, string> = {};
+    for (const m of memberList) {
+      if (m.userId) {
+        byUserId[m.userId] =
+          m.user?.name?.trim() || m.user?.email || "Member";
+      }
+      if (m.contactId && m.contact) {
+        byContactId[m.contactId] = m.contact.name;
+      }
+    }
+    return (p: {
+      userId: string | null;
+      contactId: string | null;
+      contact?: { name: string } | null;
+    }) => {
+      if (p.contact?.name) return p.contact.name;
+      if (p.userId && byUserId[p.userId]) return byUserId[p.userId];
+      if (p.contactId && byContactId[p.contactId])
+        return byContactId[p.contactId];
+      if (p.userId) return "Member";
+      if (p.contactId) return "Contact";
+      return "Someone";
+    };
+  }, [group?.members]);
 
   if (isLoading) {
     return (
@@ -195,6 +223,7 @@ export default function GroupDetailPage({ params }: PageProps) {
         onViewAll={() => router.push(`/expenses?groupId=${id}`)}
         onEditExpense={handleEditExpense}
         onDeleteExpense={handleDeleteExpense}
+        getParticipantDisplayName={getParticipantDisplayName}
       />
 
       <GroupExpenseFormDialog

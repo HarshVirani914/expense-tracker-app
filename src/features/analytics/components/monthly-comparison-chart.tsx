@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
@@ -10,7 +10,8 @@ import {
 import { IconChartBar } from "@tabler/icons-react";
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis } from "recharts";
 import type { MonthlyComparison } from "../types";
-import { formatCurrencyCompact } from "@/lib/format";
+import { formatCurrencyCompact, formatCurrency } from "@/lib/format";
+import { MONEY_SEMANTICS } from "@/lib/money-semantics";
 
 type MonthlyComparisonChartProps = {
   data: MonthlyComparison[];
@@ -19,7 +20,7 @@ type MonthlyComparisonChartProps = {
 
 const chartConfig = {
   current: {
-    label: "Current Month",
+    label: "Recorded spending",
     color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
@@ -36,6 +37,9 @@ export const MonthlyComparisonChart = ({
             <IconChartBar className="h-5 w-5 text-primary" />
             <CardTitle>Monthly Comparison</CardTitle>
           </div>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.chartMonthlyComparisonSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent className="h-80 flex items-center justify-center">
           <p className="text-muted-foreground">Loading...</p>
@@ -52,6 +56,9 @@ export const MonthlyComparisonChart = ({
             <IconChartBar className="h-5 w-5 text-primary" />
             <CardTitle>Monthly Comparison</CardTitle>
           </div>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.chartMonthlyComparisonSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent className="h-80 flex items-center justify-center">
           <p className="text-muted-foreground">No data available</p>
@@ -67,6 +74,9 @@ export const MonthlyComparisonChart = ({
           <IconChartBar className="h-5 w-5 text-primary" />
           <CardTitle>Monthly Comparison</CardTitle>
         </div>
+        <CardDescription className="text-xs">
+          {MONEY_SEMANTICS.chartMonthlyComparisonSubtitle}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -97,11 +107,33 @@ export const MonthlyComparisonChart = ({
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={
+                <ChartTooltipContent
+                  labelFormatter={(_label, payload) => {
+                    const row = payload?.[0]?.payload as
+                      | MonthlyComparison
+                      | undefined;
+                    return row?.month ?? "";
+                  }}
+                />
+              }
             />
             <Bar dataKey="current" fill="var(--color-current)" radius={8} />
           </BarChart>
         </ChartContainer>
+        <div className="sr-only">
+          <p>Monthly comparison (INR)</p>
+          <ul>
+            {data.map((row) => (
+              <li key={row.month}>
+                {row.month}: {formatCurrency(row.current)}
+                {row.previous !== undefined
+                  ? `, prior ${formatCurrency(row.previous)}`
+                  : ""}
+              </li>
+            ))}
+          </ul>
+        </div>
       </CardContent>
     </Card>
   );

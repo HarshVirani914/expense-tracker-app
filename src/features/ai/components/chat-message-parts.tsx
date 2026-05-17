@@ -6,6 +6,7 @@ import { IconLoader } from "@tabler/icons-react";
 import type { ChatMessage } from "@/lib/ai/chat-message";
 import { ChatAssistantMarkdown } from "@/features/ai/components/chat-assistant-markdown";
 import { ChatToolCreateExpense } from "@/features/ai/components/chat-tool-create-expense";
+import { ChatToolExpenseMutation } from "@/features/ai/components/chat-tool-expense-mutation";
 import { getChatMessagePartReactKey } from "@/features/ai/lib/chat-message-part-key";
 import { isToolPartRunning } from "@/features/ai/lib/chat-tool-messages";
 
@@ -66,6 +67,19 @@ export const ChatMessageParts = ({
             );
           }
 
+          if (
+            part.type === "tool-updateExpense" ||
+            part.type === "tool-deleteExpense"
+          ) {
+            return (
+              <ChatToolExpenseMutation
+                key={key}
+                part={part}
+                addToolApprovalResponse={addToolApprovalResponse}
+              />
+            );
+          }
+
           if (part.state === "output-error" && part.errorText) {
             return (
               <div
@@ -83,7 +97,7 @@ export const ChatMessageParts = ({
                 key={key}
                 className="rounded-lg border bg-muted/50 mb-2 px-3 py-2 text-xs text-muted-foreground"
               >
-                Action cancelled.
+                Action cancelled. Nothing was saved.
               </div>
             );
           }

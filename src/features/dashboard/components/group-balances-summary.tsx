@@ -2,9 +2,10 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGroupBalances } from "@/features/groups/hooks/use-group-balances";
 import { useGroups } from "@/features/groups/hooks/use-groups";
+import { MONEY_SEMANTICS } from "@/lib/money-semantics";
 import { IconArrowRight, IconLoader2, IconUsers } from "@tabler/icons-react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/format";
@@ -18,8 +19,11 @@ export const GroupBalancesSummary = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconUsers className="h-5 w-5 text-primary" />
-            Group Balances
+            {MONEY_SEMANTICS.groupBalancesCardTitle}
           </CardTitle>
+          <CardDescription className="text-xs pt-1">
+            {MONEY_SEMANTICS.groupBalancesCardSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
@@ -36,8 +40,11 @@ export const GroupBalancesSummary = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconUsers className="h-5 w-5 text-primary" />
-            Group Balances
+            {MONEY_SEMANTICS.groupBalancesCardTitle}
           </CardTitle>
+          <CardDescription className="text-xs pt-1">
+            {MONEY_SEMANTICS.groupBalancesCardSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-8 gap-4">
@@ -61,17 +68,22 @@ export const GroupBalancesSummary = () => {
 
   return (
     <Card className="shadow-none">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2">
-          <IconUsers className="h-5 w-5 text-primary" />
-          Group Balances
-        </CardTitle>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/groups" className="flex items-center gap-1">
-            View All
-            <IconArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
+      <CardHeader className="space-y-3">
+        <div className="flex flex-row items-center justify-between gap-2">
+          <CardTitle className="flex items-center gap-2">
+            <IconUsers className="h-5 w-5 text-primary" />
+            {MONEY_SEMANTICS.groupBalancesCardTitle}
+          </CardTitle>
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/groups" className="flex items-center gap-1">
+              View All
+              <IconArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+        <CardDescription className="text-xs">
+          {MONEY_SEMANTICS.groupBalancesCardSubtitle}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-3">
@@ -150,7 +162,9 @@ const GroupBalanceItem = ({
                 {formatCurrency(owedAmount)}
               </p>
               <p className="text-xs text-muted-foreground">
-                {owedAmount > 0 ? "you're owed" : "you owe"}
+                {owedAmount > 0
+                  ? "Net owed to you in this group"
+                  : "Net you owe in this group"}
               </p>
             </>
           )}

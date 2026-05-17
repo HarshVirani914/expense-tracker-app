@@ -8,6 +8,7 @@ import { CategoryBreakdownChart } from "@/features/analytics/components/category
 import { MonthlyComparisonChart } from "@/features/analytics/components/monthly-comparison-chart"
 import { InsightsSummary } from "@/features/analytics/components/insights-summary"
 import { useAnalytics } from "@/features/analytics/hooks"
+import { MONEY_SEMANTICS } from "@/lib/money-semantics"
 import type { AnalyticsFilters } from "@/features/analytics/types"
 
 export default function AnalyticsPage() {
@@ -22,7 +23,7 @@ export default function AnalyticsPage() {
       <div className="space-y-1">
         <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
         <p className="text-muted-foreground">
-          Visualize your spending patterns and gain insights
+          {MONEY_SEMANTICS.analyticsPageSubtitle}
         </p>
       </div>
 

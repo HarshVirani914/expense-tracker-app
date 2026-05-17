@@ -155,6 +155,7 @@ export const updateExpenseTool = tool({
     categoryName: z.string().optional().describe("New category name"),
     date: z.iso.datetime().optional().describe("New date (ISO format)"),
   }),
+  needsApproval: true,
   execute: async (
     { expenseId, amount, description, categoryName, date },
     options,
@@ -219,6 +220,7 @@ export const deleteExpenseTool = tool({
   inputSchema: z.object({
     expenseId: z.string().describe("ID of the expense to delete"),
   }),
+  needsApproval: true,
   execute: async ({ expenseId }, options) => {
     try {
       const context = options.experimental_context as ToolContext;

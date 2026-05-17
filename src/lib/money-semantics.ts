@@ -1,42 +1,62 @@
 export const MONEY_SEMANTICS = {
-  currency: "All amounts are in Indian rupees (INR).",
-
-  dashboardIntro:
-    "Ledger balances use what you recorded in PocketPulse; monthly totals are cashflow for the calendar month; group figures are split-bill IOUs until settled.",
+  currency: "Amounts are shown in Indian rupees (INR).",
 
   glossaryDialogTitle: "What these numbers mean",
   glossaryAccountBalance:
-    "Total from your PocketPulse accounts (debits/credits you logged). It is not a live bank balance unless you keep accounts exactly in sync.",
+    "Adds up the balances you set up for each account in PocketPulse, based on income and expenses you added. It only matches your real bank balance if you keep updating the app yourself.",
   glossaryMonthCashflow:
-    "Income minus expenses for the current calendar month. This is period cashflow, not the same as your total account balance.",
+    "This month’s income minus this month’s spending. It is not the same number as your total across accounts.",
   glossaryGroupIoU:
-    "Who owes whom inside each group after splits. These are social debts until you record a settlement. They do not change your account ledger automatically.",
+    "In a group, this shows how bills were split and who still owes whom. It does not move money in your bank, and it does not change your personal account totals unless you add that separately.",
 
   heroAccountSubtitle:
-    "Ledger total from your accounts (INR), from recorded transactions—not a bank API sync.",
+    "Total from your accounts in the app (INR). Based on what you entered—not an automatic link to your bank.",
   heroMonthNetSubtitle:
-    "This month: income minus expenses (INR). Cashflow for the period, not your account total.",
+    "This month’s income minus spending (INR). Only for this month—not your full account total.",
+  heroMonthNetChip: "So far this month",
 
-  statsThisMonthExpenses: "Recorded expenses this month (INR), including your share of group bills.",
-  statsThisMonthIncome: "Recorded income this month (INR).",
-  statsTopCategory: "Largest spending category this month (INR) from your recorded expenses.",
+  statsThisMonthExpenses:
+    "Spending you logged this month (INR), including your share of group expenses.",
+  statsThisMonthIncome: "Income you logged this month (INR).",
+  statsTopCategory:
+    "Where you spent the most this month (INR), based on what you logged.",
 
-  accountsCardSubtitle: "Per-account balances from linked income and expenses (INR).",
+  accountsCardSubtitle:
+    "Balance for each account (INR), from the income and expenses you linked to it.",
 
   groupBalancesCardTitle: "Group balances",
   groupBalancesCardSubtitle:
-    "Your net position per group after splits (INR). Split-bill IOUs, not money in your bank.",
+    "Per group: are you owed money or do you owe others after splits (INR)? This is about shared bills, not cash in your bank.",
 
   outstandingDebtsSubtitle:
-    "Unsettled amounts across groups (INR). Recording a settlement tracks payment; it does not move bank money.",
+    "Money still to sort out across groups (INR). Marking paid in the app keeps a record—it does not take money from your bank.",
 
   analyticsPageSubtitle:
-    "Recorded spending for the selected period (INR). Charts show category and time patterns—not live bank balances.",
+    "Spending you logged for the dates you picked (INR). The charts help you see patterns—not a live bank feed.",
 
   insightsAnalyticsSubtitle:
-    "Derived from recorded expenses in this period (INR). Not a bank statement.",
+    "Based on expenses you logged for this period (INR). Not a bank or card statement.",
 
-  chartSpendingTrendsSubtitle: "Total recorded expenses over time for the selected range (INR).",
-  chartCategorySubtitle: "Share of recorded spending by category for this period (INR).",
-  chartMonthlyComparisonSubtitle: "Recorded spending for recent months (INR).",
+  chartSpendingTrendsSubtitle:
+    "How your logged spending adds up over time for the range you chose (INR).",
+  chartCategorySubtitle:
+    "Share of your logged spending by category for this period (INR).",
+  chartMonthlyComparisonSubtitle: "Your logged spending by month (INR).",
+
+  groupYourBalanceInGroup:
+    "In this group, after splits: are you up or down (INR)? This is only about the group—not your PocketPulse account total.",
+  groupMemberBalancesSubtitle:
+    "How each person stands with you in this group (INR). Stays open until someone marks amounts settled.",
+  groupPaidVsShareCaptions:
+    "Paid is what you put toward bills. Your share is your part of the split. The net is the difference for you in this group.",
+  groupAmountsYouOweInGroup: "You owe (in this group)",
+  groupAmountsOwedToYou: "They owe you (in this group)",
+  groupAllBalancesCaption:
+    "Each person in this group after splits (INR). Plus: others owe them more overall. Minus: they owe others more overall.",
+  groupSuggestedSettlementsCaption:
+    "Suggested payments between people. “Simplify” means fewer steps to settle the same amounts.",
+  groupSimplifyFooter:
+    "No one’s total owed changes—only who pays whom can be combined into fewer payments.",
+  groupActivityCardSubtitle:
+    "Full bill (INR). Below it: how the bill was split and who paid.",
 } as const;

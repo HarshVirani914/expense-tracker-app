@@ -6,6 +6,7 @@ import {
   IconTrendingDown,
   IconTrendingUp,
 } from "@tabler/icons-react";
+import { MONEY_SEMANTICS } from "@/lib/money-semantics";
 import { formatCurrency } from "@/lib/format";
 import { memo } from "react";
 import type { MonthlyStats } from "../types";
@@ -31,7 +32,9 @@ export const StatsCards = memo(({ stats }: StatsCardsProps) => {
           <div className="text-3xl font-bold text-red-600 dark:text-red-400">
             {formatCurrency(stats.totalExpenses)}
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">This month</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {MONEY_SEMANTICS.statsThisMonthExpenses}
+          </p>
         </CardContent>
       </Card>
 
@@ -47,7 +50,9 @@ export const StatsCards = memo(({ stats }: StatsCardsProps) => {
           <div className="text-3xl font-bold text-green-600 dark:text-green-400">
             {formatCurrency(stats.totalIncome)}
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">This month</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {MONEY_SEMANTICS.statsThisMonthIncome}
+          </p>
         </CardContent>
       </Card>
 
@@ -80,7 +85,9 @@ export const StatsCards = memo(({ stats }: StatsCardsProps) => {
               No expense activity this month
             </p>
           )}
-          <p className="text-xs text-muted-foreground">This month</p>
+          <p className="text-xs text-muted-foreground">
+            {MONEY_SEMANTICS.statsTopCategory}
+          </p>
         </CardContent>
       </Card>
     </div>

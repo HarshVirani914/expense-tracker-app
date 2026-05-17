@@ -8,6 +8,7 @@ import {
   IconTrendingUp,
   IconWallet,
 } from "@tabler/icons-react";
+import { MONEY_SEMANTICS } from "@/lib/money-semantics";
 import { memo } from "react";
 
 type HeroBalanceCardProps = {
@@ -29,7 +30,7 @@ export const HeroBalanceCard = memo(
             <div>
               <p className="text-lg font-medium leading-tight">Account balance</p>
               <p className="text-xs text-muted-foreground font-normal">
-                Combined across your accounts
+                {MONEY_SEMANTICS.heroAccountSubtitle}
               </p>
             </div>
           </div>
@@ -54,7 +55,7 @@ export const HeroBalanceCard = memo(
               )}
               <span>
                 <span className="text-muted-foreground font-medium">
-                  This month net{" "}
+                  {MONEY_SEMANTICS.heroMonthNetChip}{" "}
                 </span>
                 <span className="font-semibold tabular-nums">
                   {isNetPositive ? "+" : ""}

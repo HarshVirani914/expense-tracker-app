@@ -66,6 +66,6 @@ export const getChatErrorDisplay = (error: Error | undefined): ChatErrorDisplay 
   return {
     variant: "generic",
     title: "Could not send your message",
-    description: truncated,
+    description: `Nothing was saved. ${truncated}`,
   };
 };

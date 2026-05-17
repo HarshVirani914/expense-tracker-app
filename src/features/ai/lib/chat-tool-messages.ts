@@ -1,5 +1,5 @@
 const TOOL_ACTIVITY_ROTATION_MESSAGES = [
-  "Peeking at your ledger…",
+  "Looking at your recent entries…",
   "Following the rupee trail…",
   "Dusting off recent transactions…",
   "Connecting the spending dots…",

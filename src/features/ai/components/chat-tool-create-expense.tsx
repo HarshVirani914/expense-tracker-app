@@ -124,7 +124,7 @@ export const ChatToolCreateExpense = ({
   if (part.state === "output-denied") {
     return (
       <div className="rounded-lg border bg-muted/50 mb-2 px-3 py-2 text-xs text-muted-foreground">
-        Action cancelled.
+        Action cancelled. Nothing was saved.
       </div>
     );
   }

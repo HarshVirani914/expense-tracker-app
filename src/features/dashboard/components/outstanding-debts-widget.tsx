@@ -2,13 +2,14 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGroup } from "@/features/groups/hooks/use-group";
 import { getMembersInfo } from "@/features/groups/utils/member-info";
 import { SettlementFormDialog } from "@/features/settlements/components/settlement-form-dialog";
 import { useOutstandingDebts } from "@/features/settlements/hooks/use-outstanding-debts";
 import { formatCurrency } from "@/lib/format";
+import { MONEY_SEMANTICS } from "@/lib/money-semantics";
 import {
   IconArrowDown,
   IconArrowUp,
@@ -45,6 +46,9 @@ export const OutstandingDebtsWidget = () => {
             <IconCash className="h-5 w-5 text-primary" />
             Outstanding Debts
           </CardTitle>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.outstandingDebtsSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -65,6 +69,9 @@ export const OutstandingDebtsWidget = () => {
             <IconCash className="h-5 w-5" />
             Outstanding Debts
           </CardTitle>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.outstandingDebtsSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
@@ -103,6 +110,9 @@ export const OutstandingDebtsWidget = () => {
               {debts.length}
             </Badge>
           </CardTitle>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.outstandingDebtsSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">

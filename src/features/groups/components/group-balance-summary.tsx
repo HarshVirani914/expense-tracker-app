@@ -15,6 +15,7 @@ import { useState, useMemo, useCallback, memo } from "react";
 import { useGroupBalances } from "../hooks/use-group-balances";
 import { simplifyDebts } from "../utils/simplify-debts";
 import { formatCurrency } from "@/lib/format";
+import { MONEY_SEMANTICS } from "@/lib/money-semantics";
 
 type GroupBalanceSummaryProps = {
   groupId: string;
@@ -73,26 +74,30 @@ export const GroupBalanceSummary = memo(
       <div className="space-y-4">
         {currentUserBalance && (
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
               <IconCurrencyRupee className="h-5 w-5 text-primary" />
-              Your Balance
+              Your balance in this group
             </h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              {MONEY_SEMANTICS.groupYourBalanceInGroup}{" "}
+              {MONEY_SEMANTICS.groupPaidVsShareCaptions}
+            </p>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Total Paid:</span>
+                <span className="text-muted-foreground">Total you paid</span>
                 <span className="font-semibold">
                   {formatCurrency(currentUserBalance.totalPaid)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Total Owed:</span>
+                <span className="text-muted-foreground">Your share (splits)</span>
                 <span className="font-semibold">
                   {formatCurrency(currentUserBalance.totalOwed)}
                 </span>
               </div>
               <div className="pt-3 border-t">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold">Net Balance:</span>
+                  <span className="font-semibold">Net in this group</span>
                   <div className="flex items-center gap-2">
                     {currentUserBalance.netBalance > 0.01 ? (
                       <>
@@ -119,8 +124,8 @@ export const GroupBalanceSummary = memo(
 
               {currentUserBalance.owesTo.length > 0 && (
                 <div className="pt-3 border-t">
-                  <h4 className="text-sm font-medium text-red-600 mb-2">
-                    You owe:
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                    {MONEY_SEMANTICS.groupAmountsYouOweInGroup}
                   </h4>
                   <div className="space-y-2">
                     {currentUserBalance.owesTo.map((debt) => (
@@ -142,8 +147,8 @@ export const GroupBalanceSummary = memo(
 
               {currentUserBalance.owedBy.length > 0 && (
                 <div className="pt-3 border-t">
-                  <h4 className="text-sm font-medium text-green-600 mb-2">
-                    Owes you:
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                    {MONEY_SEMANTICS.groupAmountsOwedToYou}
                   </h4>
                   <div className="space-y-2">
                     {currentUserBalance.owedBy.map((debt) => (
@@ -168,7 +173,10 @@ export const GroupBalanceSummary = memo(
 
         {hasBalances && (
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">All Balances</h3>
+            <h3 className="text-lg font-semibold mb-1">All balances</h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              {MONEY_SEMANTICS.groupAllBalancesCaption}
+            </p>
             <div className="space-y-3">
               {balancesWithDebt.map((balance) => (
                 <div
@@ -201,8 +209,8 @@ export const GroupBalanceSummary = memo(
             </div>
 
             <div className="mt-6 pt-4 border-t">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-medium">Suggested Settlements</h4>
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <h4 className="text-sm font-medium">Suggested settlements</h4>
                 <Button
                   variant="outline"
                   size="sm"
@@ -210,9 +218,12 @@ export const GroupBalanceSummary = memo(
                   className="gap-2"
                 >
                   <IconAdjustmentsAlt className="h-4 w-4" />
-                  {showSimplified ? "Show Actual" : "Simplify"}
+                  {showSimplified ? "Show actual" : "Simplify"}
                 </Button>
               </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                {MONEY_SEMANTICS.groupSuggestedSettlementsCaption}
+              </p>
               <div className="space-y-2">
                 {showSimplified
                   ? simplifiedDebts.map((debt, idx) => (
@@ -252,9 +263,9 @@ export const GroupBalanceSummary = memo(
               </div>
               {showSimplified && simplifiedDebts.length > 0 && (
                 <p className="text-xs text-muted-foreground mt-3">
-                  Showing optimized settlements ({simplifiedDebts.length}{" "}
-                  transaction
-                  {simplifiedDebts.length !== 1 ? "s" : ""})
+                  {MONEY_SEMANTICS.groupSimplifyFooter} Showing{" "}
+                  {simplifiedDebts.length} suggested transfer
+                  {simplifiedDebts.length !== 1 ? "s" : ""}.
                 </p>
               )}
             </div>

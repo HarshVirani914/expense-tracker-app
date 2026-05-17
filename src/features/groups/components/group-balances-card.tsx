@@ -2,9 +2,10 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/format";
+import { MONEY_SEMANTICS } from "@/lib/money-semantics";
 import { cn } from "@/lib/utils";
 import {
   IconCash,
@@ -65,7 +66,10 @@ export const GroupBalancesCard = ({
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle className="text-lg">Member Balances</CardTitle>
+          <CardTitle className="text-lg">Member balances</CardTitle>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.groupMemberBalancesSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -82,7 +86,10 @@ export const GroupBalancesCard = ({
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle className="text-lg">Member Balances</CardTitle>
+          <CardTitle className="text-lg">Member balances</CardTitle>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.groupMemberBalancesSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-12 text-muted-foreground">
@@ -96,7 +103,10 @@ export const GroupBalancesCard = ({
   return (
     <Card className="h-full shadow-none">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Member Balances</CardTitle>
+        <CardTitle className="text-lg">Member balances</CardTitle>
+        <CardDescription className="text-xs">
+          {MONEY_SEMANTICS.groupMemberBalancesSubtitle}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
@@ -131,13 +141,17 @@ export const GroupBalancesCard = ({
                   {owedByUser && (
                     <div className="flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400">
                       <IconTrendingDown className="h-3.5 w-3.5" />
-                      <span>You owe {formatCurrency(owedByUser.amount)}</span>
+                      <span>
+                        You owe them {formatCurrency(owedByUser.amount)}
+                      </span>
                     </div>
                   )}
                   {owesToUser && (
                     <div className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
                       <IconTrendingUp className="h-3.5 w-3.5" />
-                      <span>Owes you {formatCurrency(owesToUser.amount)}</span>
+                      <span>
+                        They owe you {formatCurrency(owesToUser.amount)}
+                      </span>
                     </div>
                   )}
                   {!owesToUser && !owedByUser && (

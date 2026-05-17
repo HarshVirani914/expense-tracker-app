@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { IconTrendingUp, IconTrendingDown, IconMinus, IconBulb } from "@tabler/icons-react"
 import type { AnalyticsInsights } from "../types"
 import { formatCurrencyWithDecimals } from "@/lib/format"
+import { MONEY_SEMANTICS } from "@/lib/money-semantics"
 
 type InsightsSummaryProps = {
   insights: AnalyticsInsights | undefined
@@ -20,6 +21,7 @@ export const InsightsSummary = ({ insights, isLoading }: InsightsSummaryProps) =
             <IconBulb className="h-5 w-5 text-primary" />
             <h3 className="font-semibold text-lg">Insights</h3>
           </div>
+          <p className="text-xs text-muted-foreground">{MONEY_SEMANTICS.insightsAnalyticsSubtitle}</p>
           <div className="flex items-center justify-center h-32">
             <p className="text-muted-foreground">Loading...</p>
           </div>
@@ -36,6 +38,7 @@ export const InsightsSummary = ({ insights, isLoading }: InsightsSummaryProps) =
             <IconBulb className="h-5 w-5 text-primary" />
             <h3 className="font-semibold text-lg">Insights</h3>
           </div>
+          <p className="text-xs text-muted-foreground">{MONEY_SEMANTICS.insightsAnalyticsSubtitle}</p>
           <div className="flex items-center justify-center h-32">
             <p className="text-muted-foreground">No insights available</p>
           </div>
@@ -73,6 +76,7 @@ export const InsightsSummary = ({ insights, isLoading }: InsightsSummaryProps) =
           <IconBulb className="h-5 w-5 text-primary" />
           <h3 className="font-semibold text-lg">Insights</h3>
         </div>
+        <p className="text-xs text-muted-foreground">{MONEY_SEMANTICS.insightsAnalyticsSubtitle}</p>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-1">

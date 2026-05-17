@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
@@ -12,6 +12,7 @@ import { IconChartPie } from "@tabler/icons-react";
 import { PieChart, Pie, Label } from "recharts";
 import type { CategoryBreakdown } from "../types";
 import { formatCurrency } from "@/lib/format";
+import { MONEY_SEMANTICS } from "@/lib/money-semantics";
 
 type CategoryBreakdownChartProps = {
   data: CategoryBreakdown[];
@@ -55,6 +56,9 @@ export const CategoryBreakdownChart = ({
             <IconChartPie className="h-5 w-5 text-primary" />
             <CardTitle>Category Breakdown</CardTitle>
           </div>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.chartCategorySubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent className="h-80 flex items-center justify-center">
           <p className="text-muted-foreground">Loading...</p>
@@ -71,6 +75,9 @@ export const CategoryBreakdownChart = ({
             <IconChartPie className="h-5 w-5 text-primary" />
             <CardTitle>Category Breakdown</CardTitle>
           </div>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.chartCategorySubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent className="h-80 flex items-center justify-center">
           <p className="text-muted-foreground">No data available</p>
@@ -86,6 +93,9 @@ export const CategoryBreakdownChart = ({
           <IconChartPie className="h-5 w-5 text-primary" />
           <CardTitle>Category Breakdown</CardTitle>
         </div>
+        <CardDescription className="text-xs">
+          {MONEY_SEMANTICS.chartCategorySubtitle}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[300px]">
@@ -133,6 +143,17 @@ export const CategoryBreakdownChart = ({
             </Pie>
           </PieChart>
         </ChartContainer>
+        <div className="sr-only">
+          <p>Category breakdown totals (INR)</p>
+          <p>Total {formatCurrency(totalAmount)}</p>
+          <ul>
+            {chartData.map((row) => (
+              <li key={row.category}>
+                {row.category}: {formatCurrency(row.amount)}
+              </li>
+            ))}
+          </ul>
+        </div>
       </CardContent>
     </Card>
   );

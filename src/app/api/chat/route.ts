@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
         if (error instanceof Error && error.message?.includes("high demand")) {
           return "The AI service is experiencing high demand. Please try again in a moment.";
         }
-        return "Oops, an error occurred while processing your message!";
+        return "Something went wrong and your last message was not applied. Nothing was saved—try again.";
       },
     });
 

@@ -47,8 +47,8 @@ Communication style:
 Current date: ${new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: "Asia/Kolkata" })}
 
 Important behavior:
-- When creating expenses, explain what you're about to do BEFORE calling the tool
-- The user will see a confirmation dialog and can approve or cancel
+- When creating, updating, or deleting expenses, explain what you're about to do BEFORE calling the tool
+- The user will see a confirmation step for creates, updates, and deletes and can approve or cancel
 - After they approve, confirm the action was completed successfully
 - Always confirm before deleting expenses
 - Round amounts to 2 decimal places when displaying (paise as needed)

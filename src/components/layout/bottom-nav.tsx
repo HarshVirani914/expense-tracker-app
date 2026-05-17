@@ -20,12 +20,18 @@ import {
   IconPlus,
   IconReceipt,
   IconRepeat,
+  IconUserCircle,
   IconUsers,
+  IconWallet,
 } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AccountFormDialog } from "@/features/accounts/components/account-form-dialog";
+import { ContactFormDialog } from "@/features/contacts/components/contact-form-dialog";
+import { ExpenseFormDialog } from "@/features/expenses/components/expense-form-dialog";
+import { GroupFormDialog } from "@/features/groups/components/group-form-dialog";
 
 type NavItem = {
   id: number;
@@ -80,16 +86,6 @@ const moreNavItems = [
     icon: IconBuildingBank,
   },
   {
-    href: "/contacts",
-    label: "Contacts",
-    icon: IconAddressBook,
-  },
-  {
-    href: "/categories",
-    label: "Categories",
-    icon: IconCategory2,
-  },
-  {
     href: "/analytics",
     label: "Analytics",
     icon: IconChartBar,
@@ -100,13 +96,23 @@ const moreNavItems = [
     icon: IconChartPie,
   },
   {
+    href: "/categories",
+    label: "Categories",
+    icon: IconCategory2,
+  },
+  {
+    href: "/contacts",
+    label: "Contacts",
+    icon: IconAddressBook,
+  },
+  {
     href: "/recurring",
     label: "Recurring",
     icon: IconRepeat,
   },
   {
     href: "/ai",
-    label: "AI",
+    label: "AI Assistant",
     icon: IconMessageChatbot,
   },
 ];
@@ -116,6 +122,12 @@ export const BottomNav = () => {
   const [indicatorStyle, setIndicatorStyle] = useState({ width: 0, left: 0 });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [expenseDialogOpen, setExpenseDialogOpen] = useState(false);
+  const [groupDialogOpen, setGroupDialogOpen] = useState(false);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [accountDialogOpen, setAccountDialogOpen] = useState(false);
+  const createTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const moreTriggerRef = useRef<HTMLButtonElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<(HTMLAnchorElement | HTMLButtonElement | null)[]>([]);
 
@@ -216,6 +228,12 @@ export const BottomNav = () => {
                 key={item.id}
                 ref={(el) => {
                   btnRefs.current[index] = el;
+                  if (item.label === "Create") {
+                    createTriggerRef.current = el;
+                  }
+                  if (item.label === "More") {
+                    moreTriggerRef.current = el;
+                  }
                 }}
                 onClick={() => handleItemClick(index, item)}
                 className={cn(
@@ -251,57 +269,114 @@ export const BottomNav = () => {
       </nav>
 
       {/* Create Drawer */}
-      <Drawer open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DrawerContent aria-describedby="create-drawer-description">
+      <Drawer
+        open={isCreateOpen}
+        onOpenChange={(open) => {
+          setIsCreateOpen(open);
+          if (!open) {
+            requestAnimationFrame(() => createTriggerRef.current?.focus());
+          }
+        }}
+      >
+        <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Create New</DrawerTitle>
-            <DrawerDescription id="create-drawer-description">
-              Create a new expense or group
+            <DrawerDescription>
+              Create a new expense, group, account, or contact
             </DrawerDescription>
           </DrawerHeader>
           <div className="px-4 pb-4 space-y-2">
-            <Link
-              href="/expenses?create=true"
-              onClick={() => setIsCreateOpen(false)}
-              className="flex items-center gap-3 rounded-lg p-4 hover:bg-accent transition-colors"
+            <button
+              type="button"
+              onClick={() => {
+                setIsCreateOpen(false);
+                setExpenseDialogOpen(true);
+              }}
+              className="flex w-full items-center gap-3 rounded-lg p-4 text-left hover:bg-accent transition-colors"
             >
               <div className="rounded-lg bg-primary/10 p-2">
                 <IconReceipt className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="font-medium">Add Expense</p>
+                <p className="font-medium">Add expense</p>
                 <p className="text-sm text-muted-foreground">
-                  Record a new expense
+                  Record a personal or account expense
                 </p>
               </div>
-            </Link>
-            <Link
-              href="/groups?create=true"
-              onClick={() => setIsCreateOpen(false)}
-              className="flex items-center gap-3 rounded-lg p-4 hover:bg-accent transition-colors"
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsCreateOpen(false);
+                setGroupDialogOpen(true);
+              }}
+              className="flex w-full items-center gap-3 rounded-lg p-4 text-left hover:bg-accent transition-colors"
             >
               <div className="rounded-lg bg-primary/10 p-2">
                 <IconUsers className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="font-medium">Create Group</p>
+                <p className="font-medium">Create group</p>
                 <p className="text-sm text-muted-foreground">
-                  Start a new group
+                  Start a group to split bills
                 </p>
               </div>
-            </Link>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsCreateOpen(false);
+                setContactDialogOpen(true);
+              }}
+              className="flex w-full items-center gap-3 rounded-lg p-4 text-left hover:bg-accent transition-colors"
+            >
+              <div className="rounded-lg bg-primary/10 p-2">
+                <IconUserCircle className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium">Add contact</p>
+                <p className="text-sm text-muted-foreground">
+                  Save someone you split with often
+                </p>
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsCreateOpen(false);
+                setAccountDialogOpen(true);
+              }}
+              className="flex w-full items-center gap-3 rounded-lg p-4 text-left hover:bg-accent transition-colors"
+            >
+              <div className="rounded-lg bg-primary/10 p-2">
+                <IconWallet className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium">Add account</p>
+                <p className="text-sm text-muted-foreground">
+                  Track a cash, bank, or card balance
+                </p>
+              </div>
+            </button>
           </div>
         </DrawerContent>
       </Drawer>
 
       {/* More Drawer */}
-      <Drawer open={isMoreOpen} onOpenChange={setIsMoreOpen}>
-        <DrawerContent aria-describedby="more-drawer-description">
+      <Drawer
+        open={isMoreOpen}
+        onOpenChange={(open) => {
+          setIsMoreOpen(open);
+          if (!open) {
+            requestAnimationFrame(() => moreTriggerRef.current?.focus());
+          }
+        }}
+      >
+        <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>More Options</DrawerTitle>
-            <DrawerDescription id="more-drawer-description">
-              Manage your accounts, contacts, categories, analytics, budgets,
-              and recurring expenses
+            <DrawerDescription>
+              Accounts, analytics, budgets, and the rest of PocketPulse
             </DrawerDescription>
           </DrawerHeader>
           <div className="px-4 pb-4 space-y-1">
@@ -329,6 +404,23 @@ export const BottomNav = () => {
       <div
         className="h-20 sm:hidden"
         style={{ height: "calc(5rem + env(safe-area-inset-bottom))" }}
+      />
+
+      <ExpenseFormDialog
+        open={expenseDialogOpen}
+        onOpenChange={setExpenseDialogOpen}
+      />
+      <GroupFormDialog
+        open={groupDialogOpen}
+        onOpenChange={setGroupDialogOpen}
+      />
+      <ContactFormDialog
+        open={contactDialogOpen}
+        onOpenChange={setContactDialogOpen}
+      />
+      <AccountFormDialog
+        open={accountDialogOpen}
+        onOpenChange={setAccountDialogOpen}
       />
     </>
   );

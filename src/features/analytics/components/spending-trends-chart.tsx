@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
@@ -11,7 +11,8 @@ import { IconTrendingUp } from "@tabler/icons-react";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis } from "recharts";
 import type { SpendingTrend } from "../types";
 import { format } from "date-fns";
-import { formatCurrencyCompact } from "@/lib/format";
+import { formatCurrencyCompact, formatCurrency } from "@/lib/format";
+import { MONEY_SEMANTICS } from "@/lib/money-semantics";
 
 type SpendingTrendsChartProps = {
   data: SpendingTrend[];
@@ -37,6 +38,9 @@ export const SpendingTrendsChart = ({
             <IconTrendingUp className="h-5 w-5 text-primary" />
             <CardTitle>Spending Trends</CardTitle>
           </div>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.chartSpendingTrendsSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent className="h-80 flex items-center justify-center">
           <p className="text-muted-foreground">Loading...</p>
@@ -53,6 +57,9 @@ export const SpendingTrendsChart = ({
             <IconTrendingUp className="h-5 w-5 text-primary" />
             <CardTitle>Spending Trends</CardTitle>
           </div>
+          <CardDescription className="text-xs">
+            {MONEY_SEMANTICS.chartSpendingTrendsSubtitle}
+          </CardDescription>
         </CardHeader>
         <CardContent className="h-80 flex items-center justify-center">
           <p className="text-muted-foreground">No data available</p>
@@ -77,6 +84,9 @@ export const SpendingTrendsChart = ({
           <IconTrendingUp className="h-5 w-5 text-primary" />
           <CardTitle>Spending Trends</CardTitle>
         </div>
+        <CardDescription className="text-xs">
+          {MONEY_SEMANTICS.chartSpendingTrendsSubtitle}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -120,6 +130,16 @@ export const SpendingTrendsChart = ({
             />
           </LineChart>
         </ChartContainer>
+        <div className="sr-only">
+          <p>Spending trends numeric summary (INR)</p>
+          <ul>
+            {formattedData.map((row) => (
+              <li key={row.date}>
+                {row.date}: {formatCurrency(row.amount)}
+              </li>
+            ))}
+          </ul>
+        </div>
       </CardContent>
     </Card>
   );

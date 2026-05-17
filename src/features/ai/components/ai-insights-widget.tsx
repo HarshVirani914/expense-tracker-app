@@ -168,7 +168,9 @@ export const AIInsightsWidget = () => {
               AI Spending Insights
             </CardTitle>
             <CardDescription>
-              Personalized insights based on your spending patterns
+              For tips only, from the spending you already entered in PocketPulse
+              (rupees). Not professional advice. Does not change your accounts or
+              expenses.
             </CardDescription>
           </div>
           <Button

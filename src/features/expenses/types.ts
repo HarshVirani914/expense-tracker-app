@@ -26,6 +26,7 @@ export type ExpenseWithRelations = Expense & {
     oweAmount: number
     splitType: string
     splitValue: number
+    contact?: { name: string } | null
   }[]
 }
 

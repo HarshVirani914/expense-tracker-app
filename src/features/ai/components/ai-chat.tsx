@@ -17,7 +17,7 @@ import {
   lastAssistantMessageIsCompleteWithApprovalResponses,
 } from "ai";
 import { ArrowDown } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -39,6 +39,7 @@ type AIChatProps = {
 export const AIChat = ({ className }: AIChatProps) => {
   const [input, setInput] = useState("");
   const [chatId] = useState(() => crypto.randomUUID());
+  const helpTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   const {
     messages,
@@ -144,14 +145,24 @@ export const AIChat = ({ className }: AIChatProps) => {
             Financial assistant
           </p>
           <p className="text-xs text-muted-foreground">
-            Reads your accounts and expenses in this app to answer in context.
-            Confirm any actions before they are saved.
+            Uses the accounts and expenses you added in this app so answers fit
+            your situation. You’ll be asked to confirm before anything new is
+            saved.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2 self-stretch sm:self-auto">
-          <Tooltip>
+          <Tooltip
+            onOpenChange={(open) => {
+              if (!open) {
+                requestAnimationFrame(() =>
+                  helpTriggerRef.current?.focus(),
+                );
+              }
+            }}
+          >
             <TooltipTrigger asChild>
               <Button
+                ref={helpTriggerRef}
                 type="button"
                 variant="ghost"
                 size="icon"
@@ -166,9 +177,9 @@ export const AIChat = ({ className }: AIChatProps) => {
               align="end"
               className="max-w-xs text-xs"
             >
-              Ask in plain language. The assistant can summarize spending,
-              search expenses, and help draft new entries. Sensitive actions may
-              ask you to approve before applying.
+              Ask in your own words. The assistant can sum up spending, find past
+              expenses, or help you add new ones. If it might change your data,
+              it will ask you to approve first.
             </TooltipContent>
           </Tooltip>
           <Button
