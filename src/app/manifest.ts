@@ -7,6 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description:
       "A modern Progressive Web App for tracking expenses, managing budgets, and monitoring financial health across all your devices",
     start_url: "/dashboard",
+    scope: "/",
     display: "standalone",
     background_color: "#ffffff",
     theme_color: "#000000",
@@ -41,10 +42,10 @@ export default function manifest(): MetadataRoute.Manifest {
     screenshots: [],
     shortcuts: [
       {
-        name: "Add Expense",
+        name: "View Expenses",
         short_name: "Expense",
-        description: "Quickly add a new expense",
-        url: "/expenses?create=true",
+        description: "Quickly view your expenses",
+        url: "/expenses",
         icons: [
           {
             src: "/icons/icon-192.png",
