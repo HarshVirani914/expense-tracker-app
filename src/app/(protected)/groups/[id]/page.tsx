@@ -88,7 +88,7 @@ export default function GroupDetailPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex min-w-0 w-full max-w-full flex-col gap-6">
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-48 w-full" />
         <div className="grid gap-6 md:grid-cols-2">
@@ -177,7 +177,7 @@ export default function GroupDetailPage({ params }: PageProps) {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex min-w-0 w-full max-w-full flex-col gap-6">
       <GroupHeader
         groupName={group.name}
         description={group.description || undefined}

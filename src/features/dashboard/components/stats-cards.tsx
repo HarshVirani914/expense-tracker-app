@@ -19,7 +19,7 @@ export const StatsCards = memo(({ stats }: StatsCardsProps) => {
   const topCategory = stats.topCategories[0];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 @xl/dashboard:grid-cols-2 @4xl/dashboard:grid-cols-3">
       <Card className="relative overflow-hidden shadow-none">
         <div className="absolute inset-0 bg-linear-to-br from-red-500/5 to-transparent" />
         <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
@@ -56,7 +56,7 @@ export const StatsCards = memo(({ stats }: StatsCardsProps) => {
         </CardContent>
       </Card>
 
-      <Card className="relative overflow-hidden sm:col-span-2 lg:col-span-1 shadow-none">
+      <Card className="relative col-span-1 overflow-hidden shadow-none @xl/dashboard:col-span-2 @4xl/dashboard:col-span-1">
         <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent" />
         <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium flex items-center gap-2">

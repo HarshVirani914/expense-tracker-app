@@ -20,9 +20,9 @@ export default function AnalyticsPage() {
   const { analytics, isLoading } = useAnalytics(filters)
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex min-w-0 w-full max-w-full flex-col gap-6">
       <FeaturePageHero className="p-4 sm:p-5">
-        <div className="space-y-1">
+        <div className="min-w-0 space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
           <p className="text-muted-foreground">
             {MONEY_SEMANTICS.analyticsPageSubtitle}
@@ -33,9 +33,9 @@ export default function AnalyticsPage() {
       <TimeRangeSelector filters={filters} onFiltersChange={setFilters} />
 
       {isLoading ? (
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Skeleton className="h-96" />
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid min-w-0 gap-6 lg:grid-cols-2">
             <Skeleton className="h-96" />
             <Skeleton className="h-96" />
           </div>
@@ -43,7 +43,7 @@ export default function AnalyticsPage() {
           <Skeleton className="h-96" />
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <InsightsSummary insights={analytics?.insights} isLoading={isLoading} />
 
           <SpendingTrendsChart 
@@ -51,7 +51,7 @@ export default function AnalyticsPage() {
             isLoading={isLoading} 
           />
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid min-w-0 gap-6 lg:grid-cols-2">
             <CategoryBreakdownChart 
               data={analytics?.categoryBreakdown || []} 
               isLoading={isLoading} 

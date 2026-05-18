@@ -50,23 +50,23 @@ export default function BudgetsPage() {
   const totalSpent = budgets?.reduce((sum, b) => sum + b.spent, 0) || 0
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex min-w-0 w-full max-w-full flex-col gap-6">
       <FeaturePageHero className="p-4 sm:p-5">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:justify-between">
-          <div className="space-y-1">
+        <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0 flex-1 space-y-1">
             <h1 className="text-3xl font-bold tracking-tight">Budgets</h1>
             <p className="text-muted-foreground">
               Set spending limits and track your progress
             </p>
           </div>
-          <Button onClick={() => setFormOpen(true)}>
+          <Button onClick={() => setFormOpen(true)} className="shrink-0">
             <IconPlus className="h-4 w-4 mr-2" />
             Add Budget
           </Button>
         </div>
       </FeaturePageHero>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid min-w-0 w-full max-w-full gap-4 md:grid-cols-2">
         <Card className="p-6">
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Total Budgeted</p>

@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
@@ -20,7 +26,7 @@ type MonthlyComparisonChartProps = {
 
 const chartConfig = {
   current: {
-    label: "Recorded spending",
+    label: "Spending",
     color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
@@ -95,8 +101,8 @@ export const MonthlyComparisonChart = ({
               axisLine={false}
               tickMargin={8}
               tickFormatter={(value) => {
-                const parts = value.split(' ')
-                return parts[0]
+                const parts = value.split(" ");
+                return parts[0];
               }}
             />
             <YAxis

@@ -16,7 +16,7 @@ export const FeatureAmbientSurface = ({
   const accent = useMemo(() => getFeatureAccentForPath(pathname), [pathname]);
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col">
+    <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 overflow-hidden"
@@ -28,7 +28,9 @@ export const FeatureAmbientSurface = ({
           )}
         />
       </div>
-      <div className="relative flex min-h-0 flex-1 flex-col">{children}</div>
+      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+        {children}
+      </div>
     </div>
   );
 };

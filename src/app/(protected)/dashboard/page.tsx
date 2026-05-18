@@ -1,5 +1,6 @@
 "use client";
 
+import { FeaturePageHero } from "@/components/layout/feature-page-hero";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,9 +9,7 @@ import { BudgetAlertsWidget } from "@/features/budgets/components/budget-alerts-
 import { AccountBalances } from "@/features/dashboard/components/account-balances";
 import { GroupBalancesSummary } from "@/features/dashboard/components/group-balances-summary";
 import { HeroBalanceCard } from "@/features/dashboard/components/hero-balance-card";
-import { MoneySemanticsHelp } from "@/features/dashboard/components/money-semantics-help";
 import { OutstandingDebtsWidget } from "@/features/dashboard/components/outstanding-debts-widget";
-import { FeaturePageHero } from "@/components/layout/feature-page-hero";
 import { QuickActions } from "@/features/dashboard/components/quick-actions";
 import { RecentExpensesList } from "@/features/dashboard/components/recent-expenses-list";
 import { StatsCards } from "@/features/dashboard/components/stats-cards";
@@ -40,32 +39,32 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-2">
-            <Skeleton className="h-9 w-48 sm:h-10 lg:h-11" />
+      <div className="flex min-w-0 w-full max-w-full flex-col gap-6 @container/dashboard">
+        <div className="flex flex-col gap-4 @4xl/dashboard:flex-row @4xl/dashboard:items-start @4xl/dashboard:justify-between">
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-9 w-48 min-[480px]:h-10 @xl/dashboard:h-11" />
             <Skeleton className="h-4 w-full max-w-md" />
           </div>
-          <Skeleton className="h-10 w-full sm:w-36 shrink-0" />
+          <Skeleton className="h-10 w-full max-w-xs shrink-0 @4xl/dashboard:w-36" />
         </div>
 
         <Skeleton className="h-28 w-full" />
 
         <Skeleton className="h-40 w-full" />
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 @xl/dashboard:grid-cols-2 @4xl/dashboard:grid-cols-3">
           <Skeleton className="h-32" />
           <Skeleton className="h-32" />
-          <Skeleton className="h-32 sm:col-span-2 lg:col-span-1" />
+          <Skeleton className="h-32 @xl/dashboard:col-span-2 @4xl/dashboard:col-span-1" />
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 @xl/dashboard:grid-cols-2">
           <Skeleton className="h-52" />
           <Skeleton className="h-52" />
         </div>
 
-        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:gap-6">
-          <div className="flex flex-col gap-6 lg:col-span-2">
+        <div className="flex flex-col gap-6 @4xl/dashboard:grid @4xl/dashboard:grid-cols-3 @4xl/dashboard:items-start @4xl/dashboard:gap-6">
+          <div className="flex flex-col gap-6 @4xl/dashboard:col-span-2">
             <Skeleton className="h-80 w-full" />
             <Skeleton className="h-64 w-full" />
             <Skeleton className="h-72 w-full" />
@@ -96,23 +95,24 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className="flex flex-col gap-6">
-        <FeaturePageHero className="p-4 sm:p-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-1 min-w-0 flex-1">
+      <div className="flex min-w-0 w-full max-w-full flex-col gap-6 @container/dashboard">
+        <FeaturePageHero className="p-4 sm:p-5 @container/hero">
+          <div className="flex min-w-0 flex-col gap-4 @4xl/hero:flex-row @4xl/hero:items-start @4xl/hero:justify-between">
+            <div className="min-w-0 flex-1 space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                <h1 className="text-2xl font-bold tracking-tight min-[480px]:text-3xl @xl/hero:text-4xl">
                   Welcome back
                   {user?.firstName ? `, ${user.firstName}` : ""}
                 </h1>
-                <MoneySemanticsHelp />
               </div>
-              <p className="text-sm text-muted-foreground sm:text-base">
+              <p className="text-muted-foreground text-sm wrap-break-word @xl/hero:text-base">
                 Here&apos;s an overview of your finances.{" "}
               </p>
             </div>
 
-            <QuickActions />
+            <div className="flex min-w-0 w-full shrink-0 justify-end @4xl/hero:w-auto">
+              <QuickActions />
+            </div>
           </div>
         </FeaturePageHero>
 
@@ -120,12 +120,12 @@ export default function DashboardPage() {
           <Card className="relative overflow-hidden border shadow-none">
             <div className="absolute inset-0 bg-linear-to-br from-purple-500/5 via-blue-500/5 to-transparent" />
             <CardContent className="relative p-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3 flex-1">
+              <div className="flex min-w-0 items-start justify-between gap-4">
+                <div className="flex min-w-0 flex-1 items-start gap-3">
                   <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
                     <IconSparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <div className="flex-1 space-y-3">
+                  <div className="min-w-0 flex-1 space-y-3">
                     <div>
                       <h3 className="font-semibold text-sm mb-1">
                         Ask your AI Assistant
@@ -148,7 +148,7 @@ export default function DashboardPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowAIPrompts(false)}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="shrink-0 text-muted-foreground hover:text-foreground"
                 >
                   Dismiss
                 </Button>
@@ -164,13 +164,13 @@ export default function DashboardPage() {
 
         <StatsCards stats={stats.currentMonth} />
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 @xl/dashboard:grid-cols-2">
           <BudgetAlertsWidget />
           <UpcomingRecurringWidget />
         </div>
 
-        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:items-start">
-          <div className="flex flex-col gap-6 min-w-0 lg:col-span-2">
+        <div className="flex flex-col gap-6 @4xl/dashboard:grid @4xl/dashboard:grid-cols-3 @4xl/dashboard:items-start">
+          <div className="flex min-w-0 flex-col gap-6 @4xl/dashboard:col-span-2">
             <RecentExpensesList expenses={stats.recentExpenses} />
             <AIInsightsWidget />
             <OutstandingDebtsWidget />

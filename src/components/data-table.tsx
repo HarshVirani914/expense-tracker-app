@@ -77,8 +77,8 @@ export function DataTable<TData, TValue>({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-md border">
+    <div className="min-w-0 space-y-4">
+      <div className="w-full max-w-full overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -128,8 +128,8 @@ export function DataTable<TData, TValue>({
       </div>
 
       {pagination && (
-        <div className="flex items-center justify-between px-2">
-          <div className="text-sm text-muted-foreground">
+        <div className="flex min-w-0 flex-col gap-3 px-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="min-w-0 text-sm text-muted-foreground">
             Showing {pagination.pageIndex * pagination.pageSize + 1} to{" "}
             {Math.min(
               (pagination.pageIndex + 1) * pagination.pageSize,
@@ -137,7 +137,7 @@ export function DataTable<TData, TValue>({
             )}{" "}
             of {pagination.total} results
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <Button
               variant="outline"
               size="sm"

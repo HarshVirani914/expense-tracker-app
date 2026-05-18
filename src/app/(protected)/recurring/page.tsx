@@ -81,10 +81,10 @@ export default function RecurringExpensesPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex min-w-0 w-full max-w-full flex-col gap-6">
       <FeaturePageHero className="p-4 sm:p-5">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:justify-between">
-          <div className="space-y-1">
+        <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0 flex-1 space-y-1">
             <h1 className="text-3xl font-bold tracking-tight">
               Recurring Expenses
             </h1>
@@ -92,7 +92,7 @@ export default function RecurringExpensesPage() {
               Automate regular transactions that repeat
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex min-w-0 shrink-0 flex-wrap gap-2">
             <Button
               onClick={handleProcessNow}
               disabled={isProcessing}
@@ -109,7 +109,7 @@ export default function RecurringExpensesPage() {
         </div>
       </FeaturePageHero>
 
-      <Tabs defaultValue="active" className="w-full">
+      <Tabs defaultValue="active" className="min-w-0 w-full max-w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="active">
             Active ({activeExpenses.length})

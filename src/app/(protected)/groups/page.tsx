@@ -54,11 +54,11 @@ function GroupsPageContent() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex min-w-0 w-full max-w-full flex-col gap-6">
       {!isMobile && (
         <FeaturePageHero className="p-4 sm:p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-1">
+          <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="min-w-0 flex-1 space-y-1">
               <h1 className="text-4xl font-bold tracking-tight">Groups</h1>
               <p className="text-muted-foreground text-base">
                 Manage groups and split expenses
@@ -66,7 +66,7 @@ function GroupsPageContent() {
             </div>
             <Button
               onClick={() => setIsDialogOpen(true)}
-              className="gap-2 shadow-lg hover:shadow-xl transition-shadow"
+              className="gap-2 shadow-lg hover:shadow-xl transition-shadow shrink-0"
               size="lg"
             >
               <IconPlus className="h-5 w-5" />
@@ -82,7 +82,7 @@ function GroupsPageContent() {
         <GroupsSummaryCard stats={stats} />
       ) : null}
 
-      <div className="relative">
+      <div className="relative min-w-0 w-full">
         <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search groups..."
@@ -116,7 +116,7 @@ function GroupsPageContent() {
 export default function GroupsPage() {
   return (
     <Suspense fallback={
-      <div className="flex flex-col gap-6">
+      <div className="flex min-w-0 w-full max-w-full flex-col gap-6">
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-48 w-full" />
         <Skeleton className="h-96 w-full" />

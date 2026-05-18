@@ -22,15 +22,15 @@ export default function AIFeaturesPage() {
   const accent = useFeatureAccent();
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 gap-6 w-full max-w-4xl mx-auto pb-6">
+    <div className="mx-auto flex min-h-0 min-w-0 w-full max-w-4xl flex-1 flex-col gap-6 pb-6">
       <FeaturePageHero className="p-4 sm:p-5">
-        <div className="shrink-0 space-y-1">
-          <div className="flex items-center gap-2">
+        <div className="shrink-0 min-w-0 space-y-1">
+          <div className="flex min-w-0 items-center gap-2">
             <IconSparkles
               className={cn("h-7 w-7 shrink-0", accent.icon)}
               aria-hidden
             />
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            <h1 className="min-w-0 text-2xl sm:text-3xl font-bold tracking-tight">
               AI Assistant
             </h1>
           </div>
@@ -43,11 +43,11 @@ export default function AIFeaturesPage() {
         </div>
       </FeaturePageHero>
 
-      <AIChat className="w-full shadow-md" />
+      <AIChat className="min-w-0 w-full shadow-md" />
 
       <section
         aria-label="What this assistant can do"
-        className="shrink-0 grid gap-4 md:grid-cols-2 md:gap-6"
+        className="min-w-0 w-full max-w-full shrink-0 grid gap-4 md:grid-cols-2 md:gap-6"
       >
         <Card className="shadow-none border bg-card/50">
           <CardHeader className="pb-2">

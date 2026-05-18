@@ -28,7 +28,7 @@ const ACCOUNT_ICONS = {
 export const AccountBalances = memo(({ accounts }: AccountBalancesProps) => {
   if (accounts.length === 0) {
     return (
-      <Card className="shadow-none mb-3 sm:mb-0">
+      <Card className="@container/acct shadow-none mb-3 sm:mb-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconWallet className="h-5 w-5 shrink-0 text-primary" />
@@ -46,7 +46,7 @@ export const AccountBalances = memo(({ accounts }: AccountBalancesProps) => {
   }
 
   return (
-    <Card className="shadow-none mb-3 sm:mb-0">
+    <Card className="@container/acct shadow-none mb-3 sm:mb-0">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <IconWallet className="h-5 w-5 shrink-0 text-primary" />
@@ -63,21 +63,21 @@ export const AccountBalances = memo(({ accounts }: AccountBalancesProps) => {
             return (
               <div
                 key={account.id}
-                className="flex items-center justify-between p-3 rounded-lg border"
+                className="flex flex-col gap-3 rounded-lg border p-3 @lg/acct:flex-row @lg/acct:items-center @lg/acct:justify-between"
               >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-full bg-primary/10">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="shrink-0 rounded-full bg-primary/10 p-2">
                     <Icon className="h-4 w-4 text-primary" />
                   </div>
-                  <div>
-                    <p className="font-medium">{account.name}</p>
+                  <div className="min-w-0">
+                    <p className="font-medium wrap-break-word">{account.name}</p>
                     <Badge variant="secondary" className="text-xs">
                       {account.type.replace("_", " ")}
                     </Badge>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold">
+                <div className="flex shrink-0 flex-col gap-0.5 @lg/acct:items-end">
+                  <p className="font-semibold tabular-nums">
                     {formatCurrency(account.currentBalance)}
                   </p>
                   <p className="text-xs text-muted-foreground">

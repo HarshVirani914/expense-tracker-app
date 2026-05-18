@@ -135,7 +135,7 @@ export const AIChat = ({ className }: AIChatProps) => {
   return (
     <div
       className={cn(
-        "flex flex-col min-h-[min(520px,calc(100dvh-14rem))] md:min-h-[min(640px,calc(100dvh-12rem))] rounded-xl border bg-card shadow-sm relative overflow-hidden",
+        "flex min-w-0 flex-col min-h-[min(520px,calc(100dvh-14rem))] md:min-h-[min(640px,calc(100dvh-12rem))] rounded-xl border bg-card shadow-sm relative overflow-hidden",
         className,
       )}
     >

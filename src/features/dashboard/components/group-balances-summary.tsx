@@ -15,7 +15,7 @@ export const GroupBalancesSummary = () => {
 
   if (groupsLoading) {
     return (
-      <Card className="shadow-none">
+      <Card className="@container/grp shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconUsers className="h-5 w-5 text-primary" />
@@ -36,7 +36,7 @@ export const GroupBalancesSummary = () => {
 
   if (!groups || groups.length === 0) {
     return (
-      <Card className="shadow-none">
+      <Card className="@container/grp shadow-none">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconUsers className="h-5 w-5 text-primary" />
@@ -67,7 +67,7 @@ export const GroupBalancesSummary = () => {
   const activeGroups = groups.slice(0, 3);
 
   return (
-    <Card className="shadow-none">
+    <Card className="@container/grp shadow-none">
       <CardHeader className="space-y-3">
         <div className="flex flex-row items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2">
@@ -114,19 +114,19 @@ const GroupBalanceItem = ({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-between p-3 rounded-lg border">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full bg-primary/10">
+      <div className="flex flex-col gap-2 rounded-lg border p-3 @lg/grp:flex-row @lg/grp:items-center @lg/grp:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="shrink-0 rounded-full bg-primary/10 p-2">
             <IconUsers className="h-4 w-4 text-primary" />
           </div>
-          <div>
-            <p className="font-medium">{groupName}</p>
+          <div className="min-w-0">
+            <p className="font-medium wrap-break-word">{groupName}</p>
             <p className="text-xs text-muted-foreground">
               {memberCount} members
             </p>
           </div>
         </div>
-        <IconLoader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+        <IconLoader2 className="h-4 w-4 shrink-0 animate-spin text-muted-foreground @lg/grp:ml-auto" />
       </div>
     );
   }
@@ -136,32 +136,32 @@ const GroupBalanceItem = ({
 
   return (
     <Link href={`/groups/${groupId}`}>
-      <div className="flex items-center justify-between p-3 rounded-lg border hover:border-primary hover:text-primary transition-colors cursor-pointer">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full bg-primary/10">
+      <div className="flex cursor-pointer flex-col gap-2 rounded-lg border p-3 transition-colors hover:border-primary hover:text-primary @lg/grp:flex-row @lg/grp:items-center @lg/grp:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="shrink-0 rounded-full bg-primary/10 p-2">
             <IconUsers className="h-4 w-4 text-primary" />
           </div>
-          <div>
-            <p className="font-medium">{groupName}</p>
+          <div className="min-w-0">
+            <p className="font-medium wrap-break-word">{groupName}</p>
             <p className="text-xs text-muted-foreground">
               {memberCount} members
             </p>
           </div>
         </div>
-        <div className="text-right">
+        <div className="min-w-0 @lg/grp:shrink-0 @lg/grp:text-right">
           {owedAmount === 0 ? (
             <Badge variant="secondary">Settled up</Badge>
           ) : (
             <>
               <p
-                className={`font-semibold ${
+                className={`font-semibold tabular-nums ${
                   owedAmount > 0 ? "text-green-600" : "text-red-600"
                 }`}
               >
                 {owedAmount > 0 ? "+" : ""}
                 {formatCurrency(owedAmount)}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground wrap-break-word">
                 {owedAmount > 0
                   ? "Net owed to you in this group"
                   : "Net you owe in this group"}

@@ -18,12 +18,12 @@ export const FeaturePageHero = ({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/60",
+        "relative w-full min-w-0 overflow-hidden rounded-2xl border border-border/60",
         accent.pageHeroTint,
         className,
       )}
     >
-      <div className="relative z-10">{children}</div>
+      <div className="relative z-10 min-w-0 w-full">{children}</div>
     </div>
   );
 };
