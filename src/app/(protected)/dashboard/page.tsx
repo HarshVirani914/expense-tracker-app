@@ -111,9 +111,8 @@ export default function DashboardPage() {
                 Here&apos;s an overview of your finances.{" "}
               </p>
             </div>
-            <div className="w-full shrink-0 sm:w-auto flex justify-stretch sm:justify-end min-w-0">
-              <QuickActions />
-            </div>
+
+            <QuickActions />
           </div>
         </FeaturePageHero>
 

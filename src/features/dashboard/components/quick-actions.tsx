@@ -13,10 +13,7 @@ import { AccountFormDialog } from "@/features/accounts/components/account-form-d
 import { ContactFormDialog } from "@/features/contacts/components/contact-form-dialog";
 import { ExpenseFormDialog } from "@/features/expenses/components/expense-form-dialog";
 import { GroupFormDialog } from "@/features/groups/components/group-form-dialog";
-import {
-  featureAccents,
-  type FeatureAccentId,
-} from "@/lib/feature-accents";
+import { featureAccents, type FeatureAccentId } from "@/lib/feature-accents";
 import { cn } from "@/lib/utils";
 import {
   IconChevronDown,
@@ -78,37 +75,35 @@ export const QuickActions = () => {
   return (
     <>
       {isMobile ? (
-        <div className="w-full">
-          <div className="flex gap-3 pb-2 min-w-max px-1">
-            {actions.map((action) => {
-              const accent = featureAccents[action.accentId];
-              const Icon = action.icon;
-              return (
-                <button
-                  key={action.id}
-                  type="button"
-                  onClick={action.onClick}
-                  className="group flex w-full flex-col items-center gap-2 rounded-xl border border-border/70 bg-card/80 p-4 shadow-none backdrop-blur-sm transition-shadow hover:shadow-sm"
+        <div className="flex gap-3 pb-2 px-1 justify-center">
+          {actions.map((action) => {
+            const accent = featureAccents[action.accentId];
+            const Icon = action.icon;
+            return (
+              <button
+                key={action.id}
+                type="button"
+                onClick={action.onClick}
+                className="group flex w-full flex-col items-center gap-2 rounded-xl border border-border/70 bg-card/80 p-4 shadow-none backdrop-blur-sm transition-shadow hover:shadow-sm shrink"
+              >
+                <div
+                  className={cn(
+                    "flex shrink-0 rounded-full p-3 transition-colors",
+                    accent.iconBg,
+                    accent.icon,
+                    accent.iconBgHover,
+                  )}
                 >
-                  <div
-                    className={cn(
-                      "flex shrink-0 rounded-full p-3 transition-colors",
-                      accent.iconBg,
-                      accent.icon,
-                      accent.iconBgHover,
-                    )}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <span className="text-xs font-medium text-center leading-tight">
-                    {action.label.split(" ")[0]}
-                    <br />
-                    {action.label.split(" ").slice(1).join(" ")}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <span className="text-xs font-medium text-center leading-tight">
+                  {action.label.split(" ")[0]}
+                  <br />
+                  {action.label.split(" ").slice(1).join(" ")}
+                </span>
+              </button>
+            );
+          })}
         </div>
       ) : (
         <DropdownMenu>

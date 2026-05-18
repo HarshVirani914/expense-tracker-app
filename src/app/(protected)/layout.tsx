@@ -5,22 +5,19 @@ import { OfflineIndicator } from "@/components/layout/offline-indicator";
 import { InstallPrompt } from "@/components/layout/install-prompt";
 import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import { UserButton } from "@clerk/nextjs";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { ProtectedSidebarProvider } from "@/components/layout/protected-sidebar-provider";
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import type { ReactNode } from "react";
 import Image from "next/image";
 
 export default function ProtectedLayout({ children }: { children: ReactNode }) {
   return (
-    <SidebarProvider>
+    <ProtectedSidebarProvider>
       <AppSidebar />
       <SidebarInset>
         <FeatureAmbientSurface>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <header className="flex h-16 shrink-0 items-center gap-2 border-0 md:border-b px-4">
             <SidebarTrigger className="-ml-1 hidden md:flex" />
             <Separator
               orientation="vertical"
@@ -57,6 +54,6 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
       <BottomNav />
       <OfflineIndicator />
       <InstallPrompt />
-    </SidebarProvider>
+    </ProtectedSidebarProvider>
   );
 }

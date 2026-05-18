@@ -23,7 +23,7 @@ export const FeatureAmbientSurface = ({
       >
         <div
           className={cn(
-            "absolute -top-36 left-1/2 h-[26rem] w-[min(130%,52rem)] -translate-x-1/2 rounded-[100%] blur-[72px] saturate-150 motion-safe:transition-colors motion-safe:duration-500",
+            "absolute -top-36 left-1/2 h-104 w-[min(130%,52rem)] -translate-x-1/2 rounded-[100%] blur-[72px] saturate-150 motion-safe:transition-colors motion-safe:duration-500",
             accent.pageAmbientBlob,
           )}
         />

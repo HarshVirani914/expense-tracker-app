@@ -462,7 +462,7 @@ export const BottomNav = () => {
           }
         }}
       >
-        <DrawerContent className="flex max-h-[90dvh] flex-col">
+        <DrawerContent className="flex flex-col">
           <DrawerHeader className="shrink-0 pb-2 text-left sm:text-left">
             <DrawerTitle className="text-lg">Explore</DrawerTitle>
             <DrawerDescription className="text-pretty">
@@ -470,7 +470,7 @@ export const BottomNav = () => {
             </DrawerDescription>
           </DrawerHeader>
           <div className="min-h-0 max-h-[min(65dvh,560px)] px-4 pb-6 [-webkit-overflow-scrolling:touch]">
-            <div className="space-y-5 pr-3">
+            <div className="space-y-5">
               {moreNavSections.map((section) => (
                 <div key={section.title} className="space-y-2.5">
                   <p className="px-0.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
