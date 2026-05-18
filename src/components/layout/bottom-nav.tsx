@@ -252,6 +252,7 @@ export const BottomNav = () => {
           ref={containerRef}
           className={cn(
             "relative isolate flex items-center justify-between overflow-hidden rounded-full px-2 py-2",
+            "[@media(max-height:520px)]:px-1.5 [@media(max-height:520px)]:py-1",
             "border border-border/45 bg-background/45 dark:border-white/10 dark:bg-background/35",
             "shadow-lg shadow-black/8 ring-1 ring-inset ring-white/25",
             "dark:shadow-black/40 dark:ring-white/10",
@@ -273,7 +274,8 @@ export const BottomNav = () => {
                   }}
                   onClick={() => handleItemClick(index, item)}
                   className={cn(
-                    "relative z-10 flex flex-col items-center justify-center flex-1 px-3 py-2.5 text-sm font-medium transition-colors rounded-full",
+                    "relative z-10 flex flex-col items-center justify-center flex-1 rounded-full px-3 py-2.5 text-sm font-medium transition-colors",
+                    "[@media(max-height:520px)]:px-2 [@media(max-height:520px)]:py-1.5",
                     isItemActive
                       ? itemAccent.navActive
                       : "text-muted-foreground hover:text-foreground",
@@ -302,7 +304,8 @@ export const BottomNav = () => {
                 }}
                 onClick={() => handleItemClick(index, item)}
                 className={cn(
-                  "relative z-10 flex flex-col items-center justify-center flex-1 px-3 py-2.5 text-sm font-medium transition-colors rounded-full",
+                  "relative z-10 flex flex-col items-center justify-center flex-1 rounded-full px-3 py-2.5 text-sm font-medium transition-colors",
+                  "[@media(max-height:520px)]:px-2 [@media(max-height:520px)]:py-1.5",
                   item.label === "Create"
                     ? "text-primary"
                     : item.label === "More" && isMoreRouteActive
@@ -348,14 +351,15 @@ export const BottomNav = () => {
           }
         }}
       >
-        <DrawerContent>
-          <DrawerHeader>
+        <DrawerContent className="flex max-h-[85dvh] min-h-0 flex-col overflow-hidden">
+          <DrawerHeader className="shrink-0">
             <DrawerTitle>Create New</DrawerTitle>
             <DrawerDescription>
               Create a new expense, group, account, or contact
             </DrawerDescription>
           </DrawerHeader>
-          <div className="px-4 pb-4 space-y-2">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 [-webkit-overflow-scrolling:touch]">
+            <div className="space-y-2">
             <button
               type="button"
               onClick={() => {
@@ -448,6 +452,7 @@ export const BottomNav = () => {
                 </p>
               </div>
             </button>
+            </div>
           </div>
         </DrawerContent>
       </Drawer>
@@ -462,14 +467,14 @@ export const BottomNav = () => {
           }
         }}
       >
-        <DrawerContent className="flex flex-col">
+        <DrawerContent className="flex max-h-[85dvh] min-h-0 flex-col overflow-hidden">
           <DrawerHeader className="shrink-0 pb-2 text-left sm:text-left">
             <DrawerTitle className="text-lg">Explore</DrawerTitle>
             <DrawerDescription className="text-pretty">
               Jump to accounts, insights, and tools
             </DrawerDescription>
           </DrawerHeader>
-          <div className="min-h-0 max-h-[min(65dvh,560px)] px-4 pb-6 [-webkit-overflow-scrolling:touch]">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6 [-webkit-overflow-scrolling:touch]">
             <div className="space-y-5">
               {moreNavSections.map((section) => (
                 <div key={section.title} className="space-y-2.5">

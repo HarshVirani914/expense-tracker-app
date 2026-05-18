@@ -24,7 +24,11 @@ type RecentExpensesListProps = {
   expenses: ExpenseWithRelations[];
 };
 
-const RecentExpenseCardRow = ({ expense }: { expense: ExpenseWithRelations }) => (
+const RecentExpenseCardRow = ({
+  expense,
+}: {
+  expense: ExpenseWithRelations;
+}) => (
   <div className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent/50">
     <div
       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
@@ -76,17 +80,38 @@ const RecentExpenseCardRow = ({ expense }: { expense: ExpenseWithRelations }) =>
   </div>
 );
 
+const MOBILE_CARD_PREVIEW_LIMIT = 5;
+
 const RecentExpensesCardList = ({
   expenses,
+  maxItems,
 }: {
   expenses: ExpenseWithRelations[];
-}) => (
-  <div className="space-y-2">
-    {expenses.map((expense) => (
-      <RecentExpenseCardRow key={expense.id} expense={expense} />
-    ))}
-  </div>
-);
+  maxItems?: number;
+}) => {
+  const items = maxItems !== undefined ? expenses.slice(0, maxItems) : expenses;
+
+  return (
+    <>
+      <div className="space-y-2">
+        {items.map((expense) => (
+          <RecentExpenseCardRow key={expense.id} expense={expense} />
+        ))}
+      </div>
+      {maxItems !== undefined && expenses.length > maxItems ? (
+        <p className="pt-4 text-center text-xs text-muted-foreground">
+          Showing {maxItems} of {expenses.length}.{" "}
+          <Link
+            href="/expenses"
+            className="font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            View all
+          </Link>
+        </p>
+      ) : null}
+    </>
+  );
+};
 
 export const RecentExpensesList = memo(
   ({ expenses }: RecentExpensesListProps) => {
@@ -132,98 +157,96 @@ export const RecentExpensesList = memo(
         </CardHeader>
         <CardContent className="min-w-0">
           {isMobile ? (
-            <RecentExpensesCardList expenses={expenses} />
+            <RecentExpensesCardList
+              expenses={expenses}
+              maxItems={MOBILE_CARD_PREVIEW_LIMIT}
+            />
           ) : (
-            <>
-              <div className="@lg/recent:hidden">
-                <RecentExpensesCardList expenses={expenses} />
-              </div>
-              <div className="hidden min-w-0 overflow-x-auto @lg/recent:block">
-                <Table className="min-w-xl">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-18 whitespace-nowrap">
-                        Date
-                      </TableHead>
-                      <TableHead className="min-w-32 max-w-56">
-                        Description
-                      </TableHead>
-                      <TableHead className="min-w-28">Type</TableHead>
-                      <TableHead className="min-w-24">Category</TableHead>
-                      <TableHead className="w-24 text-right whitespace-nowrap">
-                        Amount
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {expenses.map((expense) => (
-                      <TableRow key={expense.id} className="cursor-pointer">
-                        <TableCell className="whitespace-nowrap font-medium">
-                          {format(new Date(expense.date), "MMM dd")}
-                        </TableCell>
-                        <TableCell className="min-w-0 max-w-56">
-                          <span className="block truncate">
-                            {expense.description || "No description"}
-                          </span>
-                        </TableCell>
-                        <TableCell className="min-w-0">
-                          <div className="flex min-w-0 flex-wrap items-center gap-1">
-                            {expense.type === "INCOME" ? (
-                              <Badge className="shrink-0 bg-green-600 text-xs">
-                                Income
-                              </Badge>
-                            ) : (
-                              <Badge
-                                variant="destructive"
-                                className="shrink-0 text-xs"
-                              >
-                                Expense
-                              </Badge>
-                            )}
-                            {expense.group && (
-                              <Link href={`/groups/${expense.group.id}`}>
-                                <Badge
-                                  variant="outline"
-                                  className="max-w-40 cursor-pointer gap-1 truncate text-xs hover:border-primary hover:text-primary"
-                                >
-                                  <IconUsers className="h-3 w-3 shrink-0" />
-                                  <span className="truncate">
-                                    {expense.group.name}
-                                  </span>
-                                </Badge>
-                              </Link>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="whitespace-nowrap">
-                          <Badge
-                            variant="outline"
-                            className="max-w-36 truncate"
-                            style={{
-                              borderColor: expense.category.color,
-                              color: expense.category.color,
-                            }}
-                          >
-                            {expense.category.name}
-                          </Badge>
-                        </TableCell>
-                        <TableCell
-                          className={cn(
-                            "whitespace-nowrap text-right font-medium tabular-nums",
-                            expense.type === "INCOME"
-                              ? "text-green-600 dark:text-green-400"
-                              : "text-red-600 dark:text-red-400",
+            <div className="hidden min-w-0 overflow-x-auto @lg/recent:block">
+              <Table className="min-w-xl">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-18 whitespace-nowrap">
+                      Date
+                    </TableHead>
+                    <TableHead className="min-w-32 max-w-56">
+                      Description
+                    </TableHead>
+                    <TableHead className="min-w-28">Type</TableHead>
+                    <TableHead className="min-w-24">Category</TableHead>
+                    <TableHead className="w-24 text-right whitespace-nowrap">
+                      Amount
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {expenses.map((expense) => (
+                    <TableRow key={expense.id} className="cursor-pointer">
+                      <TableCell className="whitespace-nowrap font-medium">
+                        {format(new Date(expense.date), "MMM dd")}
+                      </TableCell>
+                      <TableCell className="min-w-0 max-w-56">
+                        <span className="block truncate">
+                          {expense.description || "No description"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="min-w-0">
+                        <div className="flex min-w-0 flex-wrap items-center gap-1">
+                          {expense.type === "INCOME" ? (
+                            <Badge className="shrink-0 bg-green-600 text-xs">
+                              Income
+                            </Badge>
+                          ) : (
+                            <Badge
+                              variant="destructive"
+                              className="shrink-0 text-xs"
+                            >
+                              Expense
+                            </Badge>
                           )}
+                          {expense.group && (
+                            <Link href={`/groups/${expense.group.id}`}>
+                              <Badge
+                                variant="outline"
+                                className="max-w-40 cursor-pointer gap-1 truncate text-xs hover:border-primary hover:text-primary"
+                              >
+                                <IconUsers className="h-3 w-3 shrink-0" />
+                                <span className="truncate">
+                                  {expense.group.name}
+                                </span>
+                              </Badge>
+                            </Link>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        <Badge
+                          variant="outline"
+                          className="max-w-36 truncate"
+                          style={{
+                            borderColor: expense.category.color,
+                            color: expense.category.color,
+                          }}
                         >
-                          {expense.type === "INCOME" ? "+" : "-"}
-                          {formatCurrency(Number(expense.amount))}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </>
+                          {expense.category.name}
+                        </Badge>
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          "whitespace-nowrap text-right font-medium tabular-nums",
+                          expense.type === "INCOME"
+                            ? "text-green-600 dark:text-green-400"
+                            : "text-red-600 dark:text-red-400",
+                        )}
+                      >
+                        {expense.type === "INCOME" ? "+" : "-"}
+                        {formatCurrency(Number(expense.amount))}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

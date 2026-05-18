@@ -10,7 +10,7 @@ import { AccountBalances } from "@/features/dashboard/components/account-balance
 import { GroupBalancesSummary } from "@/features/dashboard/components/group-balances-summary";
 import { HeroBalanceCard } from "@/features/dashboard/components/hero-balance-card";
 import { OutstandingDebtsWidget } from "@/features/dashboard/components/outstanding-debts-widget";
-import { QuickActions } from "@/features/dashboard/components/quick-actions";
+import { QuickActionsDesktopTrigger, QuickActionsMobileTiles, QuickActionsProvider } from "@/features/dashboard/components/quick-actions";
 import { RecentExpensesList } from "@/features/dashboard/components/recent-expenses-list";
 import { StatsCards } from "@/features/dashboard/components/stats-cards";
 import { useDashboardStats } from "@/features/dashboard/hooks";
@@ -39,39 +39,39 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-w-0 w-full max-w-full flex-col gap-6 @container/dashboard">
-        <div className="flex flex-col gap-4 @4xl/dashboard:flex-row @4xl/dashboard:items-start @4xl/dashboard:justify-between">
+      <div className="flex min-w-0 w-full max-w-full flex-col gap-4 md:gap-6 @container/dashboard">
+        <div className="order-1 flex flex-col gap-4 @4xl/dashboard:flex-row @4xl/dashboard:items-start @4xl/dashboard:justify-between">
           <div className="min-w-0 flex-1 space-y-2">
-            <Skeleton className="h-9 w-48 min-[480px]:h-10 @xl/dashboard:h-11" />
-            <Skeleton className="h-4 w-full max-w-md" />
+            <Skeleton className="h-8 w-40 min-[480px]:h-9 @xl/dashboard:h-10" />
+            <Skeleton className="hidden h-4 w-full max-w-md md:block" />
           </div>
-          <Skeleton className="h-10 w-full max-w-xs shrink-0 @4xl/dashboard:w-36" />
+          <Skeleton className="hidden h-10 w-full max-w-xs shrink-0 @4xl/dashboard:block @4xl/dashboard:w-36" />
         </div>
 
-        <Skeleton className="h-28 w-full" />
+        <Skeleton className="order-2 h-32 w-full md:order-3 md:h-36" />
 
-        <Skeleton className="h-40 w-full" />
+        <Skeleton className="order-3 h-28 w-full md:hidden" />
 
-        <div className="grid grid-cols-1 gap-4 @xl/dashboard:grid-cols-2 @4xl/dashboard:grid-cols-3">
+        <div className="order-4 grid grid-cols-1 gap-4 @xl/dashboard:grid-cols-2 @4xl/dashboard:grid-cols-3 md:order-4">
           <Skeleton className="h-32" />
           <Skeleton className="h-32" />
           <Skeleton className="h-32 @xl/dashboard:col-span-2 @4xl/dashboard:col-span-1" />
         </div>
 
-        <div className="grid grid-cols-1 gap-6 @xl/dashboard:grid-cols-2">
+        <div className="order-5 grid grid-cols-1 gap-4 @xl/dashboard:grid-cols-2 md:order-5 md:gap-6">
           <Skeleton className="h-52" />
           <Skeleton className="h-52" />
         </div>
 
-        <div className="flex flex-col gap-6 @4xl/dashboard:grid @4xl/dashboard:grid-cols-3 @4xl/dashboard:items-start @4xl/dashboard:gap-6">
-          <div className="flex flex-col gap-6 @4xl/dashboard:col-span-2">
-            <Skeleton className="h-80 w-full" />
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-72 w-full" />
+        <div className="order-6 flex flex-col gap-4 @4xl/dashboard:grid @4xl/dashboard:grid-cols-3 @4xl/dashboard:items-start md:gap-6">
+          <div className="flex flex-col gap-4 @4xl/dashboard:col-span-2 md:gap-6">
+            <Skeleton className="h-72 w-full md:h-80" />
+            <Skeleton className="h-56 w-full md:h-64" />
+            <Skeleton className="h-64 w-full md:h-72" />
           </div>
-          <div className="flex flex-col gap-6">
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-64 w-full" />
+          <div className="flex flex-col gap-4 md:gap-6">
+            <Skeleton className="h-56 w-full md:h-64" />
+            <Skeleton className="h-56 w-full md:h-64" />
           </div>
         </div>
       </div>
@@ -94,103 +94,113 @@ export default function DashboardPage() {
   );
 
   return (
-    <>
-      <div className="flex min-w-0 w-full max-w-full flex-col gap-6 @container/dashboard">
-        <FeaturePageHero className="p-4 sm:p-5 @container/hero">
-          <div className="flex min-w-0 flex-col gap-4 @4xl/hero:flex-row @4xl/hero:items-start @4xl/hero:justify-between">
-            <div className="min-w-0 flex-1 space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight min-[480px]:text-3xl @xl/hero:text-4xl">
-                  Welcome back
-                  {user?.firstName ? `, ${user.firstName}` : ""}
-                </h1>
-              </div>
-              <p className="text-muted-foreground text-sm wrap-break-word @xl/hero:text-base">
-                Here&apos;s an overview of your finances.{" "}
-              </p>
-            </div>
-
-            <div className="flex min-w-0 w-full shrink-0 justify-end @4xl/hero:w-auto">
-              <QuickActions />
-            </div>
-          </div>
-        </FeaturePageHero>
-
-        {showAIPrompts && (
-          <Card className="relative overflow-hidden border shadow-none">
-            <div className="absolute inset-0 bg-linear-to-br from-purple-500/5 via-blue-500/5 to-transparent" />
-            <CardContent className="relative p-4">
-              <div className="flex min-w-0 items-start justify-between gap-4">
-                <div className="flex min-w-0 flex-1 items-start gap-3">
-                  <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
-                    <IconSparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div className="min-w-0 flex-1 space-y-3">
-                    <div>
-                      <h3 className="font-semibold text-sm mb-1">
-                        Ask your AI Assistant
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        Get instant insights, add expenses, or analyze your
-                        spending
-                      </p>
-                    </div>
-
-                    <Link href="/ai">
-                      <Button size="sm" className="gap-2">
-                        <IconMessageChatbot className="w-3.5 h-3.5" />
-                        Open AI Chat
-                      </Button>
-                    </Link>
-                  </div>
+    <QuickActionsProvider>
+      <>
+        <div className="flex min-w-0 w-full max-w-full flex-col gap-4 md:gap-6 @container/dashboard">
+          <FeaturePageHero className="order-1 p-3 sm:p-4 md:p-5 @container/hero">
+            <div className="flex min-w-0 flex-col gap-3 @4xl/hero:flex-row @4xl/hero:items-start @4xl/hero:justify-between md:gap-4">
+              <div className="min-w-0 flex-1 space-y-0.5 md:space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-xl font-bold tracking-tight min-[480px]:text-2xl md:text-2xl @xl/hero:text-4xl">
+                    Welcome back
+                    {user?.firstName ? `, ${user.firstName}` : ""}
+                  </h1>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAIPrompts(false)}
-                  className="shrink-0 text-muted-foreground hover:text-foreground"
-                >
-                  Dismiss
-                </Button>
+                <p className="hidden text-muted-foreground text-sm wrap-break-word md:block @xl/hero:text-base">
+                  Here&apos;s an overview of your finances.{" "}
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        )}
 
-        <HeroBalanceCard
-          totalAccountBalance={totalAccountBalance}
-          monthlyNet={stats.currentMonth.netBalance}
-        />
+              <QuickActionsDesktopTrigger className="hidden min-w-0 shrink-0 @md:flex @md:w-full @md:justify-center @4xl/hero:w-auto @4xl/hero:justify-end" />
+            </div>
+          </FeaturePageHero>
 
-        <StatsCards stats={stats.currentMonth} />
+          {showAIPrompts && (
+            <Card className="relative order-2 hidden overflow-hidden border shadow-none md:block">
+              <div className="absolute inset-0 bg-linear-to-br from-purple-500/5 via-blue-500/5 to-transparent" />
+              <CardContent className="relative p-4">
+                <div className="flex min-w-0 items-start justify-between gap-4">
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-500/10">
+                      <IconSparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-3">
+                      <div>
+                        <h3 className="mb-1 text-sm font-semibold">
+                          Ask your AI Assistant
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          Get instant insights, add expenses, or analyze your
+                          spending
+                        </p>
+                      </div>
 
-        <div className="grid grid-cols-1 gap-6 @xl/dashboard:grid-cols-2">
-          <BudgetAlertsWidget />
-          <UpcomingRecurringWidget />
-        </div>
+                      <Link href="/ai">
+                        <Button size="sm" className="gap-2">
+                          <IconMessageChatbot className="h-3.5 w-3.5" />
+                          Open AI Chat
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAIPrompts(false)}
+                    className="shrink-0 text-muted-foreground hover:text-foreground"
+                  >
+                    Dismiss
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-        <div className="flex flex-col gap-6 @4xl/dashboard:grid @4xl/dashboard:grid-cols-3 @4xl/dashboard:items-start">
-          <div className="flex min-w-0 flex-col gap-6 @4xl/dashboard:col-span-2">
-            <RecentExpensesList expenses={stats.recentExpenses} />
-            <AIInsightsWidget />
-            <OutstandingDebtsWidget />
+          <div className="order-2 md:order-3">
+            <HeroBalanceCard
+              totalAccountBalance={totalAccountBalance}
+              monthlyNet={stats.currentMonth.netBalance}
+            />
           </div>
-          <aside className="flex flex-col gap-6 min-w-0">
-            <GroupBalancesSummary />
-            <AccountBalances accounts={stats.accounts} />
-          </aside>
-        </div>
-      </div>
 
-      {/* Floating AI Assistant Button */}
-      <Link href="/ai">
-        <Button
-          size="lg"
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-2xl z-50 hover:scale-110 transition-all bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600"
-        >
-          <IconSparkles className="h-6 w-6" />
-        </Button>
-      </Link>
-    </>
+          <div className="order-3 md:hidden">
+            <p className="mb-2 text-xs font-medium text-muted-foreground">
+              Quick actions
+            </p>
+            <QuickActionsMobileTiles />
+          </div>
+
+          <div className="order-4 md:order-4">
+            <StatsCards stats={stats.currentMonth} />
+          </div>
+
+          <div className="order-5 grid grid-cols-1 gap-4 @xl/dashboard:grid-cols-2 md:order-5 md:gap-6">
+            <BudgetAlertsWidget />
+            <UpcomingRecurringWidget />
+          </div>
+
+          <div className="order-6 flex flex-col gap-4 @4xl/dashboard:grid @4xl/dashboard:grid-cols-3 @4xl/dashboard:items-start md:order-6 md:gap-6">
+            <div className="flex min-w-0 flex-col gap-4 @4xl/dashboard:col-span-2 md:gap-6">
+              <RecentExpensesList expenses={stats.recentExpenses} />
+              <AIInsightsWidget />
+              <OutstandingDebtsWidget />
+            </div>
+            <aside className="flex min-w-0 flex-col gap-4 md:gap-6">
+              <GroupBalancesSummary />
+              <AccountBalances accounts={stats.accounts} />
+            </aside>
+          </div>
+        </div>
+
+        <Link href="/ai" aria-label="Open AI assistant">
+          <Button
+            size="lg"
+            className="fixed right-4 z-50 h-14 w-14 rounded-full shadow-2xl max-md:bottom-24 hover:scale-110 md:bottom-6 md:right-6 transition-all bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600"
+          >
+            <IconSparkles className="h-6 w-6" />
+          </Button>
+        </Link>
+      </>
+    </QuickActionsProvider>
   );
 }

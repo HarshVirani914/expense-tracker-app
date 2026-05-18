@@ -31,19 +31,21 @@ export const HeroBalanceCard = memo(
       >
         <div className="absolute inset-0 bg-grid-white/10 mask-[radial-gradient(white,transparent_70%)]" />
 
-        <div className="relative p-6 space-y-4">
+        <div className="relative space-y-3 p-4 md:space-y-4 md:p-6">
           <div className="flex items-center gap-2">
             <IconWallet className={cn("h-5 w-5 shrink-0", accent.icon)} />
             <div>
-              <p className="text-lg font-medium leading-tight">Account balance</p>
-              <p className="text-xs text-muted-foreground font-normal">
+              <p className="text-base leading-tight font-medium md:text-lg">
+                Account balance
+              </p>
+              <p className="text-xs font-normal text-muted-foreground">
                 {MONEY_SEMANTICS.heroAccountSubtitle}
               </p>
             </div>
           </div>
 
           <div className="space-y-2">
-            <div className="text-4xl font-bold tracking-tight font-mono">
+            <div className="font-mono text-3xl font-bold tracking-tight md:text-4xl">
               {formatCurrency(totalAccountBalance)}
             </div>
 
