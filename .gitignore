@@ -51,6 +51,9 @@ next-env.d.ts
 # agents
 .agents
 
+# .claude
+.claude
+
 
 # generated
 /src/generated/prisma

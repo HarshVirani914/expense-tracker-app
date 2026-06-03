@@ -62,7 +62,11 @@ export async function withModelFallback<T>(
         error instanceof Error &&
         (error.message.includes("high demand") ||
           error.message.includes("UNAVAILABLE") ||
-          error.message.includes("503"));
+          error.message.includes("503") ||
+          // Google Gemini quota exhaustion — separate from rate limiting
+          error.message.includes("RESOURCE_EXHAUSTED") ||
+          error.message.includes("overloaded") ||
+          error.message.includes("529"));
 
       // If it's not retryable or we're on the last model, throw
       if (!isRetryable || i === fallbackChain.length - 1) {

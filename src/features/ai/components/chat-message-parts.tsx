@@ -2,11 +2,11 @@
 
 import type { ChatAddToolApproveResponseFunction } from "ai";
 import { isTextUIPart, isToolUIPart } from "ai";
-import { IconLoader } from "@tabler/icons-react";
 import type { ChatMessage } from "@/lib/ai/chat-message";
 import { ChatAssistantMarkdown } from "@/features/ai/components/chat-assistant-markdown";
 import { ChatToolCreateExpense } from "@/features/ai/components/chat-tool-create-expense";
 import { ChatToolExpenseMutation } from "@/features/ai/components/chat-tool-expense-mutation";
+import { ChatToolActivityCard } from "@/features/ai/components/chat-tool-activity-card";
 import { getChatMessagePartReactKey } from "@/features/ai/lib/chat-message-part-key";
 import { isToolPartRunning } from "@/features/ai/lib/chat-tool-messages";
 
@@ -35,14 +35,14 @@ export const ChatMessageParts = ({
             return (
               <div
                 key={key}
-                className="p-3 rounded-lg mb-2 bg-primary text-primary-foreground"
+                className="mb-1 rounded-2xl rounded-br-sm bg-primary px-4 py-2.5 text-primary-foreground shadow-sm"
               >
-                <span className="whitespace-pre-wrap text-sm">{part.text}</span>
+                <span className="whitespace-pre-wrap text-sm leading-relaxed">{part.text}</span>
               </div>
             );
           }
           return (
-            <div key={key} className="p-3 rounded-lg mb-2 bg-muted">
+            <div key={key} className="mb-1 rounded-2xl rounded-bl-sm bg-muted px-4 py-3">
               <ChatAssistantMarkdown>{part.text}</ChatAssistantMarkdown>
             </div>
           );
@@ -54,7 +54,12 @@ export const ChatMessageParts = ({
           }
 
           if (isToolPartRunning(part.state)) {
-            return null;
+            // Show shimmer card instead of nothing — prevents the "blink" on fast tools
+            return (
+              <div key={key} className="mb-1">
+                <ChatToolActivityCard part={part} isRunning />
+              </div>
+            );
           }
 
           if (part.type === "tool-createExpense") {
@@ -107,7 +112,12 @@ export const ChatMessageParts = ({
           }
 
           if (part.state === "output-available") {
-            return null;
+            // Show expandable completed card for non-approval tools
+            return (
+              <div key={key} className="mb-1">
+                <ChatToolActivityCard part={part} isRunning={false} />
+              </div>
+            );
           }
 
           return null;
@@ -115,13 +125,14 @@ export const ChatMessageParts = ({
 
         return null;
       })}
+      {/* Rotating label shown below the last message's parts while a tool is in-flight.
+          The per-part shimmer cards above handle the visual, this adds extra context. */}
       {message.role === "assistant" &&
         message.id === lastMessageId &&
         toolActivityActive && (
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/80 text-sm border border-border/50 border-dashed">
-            <IconLoader className="w-4 h-4 shrink-0 animate-spin text-purple-600 dark:text-purple-400" />
-            <span className="text-muted-foreground">{toolActivityLabel}</span>
-          </div>
+          <p className="text-[11px] text-muted-foreground px-1 pt-0.5 italic">
+            {toolActivityLabel}
+          </p>
         )}
     </>
   );

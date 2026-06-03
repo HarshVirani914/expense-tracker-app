@@ -1,7 +1,8 @@
 "use client";
 
 import type { ChatStatus } from "ai";
-import { IconLoader } from "@tabler/icons-react";
+import { motion } from "framer-motion";
+import { IconSparkles } from "@tabler/icons-react";
 import type { ChatMessage } from "@/lib/ai/chat-message";
 
 type AIChatThinkingIndicatorProps = {
@@ -18,13 +19,40 @@ export const AIChatThinkingIndicator = ({
   }
 
   return (
-    <div className="flex gap-3">
-      <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
-        <IconLoader className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-spin" />
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      className="flex items-end gap-2.5"
+    >
+      {/* Gradient sparkle avatar matches message rows */}
+      <div
+        aria-hidden
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-indigo-600 shadow-sm shadow-violet-500/30"
+      >
+        <IconSparkles className="h-3.5 w-3.5 text-white" />
       </div>
-      <div className="p-3 rounded-lg bg-muted text-sm text-muted-foreground">
-        Thinking...
+
+      {/* Bouncing dots — iMessage typing style */}
+      <div
+        role="status"
+        aria-label="Assistant is thinking"
+        className="flex items-center gap-1.5 rounded-2xl rounded-bl-sm bg-muted px-4 py-3.5"
+      >
+        {[0, 1, 2].map((i) => (
+          <motion.span
+            key={i}
+            animate={{ y: [0, -5, 0] }}
+            transition={{
+              duration: 0.55,
+              repeat: Infinity,
+              ease: "easeInOut" as const,
+              delay: i * 0.14,
+            }}
+            className="block h-2 w-2 rounded-full bg-muted-foreground/50"
+          />
+        ))}
       </div>
-    </div>
+    </motion.div>
   );
 };

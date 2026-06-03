@@ -1,18 +1,15 @@
 import type { InferUITool, UIMessage } from "ai";
-import {
-  createExpenseTool,
-  deleteExpenseTool,
-  getSpendingSummaryTool,
-  queryExpensesTool,
-  updateExpenseTool,
-} from "@/lib/ai/tools";
+import type { getExpenseTools } from "@/lib/ai/tools";
+
+// Derive tool types from the factory's return type — no dummy userId needed.
+type ToolMap = ReturnType<typeof getExpenseTools>;
 
 export type ExpenseChatTools = {
-  queryExpenses: InferUITool<typeof queryExpensesTool>;
-  createExpense: InferUITool<typeof createExpenseTool>;
-  updateExpense: InferUITool<typeof updateExpenseTool>;
-  deleteExpense: InferUITool<typeof deleteExpenseTool>;
-  getSpendingSummary: InferUITool<typeof getSpendingSummaryTool>;
+  queryExpenses: InferUITool<ToolMap["queryExpenses"]>;
+  createExpense: InferUITool<ToolMap["createExpense"]>;
+  updateExpense: InferUITool<ToolMap["updateExpense"]>;
+  deleteExpense: InferUITool<ToolMap["deleteExpense"]>;
+  getSpendingSummary: InferUITool<ToolMap["getSpendingSummary"]>;
 };
 
 export type ChatMessage = UIMessage<

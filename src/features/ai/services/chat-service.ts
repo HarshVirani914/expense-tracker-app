@@ -6,17 +6,19 @@ export interface ChatOptions {
   messages: ModelMessage[];
   userId: string;
   userName?: string;
+  abortSignal?: AbortSignal;
 }
 
 export const chatService = {
   /**
-   * Stream AI chat responses with tool calling
-   * Uses experimental_context to inject userId into tools
-   * Includes automatic fallback for model availability
+   * Stream AI chat responses with tool calling.
+   * - userId is injected into tools via experimental_context
+   * - abortSignal cancels the upstream Gemini stream when the client disconnects
+   * - Fallback chain retries across models on 503/UNAVAILABLE/RESOURCE_EXHAUSTED
    */
-  async streamChat({ messages, userId, userName }: ChatOptions) {
-    // Get tools (userId will be passed via experimental_context)
-    const tools = getExpenseTools();
+  async streamChat({ messages, userId, userName, abortSignal }: ChatOptions) {
+    // Tools are created as closures capturing userId — stable API, no experimental_context
+    const tools = getExpenseTools(userId);
 
     const result = await withModelFallback(
       async (model) =>
@@ -54,13 +56,16 @@ Important behavior:
 - Round amounts to 2 decimal places when displaying (paise as needed)
 - Be proactive in offering insights from their spending patterns
 - IMPORTANT: After calling a tool and getting results, ALWAYS provide a natural language response explaining the results to the user in INR`,
-          messages: messages,
+          messages,
           tools,
-          stopWhen: stepCountIs(5),
-          maxRetries: 5,
-          experimental_context: {
-            userId,
-          },
+          // 8 steps allows query → analyse → create → confirm → follow-up flows
+          stopWhen: stepCountIs(8),
+          // 2 retries per model is enough; the fallback chain handles switching models
+          maxRetries: 2,
+          // Cap response length — prevents runaway outputs for a chat assistant
+          maxOutputTokens: 4096,
+          // Cancel the upstream request when the client disconnects
+          abortSignal,
         }),
       fallbackChains.chat
     );

@@ -1,13 +1,11 @@
 "use client";
 
 import type { ChatAddToolApproveResponseFunction, ChatStatus } from "ai";
-import {
-  IconLoader,
-  IconRobot,
-  IconUser,
-} from "@tabler/icons-react";
+import { IconLoader, IconSparkles } from "@tabler/icons-react";
+import { motion } from "framer-motion";
 import type { ChatMessage } from "@/lib/ai/chat-message";
 import { ChatMessageParts } from "@/features/ai/components/chat-message-parts";
+import { cn } from "@/lib/utils";
 
 type ChatMessageRowProps = {
   message: ChatMessage;
@@ -25,34 +23,41 @@ export const ChatMessageRow = ({
   toolActivityActive,
   toolActivityLabel,
   addToolApprovalResponse,
-}: ChatMessageRowProps) => (
-  <div
-    className={`flex gap-3 ${message.role === "user" ? "justify-end" : ""}`}
-  >
-    {message.role === "assistant" && (
-      <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
-        {status === "streaming" && message.id === lastMessageId ? (
-          <IconLoader className="w-4 h-4 text-purple-600 dark:text-purple-400 animate-spin" />
-        ) : (
-          <IconRobot className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-        )}
-      </div>
-    )}
-    <div
-      className={`max-w-[80%] ${message.role === "user" ? "" : "w-full"}`}
+}: ChatMessageRowProps) => {
+  const isUser = message.role === "user";
+  const isStreaming = status === "streaming" && message.id === lastMessageId;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.22, ease: "easeOut" as const }}
+      className={cn("flex items-end gap-2.5", isUser ? "flex-row-reverse" : "flex-row")}
     >
-      <ChatMessageParts
-        message={message}
-        lastMessageId={lastMessageId}
-        toolActivityActive={toolActivityActive}
-        toolActivityLabel={toolActivityLabel}
-        addToolApprovalResponse={addToolApprovalResponse}
-      />
-    </div>
-    {message.role === "user" && (
-      <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
-        <IconUser className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+      {/* Gradient sparkle avatar — assistant only */}
+      {!isUser && (
+        <div
+          aria-hidden
+          className="flex h-8 w-8 shrink-0 self-end mb-0.5 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-indigo-600 shadow-sm shadow-violet-500/30"
+        >
+          {isStreaming ? (
+            <IconLoader className="h-3.5 w-3.5 animate-spin text-white" />
+          ) : (
+            <IconSparkles className="h-3.5 w-3.5 text-white" />
+          )}
+        </div>
+      )}
+
+      {/* Bubble content — user is narrow, assistant is wide */}
+      <div className={cn("min-w-0", isUser ? "max-w-[78%]" : "max-w-[88%] w-full")}>
+        <ChatMessageParts
+          message={message}
+          lastMessageId={lastMessageId}
+          toolActivityActive={toolActivityActive}
+          toolActivityLabel={toolActivityLabel}
+          addToolApprovalResponse={addToolApprovalResponse}
+        />
       </div>
-    )}
-  </div>
-);
+    </motion.div>
+  );
+};

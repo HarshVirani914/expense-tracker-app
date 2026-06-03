@@ -91,6 +91,9 @@ export async function POST(req: NextRequest) {
           messages: modelMessages,
           userId: user.id,
           userName: user.name || undefined,
+          // Forward the request abort signal so the Gemini stream is cancelled
+          // when the client disconnects (tab closed / navigation away).
+          abortSignal: req.signal,
         });
 
         dataStream.merge(result.toUIMessageStream());

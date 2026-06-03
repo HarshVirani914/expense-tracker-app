@@ -10,6 +10,7 @@ import {
   IconPlus,
   IconProgressX,
   IconSend,
+  IconSparkles,
   IconX,
 } from "@tabler/icons-react";
 import {
@@ -139,25 +140,40 @@ export const AIChat = ({ className }: AIChatProps) => {
         className,
       )}
     >
-      <header className="shrink-0 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between border-b bg-muted/25 px-4 py-3">
-        <div className="min-w-0 space-y-0.5">
-          <p className="text-sm font-semibold leading-tight">
-            Financial assistant
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Uses the accounts and expenses you added in this app so answers fit
-            your situation. You’ll be asked to confirm before anything new is
-            saved.
-          </p>
+      {/* ── Compact header with live status dot ─────────────────────────────── */}
+      <header className="shrink-0 flex items-center justify-between gap-3 border-b bg-muted/20 px-4 py-2.5">
+        <div className="flex min-w-0 items-center gap-2.5">
+          {/* Gradient sparkle avatar */}
+          <div
+            aria-hidden
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-indigo-600 shadow-sm"
+          >
+            <IconSparkles className="h-3.5 w-3.5 text-white" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <p className="text-sm font-semibold leading-none">PocketPulse AI</p>
+              {/* Live status indicator */}
+              <span
+                className={cn(
+                  "inline-flex h-1.5 w-1.5 rounded-full",
+                  isBusy
+                    ? "animate-pulse bg-amber-500"
+                    : "bg-emerald-500",
+                )}
+                aria-label={isBusy ? "Generating" : "Ready"}
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground leading-none mt-0.5 hidden sm:block">
+              Powered by Gemini · data stays in your account
+            </p>
+          </div>
         </div>
-        <div className="flex shrink-0 items-center gap-2 self-stretch sm:self-auto">
+
+        <div className="flex shrink-0 items-center gap-1">
           <Tooltip
             onOpenChange={(open) => {
-              if (!open) {
-                requestAnimationFrame(() =>
-                  helpTriggerRef.current?.focus(),
-                );
-              }
+              if (!open) requestAnimationFrame(() => helpTriggerRef.current?.focus());
             }}
           >
             <TooltipTrigger asChild>
@@ -166,33 +182,28 @@ export const AIChat = ({ className }: AIChatProps) => {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="size-9 shrink-0 text-muted-foreground"
+                className="size-8 shrink-0 text-muted-foreground"
                 aria-label="How to use this assistant"
               >
-                <IconHelp className="size-4" />
+                <IconHelp className="size-3.5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent
-              side="bottom"
-              align="end"
-              className="max-w-xs text-xs"
-            >
-              Ask in your own words. The assistant can sum up spending, find past
-              expenses, or help you add new ones. If it might change your data,
-              it will ask you to approve first.
+            <TooltipContent side="bottom" align="end" className="max-w-xs text-xs">
+              Ask in plain language. The assistant knows your spending and can help
+              log new expenses — it’ll always ask before saving anything.
             </TooltipContent>
           </Tooltip>
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="sm"
-            className="gap-1.5 shrink-0"
+            className="h-8 gap-1.5 shrink-0 text-xs font-normal text-muted-foreground hover:text-foreground px-2.5"
             onClick={handleNewConversation}
             disabled={isBusy || messages.length === 0}
             aria-label="Start a new conversation"
           >
-            <IconPlus className="size-3.5" />
-            New chat
+            <IconPlus className="size-3" />
+            New
           </Button>
         </div>
       </header>
@@ -234,15 +245,16 @@ export const AIChat = ({ className }: AIChatProps) => {
         <button
           aria-label="Scroll to latest messages"
           className={cn(
-            "absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center justify-center rounded-full border border-border/50 bg-card/95 shadow-md backdrop-blur-md transition-all duration-200 h-9 w-9",
+            "absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-border/60 bg-card/95 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-md backdrop-blur-md transition-all duration-200",
             isAtBottom
-              ? "pointer-events-none scale-90 opacity-0"
-              : "pointer-events-auto scale-100 opacity-100",
+              ? "pointer-events-none translate-y-2 opacity-0"
+              : "pointer-events-auto translate-y-0 opacity-100",
           )}
           onClick={() => scrollToBottom("smooth")}
           type="button"
         >
-          <ArrowDown className="size-4 text-muted-foreground" />
+          <ArrowDown className="size-3" />
+          New messages
         </button>
       </div>
 
@@ -272,31 +284,34 @@ export const AIChat = ({ className }: AIChatProps) => {
 
         <form
           onSubmit={handleSubmit}
-          className="flex gap-2 items-start pb-3"
+          className="flex items-end gap-2 pb-3"
           aria-label="Message the assistant"
         >
-          <div className="flex-1 space-y-1.5 min-w-0">
+          {/* Input — pill shape that expands with content */}
+          <div className="relative flex-1 min-w-0">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Message your assistant..."
+              placeholder="Message your financial assistant..."
               disabled={isBusy}
-              className="min-h-[48px] max-h-[160px] resize-none text-sm"
+              className="min-h-[44px] max-h-[160px] resize-none text-sm rounded-2xl pr-3 py-3 leading-snug"
               rows={1}
               aria-label="Message"
             />
-            <p className="text-[11px] text-muted-foreground px-0.5">
-              Enter to send · Shift+Enter for a new line
+            <p className="mt-1 text-[10px] text-muted-foreground px-1">
+              Enter to send · Shift+Enter for new line
             </p>
           </div>
+
+          {/* Send / Stop button */}
           {status === "streaming" ? (
             <Button
               type="button"
               onClick={stop}
               variant="outline"
               size="icon"
-              className="shrink-0 size-11"
+              className="shrink-0 h-11 w-11 rounded-2xl mb-5 border-destructive/40 text-destructive hover:bg-destructive/10"
               aria-label="Stop generating"
             >
               <IconProgressX className="h-4 w-4" />
@@ -306,7 +321,7 @@ export const AIChat = ({ className }: AIChatProps) => {
               type="submit"
               disabled={isBusy || !input.trim()}
               size="icon"
-              className="shrink-0 size-11"
+              className="shrink-0 h-11 w-11 rounded-2xl mb-5 bg-violet-600 hover:bg-violet-700 disabled:opacity-40"
               aria-label="Send message"
             >
               <IconSend className="h-4 w-4" />
