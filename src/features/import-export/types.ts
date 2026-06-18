@@ -5,6 +5,7 @@ export type CsvExpenseRow = {
   category: string
   account?: string
   type: 'EXPENSE' | 'INCOME'
+  method?: string
   notes?: string
 }
 

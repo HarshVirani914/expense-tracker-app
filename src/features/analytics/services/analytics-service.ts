@@ -250,6 +250,7 @@ export const analyticsService = {
         amount: true,
         categoryId: true,
         date: true,
+        category: { select: { name: true } },
       },
       orderBy: {
         amount: 'desc',
@@ -259,27 +260,24 @@ export const analyticsService = {
     const totalAmount = expenses.reduce((sum, e) => sum + Number(e.amount), 0)
     const largestExpense = expenses.length > 0 ? Number(expenses[0].amount) : 0
 
-    const categoryCount = new Map<string, number>()
+    const categoryCount = new Map<string, { count: number; name: string }>()
     expenses.forEach(expense => {
-      categoryCount.set(expense.categoryId, (categoryCount.get(expense.categoryId) || 0) + 1)
+      const entry = categoryCount.get(expense.categoryId)
+      if (entry) {
+        entry.count += 1
+      } else {
+        categoryCount.set(expense.categoryId, { count: 1, name: expense.category.name })
+      }
     })
 
     let mostFrequentCategory = 'N/A'
     let maxCount = 0
-    categoryCount.forEach((count, categoryId) => {
+    categoryCount.forEach(({ count, name }) => {
       if (count > maxCount) {
         maxCount = count
-        mostFrequentCategory = categoryId
+        mostFrequentCategory = name
       }
     })
-
-    if (mostFrequentCategory !== 'N/A') {
-      const category = await prisma.category.findUnique({
-        where: { id: mostFrequentCategory },
-        select: { name: true },
-      })
-      mostFrequentCategory = category?.name || 'N/A'
-    }
 
     const daysDiff = Math.max(differenceInDays(endDate, startDate), 1)
     const averageDaily = totalAmount / daysDiff

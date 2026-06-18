@@ -213,7 +213,9 @@ export const AccountFormDialog = ({
                 Cancel
               </Button>
               <Button type="submit" disabled={isCreating || isUpdating}>
-                {isEditing ? "Update" : "Create"} Account
+                {isCreating || isUpdating
+                  ? isEditing ? "Updating..." : "Creating..."
+                  : isEditing ? "Update Account" : "Create Account"}
               </Button>
             </DialogFooter>
           </form>

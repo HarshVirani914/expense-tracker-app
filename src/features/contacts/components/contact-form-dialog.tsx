@@ -172,7 +172,9 @@ export const ContactFormDialog = ({
                 Cancel
               </Button>
               <Button type="submit" disabled={isCreating || isUpdating}>
-                {isEditing ? "Update" : "Create"} Contact
+                {isCreating || isUpdating
+                  ? isEditing ? "Updating..." : "Creating..."
+                  : isEditing ? "Update Contact" : "Create Contact"}
               </Button>
             </DialogFooter>
           </form>

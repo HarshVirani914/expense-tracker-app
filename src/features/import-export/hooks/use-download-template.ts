@@ -1,21 +1,30 @@
 import { toast } from 'sonner'
 
 export const useDownloadTemplate = () => {
-  const downloadTemplate = () => {
+  const downloadTemplate = async () => {
     try {
+      const response = await fetch('/api/import-export/template')
+
+      if (!response.ok) {
+        throw new Error('Failed to download template')
+      }
+
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
-      a.href = '/api/import-export/template'
-      a.download = 'expense-template.csv'
+      a.href = url
+      a.download = 'expense-import-template.xlsx'
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
-      
+      URL.revokeObjectURL(url)
+
       toast.success('Template downloaded', {
-        description: 'Use this template to import your expenses'
+        description: 'Open in Excel or Google Sheets — dropdowns are pre-filled with your categories and accounts',
       })
-    } catch (error) {
+    } catch {
       toast.error('Download failed', {
-        description: 'Failed to download template'
+        description: 'Failed to generate template',
       })
     }
   }

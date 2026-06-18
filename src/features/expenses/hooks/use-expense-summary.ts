@@ -15,7 +15,7 @@ export const useExpenseSummary = (filters?: ExpenseFilters) => {
       );
       return response.data;
     },
-    staleTime: 30000,
+    staleTime: 5 * 60 * 1000,
   });
 
   return {

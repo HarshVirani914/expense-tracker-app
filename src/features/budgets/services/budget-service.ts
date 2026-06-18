@@ -6,34 +6,54 @@ import { formatCurrencyWithDecimals } from '@/lib/format'
 
 export const budgetService = {
   async list(userId: string): Promise<BudgetWithSpending[]> {
+    const now = new Date()
+    const weekStart = startOfWeek(now)
+    const weekEnd = endOfWeek(now)
+    const monthStart = startOfMonth(now)
+    const monthEnd = endOfMonth(now)
+
     const budgets = await prisma.budget.findMany({
       where: { userId },
-      include: {
-        category: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      include: { category: true },
+      orderBy: { createdAt: 'desc' },
     })
 
-    const budgetsWithSpending = await Promise.all(
-      budgets.map(async budget => {
-        const { spent, remaining, percentageUsed, status } = await this.calculateSpending({
-          ...budget,
-          amount: Number(budget.amount),
-        } as Budget)
-        return {
-          ...budget,
-          amount: Number(budget.amount),
-          spent,
-          remaining,
-          percentageUsed,
-          status,
-        }
-      })
-    )
+    if (budgets.length === 0) return []
 
-    return budgetsWithSpending as BudgetWithSpending[]
+    const weeklyCategoryIds = budgets.filter(b => b.period === 'WEEKLY').map(b => b.categoryId)
+    const monthlyCategoryIds = budgets.filter(b => b.period === 'MONTHLY').map(b => b.categoryId)
+
+    // Two aggregations instead of one query per budget
+    const [weeklySpending, monthlySpending] = await Promise.all([
+      weeklyCategoryIds.length > 0
+        ? prisma.expense.groupBy({
+            by: ['categoryId'],
+            where: { userId, type: 'EXPENSE', date: { gte: weekStart, lte: weekEnd }, categoryId: { in: weeklyCategoryIds } },
+            _sum: { amount: true },
+          })
+        : Promise.resolve([]),
+      monthlyCategoryIds.length > 0
+        ? prisma.expense.groupBy({
+            by: ['categoryId'],
+            where: { userId, type: 'EXPENSE', date: { gte: monthStart, lte: monthEnd }, categoryId: { in: monthlyCategoryIds } },
+            _sum: { amount: true },
+          })
+        : Promise.resolve([]),
+    ])
+
+    const weeklyMap = new Map(weeklySpending.map(s => [s.categoryId, Number(s._sum.amount ?? 0)]))
+    const monthlyMap = new Map(monthlySpending.map(s => [s.categoryId, Number(s._sum.amount ?? 0)]))
+
+    return budgets.map(budget => {
+      const amount = Number(budget.amount)
+      const spent = (budget.period === 'WEEKLY' ? weeklyMap : monthlyMap).get(budget.categoryId) ?? 0
+      const remaining = amount - spent
+      const percentageUsed = amount > 0 ? (spent / amount) * 100 : 0
+      let status: 'safe' | 'warning' | 'exceeded' = 'safe'
+      if (percentageUsed >= 100) status = 'exceeded'
+      else if (percentageUsed >= 80) status = 'warning'
+      return { ...budget, amount, spent, remaining, percentageUsed, status }
+    }) as BudgetWithSpending[]
   },
 
   async getById(id: string, userId: string): Promise<BudgetWithSpending | null> {

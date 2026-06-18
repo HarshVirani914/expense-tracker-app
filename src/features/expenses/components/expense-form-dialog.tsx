@@ -343,7 +343,9 @@ export const ExpenseFormDialog = ({
                 Cancel
               </Button>
               <Button type="submit" disabled={isCreating || isUpdating}>
-                {isEditing ? "Update" : "Create"} Expense
+                {isCreating || isUpdating
+                  ? isEditing ? "Updating..." : "Creating..."
+                  : isEditing ? "Update Expense" : "Create Expense"}
               </Button>
             </DialogFooter>
           </form>

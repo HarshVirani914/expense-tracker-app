@@ -1,19 +1,43 @@
 import { z } from 'zod'
+import { normalizeDate, normalizeAmount, normalizeType, normalizePaymentMethod } from './utils/normalize'
 
 export const csvRowSchema = z.object({
-  date: z.string().refine(val => !isNaN(Date.parse(val)), {
-    message: 'Invalid date format',
+  date: z.string().transform((val, ctx) => {
+    const d = normalizeDate(val)
+    if (!d) {
+      ctx.addIssue({ code: "custom", message: `Unrecognized date format: "${val}"` })
+      return z.NEVER
+    }
+    return d.toISOString()
   }),
-  amount: z.number().or(z.string().transform(val => {
-    const num = parseFloat(val)
-    if (isNaN(num)) throw new Error('Invalid amount')
+
+  amount: z.union([z.number(), z.string()]).transform((val, ctx) => {
+    const num = normalizeAmount(val)
+    if (num === null || num <= 0) {
+      ctx.addIssue({ code: "custom", message: `Invalid amount: "${val}"` })
+      return z.NEVER
+    }
     return num
-  })),
+  }),
+
   description: z.string().min(1, 'Description is required'),
+
   category: z.string().min(1, 'Category is required'),
-  account: z.string().optional(),
-  type: z.enum(['EXPENSE', 'INCOME']).optional().default('EXPENSE'),
-  notes: z.string().optional(),
+
+  account: z.string().optional().transform(v => (v && v.trim() !== '' ? v.trim() : undefined)),
+
+  type: z
+    .string()
+    .optional()
+    .default('EXPENSE')
+    .transform(val => normalizeType(val ?? 'EXPENSE')),
+
+  method: z
+    .string()
+    .optional()
+    .transform(v => (v && v.trim() !== '' ? normalizePaymentMethod(v) : 'OTHER')),
+
+  notes: z.string().optional().transform(v => (v && v.trim() !== '' ? v.trim() : undefined)),
 })
 
 export const exportFiltersSchema = z.object({

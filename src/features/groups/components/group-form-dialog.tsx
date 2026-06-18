@@ -200,7 +200,9 @@ export const GroupFormDialog = ({
                 Cancel
               </Button>
               <Button type="submit" disabled={isCreating || isUpdating}>
-                {isEditing ? "Update" : "Create"} Group
+                {isCreating || isUpdating
+                  ? isEditing ? "Updating..." : "Creating..."
+                  : isEditing ? "Update Group" : "Create Group"}
               </Button>
             </DialogFooter>
           </form>

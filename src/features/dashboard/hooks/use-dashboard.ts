@@ -14,7 +14,7 @@ export const useDashboardStats = () => {
       )
       return response.data
     },
-    staleTime: 2 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
   })
 
   return {

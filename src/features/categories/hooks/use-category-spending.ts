@@ -29,7 +29,7 @@ export const useCategorySpending = (filters?: CategorySpendingFilters) => {
       );
       return response.data;
     },
-    staleTime: 30000,
+    staleTime: 5 * 60 * 1000,
   });
 
   return {

@@ -4,6 +4,8 @@ import { csvService } from '@/features/import-export/services/csv-service'
 import type { ApiResponse, ApiError } from '@/types/api'
 import type { ImportResult } from '@/features/import-export/types'
 
+const ACCEPTED_EXTENSIONS = ['.csv', '.xlsx']
+
 export async function POST(request: Request) {
   try {
     const user = await requireCurrentUser()
@@ -12,48 +14,39 @@ export async function POST(request: Request) {
 
     if (!file) {
       return NextResponse.json<ApiError>(
-        {
-          error: 'ValidationError',
-          message: 'No file provided',
-          statusCode: 400,
-        },
+        { error: 'ValidationError', message: 'No file provided', statusCode: 400 },
         { status: 400 }
       )
     }
 
-    if (!file.name.endsWith('.csv')) {
+    const isCSV = file.name.endsWith('.csv')
+    const isXLSX = file.name.endsWith('.xlsx')
+
+    if (!isCSV && !isXLSX) {
       return NextResponse.json<ApiError>(
         {
           error: 'ValidationError',
-          message: 'File must be a CSV',
+          message: `File must be one of: ${ACCEPTED_EXTENSIONS.join(', ')}`,
           statusCode: 400,
         },
         { status: 400 }
       )
     }
 
-    const fileSize = file.size / 1024 / 1024
-    if (fileSize > 5) {
+    if (file.size / 1024 / 1024 > 5) {
       return NextResponse.json<ApiError>(
-        {
-          error: 'ValidationError',
-          message: 'File size must be less than 5MB',
-          statusCode: 400,
-        },
+        { error: 'ValidationError', message: 'File size must be less than 5MB', statusCode: 400 },
         { status: 400 }
       )
     }
 
-    const csvText = await file.text()
-    const rows = csvService.parseCSV(csvText)
+    const rows = isXLSX
+      ? await csvService.parseXLSX(await file.arrayBuffer())
+      : csvService.parseCSV(await file.text())
 
     if (rows.length === 0) {
       return NextResponse.json<ApiError>(
-        {
-          error: 'ValidationError',
-          message: 'CSV file is empty',
-          statusCode: 400,
-        },
+        { error: 'ValidationError', message: 'File contains no data rows', statusCode: 400 },
         { status: 400 }
       )
     }
@@ -67,11 +60,7 @@ export async function POST(request: Request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to import expenses'
     return NextResponse.json<ApiError>(
-      {
-        error: 'ImportError',
-        message,
-        statusCode: 500,
-      },
+      { error: 'ImportError', message, statusCode: 500 },
       { status: 500 }
     )
   }

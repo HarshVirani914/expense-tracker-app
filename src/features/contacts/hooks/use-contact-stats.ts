@@ -14,7 +14,7 @@ export const useContactStats = () => {
       );
       return response.data;
     },
-    staleTime: 30000,
+    staleTime: 5 * 60 * 1000,
   });
 
   return {
