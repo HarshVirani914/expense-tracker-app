@@ -9,10 +9,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
+import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { IconDotsVertical, IconPencil, IconTrash, IconUsers } from "@tabler/icons-react";
 import Link from "next/link";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { toast } from "sonner";
 import { useDeleteExpense } from "../hooks/use-delete-expense";
 import { useExpenses } from "../hooks/use-expenses";
@@ -22,6 +22,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { ExpenseCard } from "./expense-card";
 import { ExpenseEmptyState } from "./expense-empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 type ExpenseListProps = {
   onEdit: (expense: ExpenseWithRelations) => void;
@@ -206,21 +207,63 @@ export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
   }
 
   if (isMobile) {
+    // Group expenses by date
+    const grouped = expenses.reduce<Map<string, ExpenseWithRelations[]>>((acc, expense) => {
+      const key = format(new Date(expense.date), "yyyy-MM-dd");
+      if (!acc.has(key)) acc.set(key, []);
+      acc.get(key)!.push(expense);
+      return acc;
+    }, new Map());
+
+    const formatDateHeader = (dateStr: string) => {
+      const d = parseISO(dateStr);
+      if (isToday(d)) return "Today";
+      if (isYesterday(d)) return "Yesterday";
+      return format(d, "EEE, MMM d");
+    };
+
     return (
-      <div className="space-y-4">
-        <div className="space-y-3">
-          {expenses.map((expense) => (
-            <ExpenseCard
-              key={expense.id}
-              expense={expense}
-              onEdit={onEdit}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
+      <div className="space-y-5">
+        {Array.from(grouped.entries()).map(([dateKey, dayExpenses]) => {
+          const dayTotal = dayExpenses.reduce((sum, e) => {
+            const amt = Number(e.amount);
+            return e.type === "INCOME" ? sum + amt : sum - amt;
+          }, 0);
+
+          return (
+            <div key={dateKey} className="space-y-2">
+              {/* Date section header */}
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {formatDateHeader(dateKey)}
+                </span>
+                <span
+                  className={cn(
+                    "text-xs font-semibold tabular-nums",
+                    dayTotal >= 0
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-red-600 dark:text-red-400",
+                  )}
+                >
+                  {dayTotal >= 0 ? "+" : ""}
+                  {formatCurrency(Math.abs(dayTotal))}
+                </span>
+              </div>
+
+              {dayExpenses.map((expense) => (
+                <ExpenseCard
+                  key={expense.id}
+                  expense={expense}
+                  onEdit={onEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          );
+        })}
 
         {pagination && pagination.total > pageSize && (
-          <div className="flex items-center justify-between pt-4">
+          <div className="flex items-center justify-between pt-2">
             <Button
               variant="outline"
               size="sm"

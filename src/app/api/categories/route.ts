@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireCurrentUser } from '@/lib/auth'
 import { categoryService } from '@/features/categories/services/category-service'
 import { createCategorySchema } from '@/features/categories/schemas'
+import { cachedJson } from '@/lib/api-response'
 import type { ApiResponse, ApiError } from '@/types/api'
 import type { Category } from '@/features/categories/types'
 
@@ -11,9 +12,7 @@ export async function GET() {
 
     const categories = await categoryService.list(user.id)
 
-    return NextResponse.json<ApiResponse<Category[]>>({
-      data: categories,
-    })
+    return cachedJson<ApiResponse<Category[]>>({ data: categories })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to fetch categories'
     return NextResponse.json<ApiError>(

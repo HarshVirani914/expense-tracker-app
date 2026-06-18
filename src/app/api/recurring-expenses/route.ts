@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireCurrentUser } from '@/lib/auth'
 import { recurringExpenseService } from '@/features/recurring-expenses/services/recurring-expense-service'
 import { createRecurringExpenseSchema } from '@/features/recurring-expenses/schemas'
+import { cachedJson } from '@/lib/api-response'
 import type { ApiResponse, ApiError } from '@/types/api'
 
 export async function GET() {
@@ -9,7 +10,7 @@ export async function GET() {
     const user = await requireCurrentUser()
     const recurringExpenses = await recurringExpenseService.list(user.id)
 
-    return NextResponse.json<ApiResponse<any>>({
+    return cachedJson<ApiResponse<any>>({
       data: recurringExpenses,
       message: 'Recurring expenses retrieved successfully',
     })

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireCurrentUser } from '@/lib/auth'
 import { budgetService } from '@/features/budgets/services/budget-service'
 import { createBudgetSchema } from '@/features/budgets/schemas'
+import { cachedJson } from '@/lib/api-response'
 import type { ApiResponse, ApiError } from '@/types/api'
 import type { BudgetWithSpending, Budget } from '@/features/budgets/types'
 
@@ -10,7 +11,7 @@ export async function GET() {
     const user = await requireCurrentUser()
     const budgets = await budgetService.list(user.id)
 
-    return NextResponse.json<ApiResponse<BudgetWithSpending[]>>({
+    return cachedJson<ApiResponse<BudgetWithSpending[]>>({
       data: budgets,
       message: 'Budgets retrieved successfully',
     })

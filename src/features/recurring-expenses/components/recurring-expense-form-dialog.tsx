@@ -161,6 +161,7 @@ export const RecurringExpenseFormDialog = ({
                   <FormControl>
                     <Input
                       type="number"
+                        inputMode="decimal"
                       placeholder="0.00"
                       step="0.01"
                       {...field}
@@ -286,6 +287,7 @@ export const RecurringExpenseFormDialog = ({
                     <FormControl>
                       <Input
                         type="number"
+                        inputMode="decimal"
                         placeholder="Number of days"
                         {...field}
                         onChange={(e) => field.onChange(parseInt(e.target.value))}

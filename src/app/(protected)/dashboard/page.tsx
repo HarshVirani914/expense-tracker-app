@@ -4,12 +4,9 @@ import { FeaturePageHero } from "@/components/layout/feature-page-hero";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AIInsightsWidget } from "@/features/ai/components/ai-insights-widget";
 import { BudgetAlertsWidget } from "@/features/budgets/components/budget-alerts-widget";
 import { AccountBalances } from "@/features/dashboard/components/account-balances";
-import { GroupBalancesSummary } from "@/features/dashboard/components/group-balances-summary";
 import { HeroBalanceCard } from "@/features/dashboard/components/hero-balance-card";
-import { OutstandingDebtsWidget } from "@/features/dashboard/components/outstanding-debts-widget";
 import { QuickActionsDesktopTrigger, QuickActionsMobileTiles, QuickActionsProvider } from "@/features/dashboard/components/quick-actions";
 import { RecentExpensesList } from "@/features/dashboard/components/recent-expenses-list";
 import { StatsCards } from "@/features/dashboard/components/stats-cards";
@@ -18,8 +15,24 @@ import { UpcomingRecurringWidget } from "@/features/recurring-expenses/component
 import { useProcessRecurringExpenses } from "@/features/recurring-expenses/hooks";
 import { useUser } from "@clerk/nextjs";
 import { IconMessageChatbot, IconSparkles } from "@tabler/icons-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+
+// Lazy-load below-fold widgets — defers their JS and API fetches until after
+// the above-fold content has rendered and hydrated.
+const AIInsightsWidget = dynamic(
+  () => import("@/features/ai/components/ai-insights-widget").then((m) => ({ default: m.AIInsightsWidget })),
+  { loading: () => <Skeleton className="h-52 w-full" />, ssr: false },
+);
+const OutstandingDebtsWidget = dynamic(
+  () => import("@/features/dashboard/components/outstanding-debts-widget").then((m) => ({ default: m.OutstandingDebtsWidget })),
+  { loading: () => <Skeleton className="h-48 w-full" />, ssr: false },
+);
+const GroupBalancesSummary = dynamic(
+  () => import("@/features/dashboard/components/group-balances-summary").then((m) => ({ default: m.GroupBalancesSummary })),
+  { loading: () => <Skeleton className="h-48 w-full" />, ssr: false },
+);
 
 export default function DashboardPage() {
   const { stats, isLoading, error } = useDashboardStats();
@@ -192,10 +205,25 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <Link href="/ai" aria-label="Open AI assistant">
+        {/* Mobile FAB — sits above the bottom nav, safe-area aware */}
+        <Link
+          href="/ai"
+          aria-label="Open AI assistant"
+          className="md:hidden fixed right-4 z-50"
+          style={{ bottom: "calc(5rem + env(safe-area-inset-bottom) + 1.25rem)" }}
+        >
           <Button
             size="lg"
-            className="fixed right-4 z-50 h-14 w-14 rounded-full shadow-2xl max-md:bottom-24 hover:scale-110 md:bottom-6 md:right-6 transition-all bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600"
+            className="h-14 w-14 rounded-full shadow-2xl transition-all hover:scale-110 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600"
+          >
+            <IconSparkles className="h-6 w-6" />
+          </Button>
+        </Link>
+        {/* Desktop FAB */}
+        <Link href="/ai" aria-label="Open AI assistant" className="hidden md:block fixed bottom-6 right-6 z-50">
+          <Button
+            size="lg"
+            className="h-14 w-14 rounded-full shadow-2xl transition-all hover:scale-110 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600"
           >
             <IconSparkles className="h-6 w-6" />
           </Button>

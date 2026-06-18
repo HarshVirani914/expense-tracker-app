@@ -1,13 +1,13 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/format";
+import { MONEY_SEMANTICS } from "@/lib/money-semantics";
 import {
   IconCategory,
   IconTrendingDown,
   IconTrendingUp,
 } from "@tabler/icons-react";
-import { MONEY_SEMANTICS } from "@/lib/money-semantics";
-import { formatCurrency } from "@/lib/format";
 import { memo } from "react";
 import type { MonthlyStats } from "../types";
 
@@ -29,9 +29,9 @@ export const StatsCards = memo(({ stats }: StatsCardsProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="relative">
-          <div className="text-3xl font-bold text-red-600 dark:text-red-400">
+          <p className="text-3xl font-bold text-red-600 dark:text-red-400 tabular-nums">
             {formatCurrency(stats.totalExpenses)}
-          </div>
+          </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {MONEY_SEMANTICS.statsThisMonthExpenses}
           </p>
@@ -47,9 +47,9 @@ export const StatsCards = memo(({ stats }: StatsCardsProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="relative">
-          <div className="text-3xl font-bold text-green-600 dark:text-green-400">
+          <p className="text-3xl font-bold text-green-600 dark:text-green-400 tabular-nums">
             {formatCurrency(stats.totalIncome)}
-          </div>
+          </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {MONEY_SEMANTICS.statsThisMonthIncome}
           </p>
@@ -76,9 +76,9 @@ export const StatsCards = memo(({ stats }: StatsCardsProps) => {
                   {topCategory.name}
                 </span>
               </div>
-              <div className="text-3xl font-bold tabular-nums">
+              <p className="text-3xl font-bold tabular-nums">
                 {formatCurrency(topCategory.total)}
-              </div>
+              </p>
             </>
           ) : (
             <p className="text-sm text-muted-foreground">

@@ -1,4 +1,5 @@
 import { clerkClient, currentUser } from '@clerk/nextjs/server'
+import { cache } from 'react'
 import { prisma } from './prisma'
 import { logger } from './logger'
 
@@ -14,7 +15,10 @@ const isPrismaUniqueViolation = (error: unknown): boolean =>
  *
  * @returns User from database or null if not authenticated
  */
-export const getCurrentUser = async () => {
+// cache() deduplicates calls within the same RSC render tree so Clerk
+// session + DB lookup only fires once even if multiple server components
+// call getCurrentUser() on the same request.
+export const getCurrentUser = cache(async () => {
   const clerkUser = await currentUser()
 
   if (!clerkUser) {
@@ -82,7 +86,7 @@ export const getCurrentUser = async () => {
     }
     throw error
   }
-}
+})
 
 /**
  * Gets or creates a user by Clerk ID

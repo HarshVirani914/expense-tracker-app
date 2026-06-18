@@ -15,6 +15,13 @@ const createPrismaClient = () => {
   const pool = new Pool({
     connectionString,
     max: process.env.VERCEL === "1" ? 1 : 10,
+    // keep TCP connection alive across warm Lambda invocations
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 0,
+    // free idle connections quickly to avoid Postgres max_connections
+    idleTimeoutMillis: 10_000,
+    // fail fast rather than hang if DB is unreachable
+    connectionTimeoutMillis: 5_000,
   });
 
   const adapter = new PrismaPg(pool);

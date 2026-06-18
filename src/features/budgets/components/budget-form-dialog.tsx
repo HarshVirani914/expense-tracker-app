@@ -144,6 +144,7 @@ export const BudgetFormDialog = ({ open, onOpenChange, budget }: BudgetFormDialo
                   <FormControl>
                     <Input
                       type="number"
+                        inputMode="decimal"
                       placeholder="0.00"
                       step="0.01"
                       {...field}

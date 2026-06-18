@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireCurrentUser } from '@/lib/auth'
 import { accountService } from '@/features/accounts/services/account-service'
 import { createAccountSchema } from '@/features/accounts/schemas'
+import { cachedJson } from '@/lib/api-response'
 import type { ApiResponse, ApiError } from '@/types/api'
 import type { AccountWithBalance } from '@/features/accounts/types'
 
@@ -11,9 +12,7 @@ export async function GET() {
 
     const accounts = await accountService.list(user.id)
 
-    return NextResponse.json<ApiResponse<AccountWithBalance[]>>({
-      data: accounts,
-    })
+    return cachedJson<ApiResponse<AccountWithBalance[]>>({ data: accounts })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to fetch accounts'
     return NextResponse.json<ApiError>(

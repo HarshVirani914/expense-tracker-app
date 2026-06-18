@@ -30,7 +30,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
                   alt="PocketPulse"
                   width={100}
                   height={32}
-                  loading="eager"
+                  priority
                   className="w-auto h-auto"
                 />
               </div>
@@ -46,7 +46,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
               </div>
             </div>
           </header>
-          <main className="flex min-h-0 min-w-0 w-full max-w-full flex-1 flex-col gap-4 p-4 pt-6 pb-44 md:pb-6">
+          <main className="flex min-h-0 min-w-0 w-full max-w-full flex-1 flex-col gap-4 p-4 pt-6 pb-44 md:pb-6 overscroll-y-contain">
             {children}
           </main>
         </FeatureAmbientSurface>

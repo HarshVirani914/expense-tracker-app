@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireCurrentUser } from '@/lib/auth'
 import { expenseService } from '@/features/expenses/services/expense-service'
 import { createExpenseSchema, expenseFiltersSchema } from '@/features/expenses/schemas'
+import { cachedJson } from '@/lib/api-response'
 import type { PaginatedResponse, ApiResponse, ApiError } from '@/types/api'
 import type { ExpenseWithRelations } from '@/features/expenses/types'
 
@@ -15,7 +16,7 @@ export async function GET(request: Request) {
 
     const expenses = await expenseService.list(user.id, validatedFilters)
 
-    return NextResponse.json<PaginatedResponse<ExpenseWithRelations>>(expenses)
+    return cachedJson<PaginatedResponse<ExpenseWithRelations>>(expenses)
   } catch (error) {
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json<ApiError>(
