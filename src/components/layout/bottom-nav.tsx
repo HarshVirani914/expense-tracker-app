@@ -46,7 +46,7 @@ type NavItem = {
   type: "link" | "action";
 };
 
-// 4-item nav — clean, thumb-friendly, nothing hidden above the fold
+// 5-item nav — Add is in position 3 (true center), 2 items on each side
 const mainNavItems: NavItem[] = [
   {
     id: 0,
@@ -71,6 +71,13 @@ const mainNavItems: NavItem[] = [
   },
   {
     id: 3,
+    href: "/analytics",
+    icon: IconChartBar,
+    label: "Analytics",
+    type: "link",
+  },
+  {
+    id: 4,
     href: "",
     icon: IconDotsVertical,
     label: "More",
@@ -236,8 +243,8 @@ export const BottomNav = () => {
           ref={containerRef}
           className={cn(
             "relative isolate flex items-center justify-between overflow-hidden rounded-2xl px-1.5 py-1.5",
-            // Dark glass pill — always dark to match the hero card aesthetic
-            "border border-white/8 bg-[#080C16]/90",
+            // Deep navy in both modes — slightly lighter in light mode to avoid harshness
+            "border border-white/8 bg-[#0f172a]/95 dark:bg-[#080C16]/90",
             "shadow-xl shadow-black/30",
             "supports-backdrop-filter:backdrop-blur-xl",
           )}

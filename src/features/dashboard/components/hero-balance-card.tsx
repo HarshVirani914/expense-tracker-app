@@ -22,8 +22,8 @@ export const HeroBalanceCard = memo(
 
     return (
       <div className="relative overflow-hidden rounded-2xl grain-overlay">
-        {/* Dark canvas — always dark regardless of light/dark mode */}
-        <div className="absolute inset-0 bg-[#080C16]" />
+        {/* Deep navy canvas — slightly lighter in light mode, near-black in dark */}
+        <div className="absolute inset-0 bg-[#0f172a] dark:bg-[#080C16]" />
 
         {/* Ambient glow — gold top-right, navy-blue bottom-left */}
         <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-[#C9993F]/12 blur-3xl" />
@@ -35,13 +35,13 @@ export const HeroBalanceCard = memo(
         <div className="relative px-5 pt-5 pb-4 md:px-7 md:pt-7 md:pb-5">
           {/* Greeting */}
           {userName && (
-            <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.2em] text-white/35">
+            <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.2em] text-white/45">
               Good day, {userName}
             </p>
           )}
 
           {/* Label */}
-          <p className="mb-1 text-xs font-medium uppercase tracking-widest text-white/40">
+          <p className="mb-1 text-xs font-medium uppercase tracking-widest text-white/50">
             Total balance
           </p>
 
@@ -56,8 +56,8 @@ export const HeroBalanceCard = memo(
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium",
                 isNetPositive
-                  ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-300"
-                  : "border-red-400/25 bg-red-400/10 text-red-300",
+                  ? "border-emerald-400/30 bg-emerald-400/15 text-emerald-300"
+                  : "border-red-400/30 bg-red-400/15 text-red-300",
               )}
             >
               {isNetPositive ? (
@@ -83,7 +83,7 @@ export const HeroBalanceCard = memo(
                 />
                 <div className="h-full flex-1 rounded-r-full bg-red-400/50" />
               </div>
-              <div className="flex justify-between text-[11px] text-white/35">
+              <div className="flex justify-between text-[11px] text-white/45">
                 <span className="flex items-center gap-1.5">
                   <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400/70" />
                   {formatCurrency(totalIncome)}
