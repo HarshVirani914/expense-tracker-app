@@ -2,7 +2,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, DM_Mono } from "next/font/google";
+import { DM_Sans, DM_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { QueryProvider } from "@/providers/query-provider";
@@ -20,14 +20,21 @@ const dmMono = DM_Mono({
   variable: "--font-dm-mono",
 });
 
+// Used exclusively for the hero balance number — one serif for editorial luxury
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-playfair",
+});
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+    { media: "(prefers-color-scheme: light)", color: "#FAFAF7" },
+    { media: "(prefers-color-scheme: dark)", color: "#080C16" },
   ],
   viewportFit: "cover",
 };
@@ -45,7 +52,7 @@ export const metadata: Metadata = {
   applicationName: "PocketPulse",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "PocketPulse",
   },
   formatDetection: {
@@ -74,7 +81,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", dmSans.variable, dmMono.variable)}
+      className={cn(
+        "h-full antialiased",
+        dmSans.variable,
+        dmMono.variable,
+        playfair.variable,
+      )}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
