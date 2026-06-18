@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { ExpenseWithRelations } from "@/features/expenses/types";
-import { format, formatDistanceToNow } from "date-fns";
+import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { IconUsers, IconArrowRight, IconReceipt } from "@tabler/icons-react";
 import Link from "next/link";
 import { memo } from "react";
@@ -24,83 +24,120 @@ type RecentExpensesListProps = {
   expenses: ExpenseWithRelations[];
 };
 
-const RecentExpenseCardRow = ({
-  expense,
-}: {
-  expense: ExpenseWithRelations;
-}) => (
-  <div className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-accent/50">
-    <div
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-      style={{
-        backgroundColor: `${expense.category.color}20`,
-        color: expense.category.color,
-      }}
-    >
-      <IconReceipt className="h-5 w-5" aria-hidden />
-    </div>
+const MOBILE_PREVIEW_LIMIT = 8;
 
-    <div className="min-w-0 flex-1">
-      <div className="mb-1 flex flex-wrap items-center gap-2">
-        <p className="truncate text-sm font-medium">
+function formatDateLabel(dateStr: string) {
+  const d = parseISO(dateStr);
+  if (isToday(d)) return "Today";
+  if (isYesterday(d)) return "Yesterday";
+  return format(d, "EEE, MMM d");
+}
+
+const TimelineRow = ({ expense }: { expense: ExpenseWithRelations }) => {
+  const isIncome = expense.type === "INCOME";
+  return (
+    <div className="flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-accent/50">
+      {/* Category color tile */}
+      <div
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
+        style={{
+          backgroundColor: `${expense.category.color}18`,
+          color: expense.category.color,
+        }}
+      >
+        {expense.category.name.slice(0, 1).toUpperCase()}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium leading-tight">
           {expense.description || "No description"}
         </p>
-        {expense.type === "INCOME" && (
-          <Badge className="shrink-0 bg-green-600 text-xs">Income</Badge>
-        )}
-        {expense.group && (
-          <Badge variant="secondary" className="shrink-0 text-xs">
-            <IconUsers className="mr-1 h-2.5 w-2.5" />
-            {expense.group.name}
-          </Badge>
-        )}
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+          {expense.category.name}
+          {expense.group && (
+            <span>
+              {" · "}
+              <Link
+                href={`/groups/${expense.group.id}`}
+                className="inline-flex items-center gap-0.5 hover:text-foreground"
+              >
+                <IconUsers className="h-3 w-3" />
+                {expense.group.name}
+              </Link>
+            </span>
+          )}
+        </p>
       </div>
-      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-        <span>{expense.category.name}</span>
-        <span aria-hidden>•</span>
-        <span>
-          {formatDistanceToNow(new Date(expense.date), {
-            addSuffix: true,
-          })}
-        </span>
-      </div>
+
+      <span
+        className={cn(
+          "shrink-0 text-sm font-semibold tabular-nums",
+          isIncome
+            ? "text-emerald-600 dark:text-emerald-400"
+            : "text-red-600 dark:text-red-400",
+        )}
+      >
+        {isIncome ? "+" : "−"}
+        {formatCurrency(Number(expense.amount))}
+      </span>
     </div>
+  );
+};
 
-    <div
-      className={cn(
-        "shrink-0 text-sm font-semibold tabular-nums",
-        expense.type === "INCOME"
-          ? "text-green-600 dark:text-green-400"
-          : "text-red-600 dark:text-red-400",
-      )}
-    >
-      {expense.type === "INCOME" ? "+" : "-"}
-      {formatCurrency(Number(expense.amount))}
-    </div>
-  </div>
-);
+const MobileTimeline = ({ expenses }: { expenses: ExpenseWithRelations[] }) => {
+  const limited = expenses.slice(0, MOBILE_PREVIEW_LIMIT);
 
-const MOBILE_CARD_PREVIEW_LIMIT = 5;
-
-const RecentExpensesCardList = ({
-  expenses,
-  maxItems,
-}: {
-  expenses: ExpenseWithRelations[];
-  maxItems?: number;
-}) => {
-  const items = maxItems !== undefined ? expenses.slice(0, maxItems) : expenses;
+  // Group by date
+  const grouped = limited.reduce<Map<string, ExpenseWithRelations[]>>(
+    (acc, expense) => {
+      const key = format(new Date(expense.date), "yyyy-MM-dd");
+      if (!acc.has(key)) acc.set(key, []);
+      acc.get(key)!.push(expense);
+      return acc;
+    },
+    new Map(),
+  );
 
   return (
-    <>
-      <div className="space-y-2">
-        {items.map((expense) => (
-          <RecentExpenseCardRow key={expense.id} expense={expense} />
-        ))}
-      </div>
-      {maxItems !== undefined && expenses.length > maxItems ? (
-        <p className="pt-4 text-center text-xs text-muted-foreground">
-          Showing {maxItems} of {expenses.length}.{" "}
+    <div className="space-y-4">
+      {Array.from(grouped.entries()).map(([dateKey, dayExpenses]) => {
+        const dayNet = dayExpenses.reduce((sum, e) => {
+          const amt = Number(e.amount);
+          return e.type === "INCOME" ? sum + amt : sum - amt;
+        }, 0);
+
+        return (
+          <div key={dateKey}>
+            {/* Date section header */}
+            <div className="mb-1 flex items-center justify-between px-2 py-0.5">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                {formatDateLabel(dateKey)}
+              </span>
+              <span
+                className={cn(
+                  "text-[10px] font-semibold tabular-nums",
+                  dayNet >= 0
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-red-600 dark:text-red-400",
+                )}
+              >
+                {dayNet >= 0 ? "+" : ""}
+                {formatCurrency(Math.abs(dayNet))}
+              </span>
+            </div>
+
+            <div className="-mx-2">
+              {dayExpenses.map((expense) => (
+                <TimelineRow key={expense.id} expense={expense} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+
+      {expenses.length > MOBILE_PREVIEW_LIMIT && (
+        <p className="px-2 text-center text-xs text-muted-foreground">
+          Showing {MOBILE_PREVIEW_LIMIT} of {expenses.length}.{" "}
           <Link
             href="/expenses"
             className="font-medium text-foreground underline-offset-4 hover:underline"
@@ -108,8 +145,8 @@ const RecentExpensesCardList = ({
             View all
           </Link>
         </p>
-      ) : null}
-    </>
+      )}
+    </div>
   );
 };
 
@@ -157,10 +194,7 @@ export const RecentExpensesList = memo(
         </CardHeader>
         <CardContent className="min-w-0">
           {isMobile ? (
-            <RecentExpensesCardList
-              expenses={expenses}
-              maxItems={MOBILE_CARD_PREVIEW_LIMIT}
-            />
+            <MobileTimeline expenses={expenses} />
           ) : (
             <div className="hidden min-w-0 overflow-x-auto @lg/recent:block">
               <Table className="min-w-xl">
@@ -193,7 +227,7 @@ export const RecentExpensesList = memo(
                       <TableCell className="min-w-0">
                         <div className="flex min-w-0 flex-wrap items-center gap-1">
                           {expense.type === "INCOME" ? (
-                            <Badge className="shrink-0 bg-green-600 text-xs">
+                            <Badge className="shrink-0 bg-emerald-600 text-xs">
                               Income
                             </Badge>
                           ) : (
@@ -235,11 +269,11 @@ export const RecentExpensesList = memo(
                         className={cn(
                           "whitespace-nowrap text-right font-medium tabular-nums",
                           expense.type === "INCOME"
-                            ? "text-green-600 dark:text-green-400"
+                            ? "text-emerald-600 dark:text-emerald-400"
                             : "text-red-600 dark:text-red-400",
                         )}
                       >
-                        {expense.type === "INCOME" ? "+" : "-"}
+                        {expense.type === "INCOME" ? "+" : "−"}
                         {formatCurrency(Number(expense.amount))}
                       </TableCell>
                     </TableRow>

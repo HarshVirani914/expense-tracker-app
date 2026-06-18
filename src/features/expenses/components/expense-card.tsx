@@ -1,8 +1,6 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,15 +10,11 @@ import {
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
-  IconCalendar,
-  IconCategory,
   IconDotsVertical,
   IconPencil,
   IconTrash,
   IconUsers,
-  IconWallet,
 } from "@tabler/icons-react";
-import { format } from "date-fns";
 import Link from "next/link";
 import type { ExpenseWithRelations } from "../types";
 
@@ -34,100 +28,86 @@ export const ExpenseCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => 
   const isIncome = expense.type === "INCOME";
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
-        <div className="space-y-3">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-base truncate">
-                {expense.description || "No description"}
-              </p>
-              <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                <IconCalendar className="h-3.5 w-3.5 shrink-0" />
-                <span>{format(new Date(expense.date), "MMM dd, yyyy")}</span>
-              </div>
-            </div>
+    <div className="group flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-accent/50">
+      {/* Category color tile */}
+      <div
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-bold"
+        style={{
+          backgroundColor: `${expense.category.color}18`,
+          color: expense.category.color,
+        }}
+      >
+        {expense.category.name.slice(0, 1).toUpperCase()}
+      </div>
 
-            <div className="flex items-center gap-2">
-              <div
-                className={cn(
-                  "text-xl font-bold font-mono",
-                  isIncome
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
-                )}
+      {/* Main content */}
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium leading-tight">
+          {expense.description || "No description"}
+        </p>
+        <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span>{expense.category.name}</span>
+          {expense.account && (
+            <>
+              <span aria-hidden>·</span>
+              <span>{expense.account.name}</span>
+            </>
+          )}
+          {expense.group && (
+            <>
+              <span aria-hidden>·</span>
+              <Link
+                href={`/groups/${expense.group.id}`}
+                className="inline-flex items-center gap-0.5 hover:text-foreground"
+                onClick={(e) => e.stopPropagation()}
               >
-                {isIncome ? "+" : "-"}
-                {formatCurrency(Number(expense.amount))}
-              </div>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                    <IconDotsVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => onEdit(expense)}>
-                    <IconPencil className="mr-2 h-4 w-4" />
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() =>
-                      onDelete(expense.id, expense.description || undefined)
-                    }
-                    className="text-red-600"
-                  >
-                    <IconTrash className="mr-2 h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge
-              variant="outline"
-              style={{
-                borderColor: expense.category.color,
-                color: expense.category.color,
-              }}
-              className="gap-1"
-            >
-              <IconCategory className="h-3 w-3" />
-              {expense.category.name}
-            </Badge>
-
-            {expense.group ? (
-              <Link href={`/groups/${expense.group.id}`}>
-                <Badge
-                  variant="outline"
-                  className="gap-1 hover:bg-accent cursor-pointer"
-                >
-                  <IconUsers className="h-3 w-3" />
-                  {expense.group.name}
-                </Badge>
+                <IconUsers className="h-3 w-3" />
+                {expense.group.name}
               </Link>
-            ) : (
-              <Badge variant="secondary" className="gap-1">
-                <IconWallet className="h-3 w-3" />
-                Personal
-              </Badge>
-            )}
-
-            {expense.account && (
-              <Badge variant="secondary" className="gap-1 text-xs">
-                {expense.account.name}
-              </Badge>
-            )}
-
-            <Badge variant="secondary" className="gap-1 text-xs capitalize">
-              {expense.paymentMethod.replace("_", " ")}
-            </Badge>
-          </div>
+            </>
+          )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Amount + actions */}
+      <div className="flex items-center gap-0.5 shrink-0">
+        <span
+          className={cn(
+            "text-sm font-semibold tabular-nums",
+            isIncome
+              ? "text-emerald-600 dark:text-emerald-400"
+              : "text-red-600 dark:text-red-400",
+          )}
+        >
+          {isIncome ? "+" : "−"}
+          {formatCurrency(Number(expense.amount))}
+        </span>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+            >
+              <IconDotsVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onEdit(expense)}>
+              <IconPencil className="mr-2 h-4 w-4" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onDelete(expense.id, expense.description || undefined)}
+              className="text-red-600"
+            >
+              <IconTrash className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
   );
 };
