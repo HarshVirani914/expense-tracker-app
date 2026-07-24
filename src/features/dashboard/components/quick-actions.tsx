@@ -168,7 +168,7 @@ export const QuickActionsDesktopTrigger = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            className="gap-2 shadow-lg transition-shadow hover:shadow-xl"
+            className="gap-2 border-none shadow-lg transition-shadow hover:shadow-xl"
             size="lg"
           >
             <IconPlus className="h-5 w-5" />
@@ -195,7 +195,11 @@ export const QuickActionsDesktopTrigger = ({
   );
 };
 
-export const QuickActionsMobileTiles = ({ className }: { className?: string }) => {
+export const QuickActionsMobileTiles = ({
+  className,
+}: {
+  className?: string;
+}) => {
   const ctx = useQuickActionsContext();
 
   return (

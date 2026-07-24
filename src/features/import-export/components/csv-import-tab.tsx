@@ -4,6 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   IconAlertCircle,
   IconDownload,
   IconFileTypeCsv,
@@ -195,40 +203,40 @@ export const CsvPreviewStep = ({
       </div>
 
       {previewRows.length > 0 && (
-        <div className="overflow-x-auto rounded-lg border">
-          <table className="text-xs w-full">
-            <thead>
-              <tr className="bg-muted/50">
+        <div className="overflow-hidden rounded-lg border">
+          <Table className="text-xs">
+            <TableHeader>
+              <TableRow className="bg-muted/50">
                 {detectedColumns
                   .filter((c) => ALL_EXPECTED.has(c))
                   .map((col) => (
-                    <th
+                    <TableHead
                       key={col}
-                      className="px-3 py-2 text-left font-medium text-muted-foreground whitespace-nowrap"
+                      className="h-auto px-3 py-2 text-muted-foreground"
                     >
                       {col}
-                    </th>
+                    </TableHead>
                   ))}
-              </tr>
-            </thead>
-            <tbody>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {previewRows.map((row, idx) => (
-                <tr key={idx} className="border-t">
+                <TableRow key={idx}>
                   {detectedColumns
                     .filter((c) => ALL_EXPECTED.has(c))
                     .map((col) => (
-                      <td
+                      <TableCell
                         key={col}
                         className="px-3 py-2 max-w-40 truncate"
                         title={row[col]}
                       >
                         {row[col] ?? "—"}
-                      </td>
+                      </TableCell>
                     ))}
-                </tr>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
 

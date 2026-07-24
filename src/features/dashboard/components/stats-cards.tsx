@@ -44,7 +44,7 @@ export const StatsCards = memo(({ stats }: StatsCardsProps) => {
 
       {/* Top category */}
       <div className="relative overflow-hidden rounded-xl border border-border/60 bg-card px-3 py-3.5 md:px-5 md:py-4">
-        <div className="absolute inset-y-0 left-0 w-[3px] rounded-l-xl bg-[#C9993F]" />
+        <div className="absolute inset-y-0 left-0 w-[3px] rounded-l-xl bg-primary" />
         <p className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground md:text-[10px]">
           Top spend
         </p>

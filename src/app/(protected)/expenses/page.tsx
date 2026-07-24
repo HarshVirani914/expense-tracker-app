@@ -24,7 +24,8 @@ function ExpensesPageContent() {
   const isMobile = useIsMobile();
   const searchParams = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isGroupExpenseDialogOpen, setIsGroupExpenseDialogOpen] = useState(false);
+  const [isGroupExpenseDialogOpen, setIsGroupExpenseDialogOpen] =
+    useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<
@@ -49,7 +50,8 @@ function ExpensesPageContent() {
     };
   }, [filters, searchParams]);
 
-  const { summary, isLoading: isSummaryLoading } = useExpenseSummary(filtersWithParams);
+  const { summary, isLoading: isSummaryLoading } =
+    useExpenseSummary(filtersWithParams);
 
   const handleEdit = (expense: ExpenseWithRelations) => {
     setSelectedExpense(expense);
@@ -143,7 +145,10 @@ function ExpensesPageContent() {
         </div>
       )}
 
-      <ExpenseFiltersBar filters={filtersWithParams} onFiltersChange={setFilters} />
+      <ExpenseFiltersBar
+        filters={filtersWithParams}
+        onFiltersChange={setFilters}
+      />
 
       <ExpenseList onEdit={handleEdit} filters={filtersWithParams} />
 
@@ -167,7 +172,7 @@ function ExpensesPageContent() {
         <Button
           onClick={() => setIsDialogOpen(true)}
           size="lg"
-          className="fixed bottom-26 right-6 h-14 w-14 rounded-full shadow-2xl z-40 hover:scale-110 transition-transform"
+          className="fixed bottom-26 right-6 h-14 w-14 rounded-full glow-primary z-40 hover:scale-110 transition-transform"
         >
           <IconPlus className="h-6 w-6" />
         </Button>
@@ -178,13 +183,15 @@ function ExpensesPageContent() {
 
 export default function ExpensesPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-w-0 w-full max-w-full flex-col gap-6">
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-48 w-full" />
-        <Skeleton className="h-96 w-full" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex min-w-0 w-full max-w-full flex-col gap-6">
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-96 w-full" />
+        </div>
+      }
+    >
       <ExpensesPageContent />
     </Suspense>
   );

@@ -150,7 +150,9 @@ function ExpenseFormContent({
         />
 
         {/* Category + Account */}
-        <div className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-2")}>
+        <div
+          className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-2")}
+        >
           <FormField
             control={form.control}
             name="categoryId"
@@ -209,7 +211,9 @@ function ExpenseFormContent({
         </div>
 
         {/* Date + Payment method */}
-        <div className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-2")}>
+        <div
+          className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-2")}
+        >
           <FormField
             control={form.control}
             name="date"
@@ -284,8 +288,8 @@ function ExpenseFormContent({
                   ? "Updating..."
                   : "Creating..."
                 : isEditing
-                ? `Update ${isIncome ? "Income" : "Expense"}`
-                : `Add ${isIncome ? "Income" : "Expense"}`}
+                  ? `Update ${isIncome ? "Income" : "Expense"}`
+                  : `Add ${isIncome ? "Income" : "Expense"}`}
             </Button>
           </DialogFooter>
         )}
@@ -357,10 +361,14 @@ export const ExpenseFormDialog = ({
     try {
       if (isEditing && expense) {
         await updateExpense({ id: expense.id, data });
-        toast.success(`${isIncome ? "Income" : "Expense"} updated successfully`);
+        toast.success(
+          `${isIncome ? "Income" : "Expense"} updated successfully`,
+        );
       } else {
         await createExpense(data);
-        toast.success(`${isIncome ? "Income" : "Expense"} created successfully`);
+        toast.success(
+          `${isIncome ? "Income" : "Expense"} created successfully`,
+        );
       }
       onOpenChange(false);
     } catch {
@@ -408,15 +416,15 @@ export const ExpenseFormDialog = ({
               type="button"
               onClick={form.handleSubmit(onSubmit)}
               disabled={isCreating || isUpdating}
-              className="h-12 w-full bg-[#C9993F] text-[#080C16] hover:bg-[#B8872E]"
+              className="h-12 w-full"
             >
               {isCreating || isUpdating
                 ? isEditing
                   ? "Updating..."
                   : "Creating..."
                 : isEditing
-                ? `Update ${isIncome ? "Income" : "Expense"}`
-                : `Add ${isIncome ? "Income" : "Expense"}`}
+                  ? `Update ${isIncome ? "Income" : "Expense"}`
+                  : `Add ${isIncome ? "Income" : "Expense"}`}
             </Button>
             <Button
               type="button"

@@ -245,11 +245,10 @@ export const BottomNav = () => {
         <div
           ref={containerRef}
           className={cn(
-            "relative isolate flex items-center justify-between overflow-hidden rounded-2xl px-1.5 py-1.5",
-            // Deep navy in both modes — slightly lighter in light mode to avoid harshness
-            "border border-white/8 bg-[#0f172a]/95 dark:bg-[#080C16]/90",
-            "shadow-xl shadow-black/30",
-            "supports-backdrop-filter:backdrop-blur-xl",
+            "relative isolate flex items-center justify-between overflow-hidden rounded-full px-1.5 py-1.5",
+            // Frosted glass that adapts to the active theme
+            "glass-surface",
+            "shadow-xl shadow-black/10 dark:shadow-black/40",
           )}
         >
           {mainNavItems.map((item, index) => {
@@ -262,17 +261,21 @@ export const BottomNav = () => {
                 <Link
                   key={item.id}
                   href={item.href}
-                  ref={(el) => { btnRefs.current[index] = el; }}
+                  ref={(el) => {
+                    btnRefs.current[index] = el;
+                  }}
                   onClick={() => handleItemClick(index, item)}
                   className={cn(
-                    "relative z-10 flex flex-1 flex-col items-center justify-center gap-1 rounded-xl px-2 py-2.5 text-sm font-medium transition-colors duration-200",
+                    "relative z-10 flex flex-1 flex-col items-center justify-center gap-1 rounded-full px-2 py-2.5 text-sm font-medium transition-colors duration-200",
                     isItemActive
-                      ? "text-[#C9993F]"
-                      : "text-white/40 hover:text-white/70",
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   <IconComponent className="h-5 w-5 shrink-0" />
-                  <span className="text-[10px] font-medium tracking-wide">{item.label}</span>
+                  <span className="text-[10px] font-medium tracking-wide">
+                    {item.label}
+                  </span>
                 </Link>
               );
             }
@@ -289,8 +292,8 @@ export const BottomNav = () => {
                   onClick={() => handleItemClick(index, item)}
                   className="relative z-10 flex flex-1 flex-col items-center justify-center gap-1 px-2 py-2.5"
                 >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#C9993F] shadow-lg shadow-[#C9993F]/25 transition-transform active:scale-95">
-                    <IconComponent className="h-5 w-5 text-[#080C16]" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/40 transition-transform active:scale-95">
+                    <IconComponent className="h-5 w-5 text-primary-foreground" />
                   </div>
                 </button>
               );
@@ -306,12 +309,16 @@ export const BottomNav = () => {
                 }}
                 onClick={() => handleItemClick(index, item)}
                 className={cn(
-                  "relative z-10 flex flex-1 flex-col items-center justify-center gap-1 rounded-xl px-2 py-2.5 text-sm font-medium transition-colors duration-200",
-                  isMoreRouteActive ? "text-[#C9993F]" : "text-white/40 hover:text-white/70",
+                  "relative z-10 flex flex-1 flex-col items-center justify-center gap-1 rounded-full px-2 py-2.5 text-sm font-medium transition-colors duration-200",
+                  isMoreRouteActive
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <IconComponent className="h-5 w-5" />
-                <span className="text-[10px] font-medium tracking-wide">{item.label}</span>
+                <span className="text-[10px] font-medium tracking-wide">
+                  {item.label}
+                </span>
               </button>
             );
           })}
@@ -320,7 +327,7 @@ export const BottomNav = () => {
           <motion.div
             animate={indicatorStyle}
             transition={{ type: "spring", stiffness: 420, damping: 32 }}
-            className="pointer-events-none absolute top-1.5 bottom-1.5 z-0 rounded-xl bg-[#C9993F]/10"
+            className="pointer-events-none absolute top-1.5 bottom-1.5 z-0 rounded-full bg-primary/10"
           />
         </div>
       </nav>
@@ -330,7 +337,8 @@ export const BottomNav = () => {
         open={isCreateOpen}
         onOpenChange={(open) => {
           setIsCreateOpen(open);
-          if (!open) requestAnimationFrame(() => createTriggerRef.current?.focus());
+          if (!open)
+            requestAnimationFrame(() => createTriggerRef.current?.focus());
         }}
       >
         <DrawerContent className="flex max-h-[85dvh] min-h-0 flex-col overflow-hidden">
@@ -347,31 +355,46 @@ export const BottomNav = () => {
                   icon: IconReceipt,
                   label: "Add expense",
                   desc: "Record a personal or account expense",
-                  action: () => { setIsCreateOpen(false); setExpenseDialogOpen(true); },
+                  action: () => {
+                    setIsCreateOpen(false);
+                    setExpenseDialogOpen(true);
+                  },
                 },
                 {
                   icon: IconFileImport,
                   label: "Import expenses",
                   desc: "Paste SMS, upload screenshots, or CSV",
-                  action: () => { setIsCreateOpen(false); setImportDialogOpen(true); },
+                  action: () => {
+                    setIsCreateOpen(false);
+                    setImportDialogOpen(true);
+                  },
                 },
                 {
                   icon: IconUsers,
                   label: "Create group",
                   desc: "Start a group to split bills",
-                  action: () => { setIsCreateOpen(false); setGroupDialogOpen(true); },
+                  action: () => {
+                    setIsCreateOpen(false);
+                    setGroupDialogOpen(true);
+                  },
                 },
                 {
                   icon: IconUserCircle,
                   label: "Add contact",
                   desc: "Save someone you split with often",
-                  action: () => { setIsCreateOpen(false); setContactDialogOpen(true); },
+                  action: () => {
+                    setIsCreateOpen(false);
+                    setContactDialogOpen(true);
+                  },
                 },
                 {
                   icon: IconWallet,
                   label: "Add account",
                   desc: "Track a cash, bank, or card balance",
-                  action: () => { setIsCreateOpen(false); setAccountDialogOpen(true); },
+                  action: () => {
+                    setIsCreateOpen(false);
+                    setAccountDialogOpen(true);
+                  },
                 },
               ].map(({ icon: Icon, label, desc, action }) => (
                 <button
@@ -399,7 +422,8 @@ export const BottomNav = () => {
         open={isMoreOpen}
         onOpenChange={(open) => {
           setIsMoreOpen(open);
-          if (!open) requestAnimationFrame(() => moreTriggerRef.current?.focus());
+          if (!open)
+            requestAnimationFrame(() => moreTriggerRef.current?.focus());
         }}
       >
         <DrawerContent className="flex max-h-[85dvh] min-h-0 flex-col overflow-hidden">
@@ -430,8 +454,10 @@ export const BottomNav = () => {
                             "group relative flex rounded-2xl border border-border/70 bg-card/50 p-3.5 outline-none transition-all",
                             "hover:border-border hover:bg-accent/40 active:scale-[0.98]",
                             "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                            item.featured && "col-span-2 flex-row items-center gap-4",
-                            item.featured && cn(accent.tileFeatured, accent.tileFeaturedHover),
+                            item.featured &&
+                              "col-span-2 flex-row items-center gap-4",
+                            item.featured &&
+                              cn(accent.tileFeatured, accent.tileFeaturedHover),
                             active && !item.featured && accent.tileActive,
                             active && item.featured && accent.tileActive,
                             !item.featured && "flex-col gap-2.5",
@@ -446,9 +472,18 @@ export const BottomNav = () => {
                             )}
                             aria-hidden
                           >
-                            <Icon className={cn(item.featured ? "size-6" : "size-5")} />
+                            <Icon
+                              className={cn(
+                                item.featured ? "size-6" : "size-5",
+                              )}
+                            />
                           </div>
-                          <div className={cn("min-w-0 flex-1", !item.featured && "w-full")}>
+                          <div
+                            className={cn(
+                              "min-w-0 flex-1",
+                              !item.featured && "w-full",
+                            )}
+                          >
                             <span className="block text-sm font-semibold leading-tight text-foreground">
                               {item.label}
                             </span>
@@ -473,11 +508,26 @@ export const BottomNav = () => {
         style={{ height: "calc(5rem + env(safe-area-inset-bottom))" }}
       />
 
-      <ExpenseFormDialog open={expenseDialogOpen} onOpenChange={setExpenseDialogOpen} />
-      <GroupFormDialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen} />
-      <ContactFormDialog open={contactDialogOpen} onOpenChange={setContactDialogOpen} />
-      <AccountFormDialog open={accountDialogOpen} onOpenChange={setAccountDialogOpen} />
-      <ImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} />
+      <ExpenseFormDialog
+        open={expenseDialogOpen}
+        onOpenChange={setExpenseDialogOpen}
+      />
+      <GroupFormDialog
+        open={groupDialogOpen}
+        onOpenChange={setGroupDialogOpen}
+      />
+      <ContactFormDialog
+        open={contactDialogOpen}
+        onOpenChange={setContactDialogOpen}
+      />
+      <AccountFormDialog
+        open={accountDialogOpen}
+        onOpenChange={setAccountDialogOpen}
+      />
+      <ImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+      />
     </>
   );
 };

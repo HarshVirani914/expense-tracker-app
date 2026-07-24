@@ -19,6 +19,7 @@ type DatePickerProps = {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  formatStr?: string;
 };
 
 export function DatePicker({
@@ -27,6 +28,7 @@ export function DatePicker({
   placeholder = "Pick a date",
   disabled = false,
   className,
+  formatStr = "PPP",
 }: DatePickerProps) {
   return (
     <Popover>
@@ -41,7 +43,11 @@ export function DatePicker({
           )}
         >
           <IconCalendar className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP") : <span>{placeholder}</span>}
+          {date ? (
+            <span className="truncate">{format(date, formatStr)}</span>
+          ) : (
+            <span>{placeholder}</span>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

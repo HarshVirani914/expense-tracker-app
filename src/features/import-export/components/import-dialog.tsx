@@ -125,7 +125,7 @@ const ImportDialogBody = ({ onClose, variant }: ImportDialogBodyProps) => {
           : "Paste messages, upload screenshots, or import a CSV file";
 
   const content = (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-4">
       {step === "input" && (
         <Tabs
           value={method}
@@ -234,7 +234,7 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-180 max-h-[90vh] overflow-y-auto overflow-x-hidden">
+      <DialogContent className="sm:max-w-190 max-h-[90vh] overflow-y-auto overflow-x-hidden">
         {open && (
           <ImportDialogBody
             onClose={() => handleOpenChange(false)}

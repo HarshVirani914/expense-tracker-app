@@ -2,7 +2,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, DM_Mono, Playfair_Display } from "next/font/google";
+import { Inter, JetBrains_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { QueryProvider } from "@/providers/query-provider";
@@ -12,19 +12,20 @@ import { Toaster } from "@/components/ui/sonner";
 import { ConfirmDialogProvider } from "@/components/confirm-dialog";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
+// Revolut pairs Aeonik display with Inter body — Manrope is the closest
+// open geometric grotesk, so: Inter for UI, Manrope for display numbers.
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
-const dmMono = DM_Mono({
-  weight: ["400"],
+const manrope = Manrope({
   subsets: ["latin"],
-  variable: "--font-dm-mono",
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-manrope",
 });
 
-// Used exclusively for the hero balance number — one serif for editorial luxury
-const playfair = Playfair_Display({
+const jetbrainsMono = JetBrains_Mono({
+  weight: ["400", "500"],
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-playfair",
+  variable: "--font-jetbrains-mono",
 });
 
 export const viewport: Viewport = {
@@ -33,15 +34,15 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#FAFAF7" },
-    { media: "(prefers-color-scheme: dark)", color: "#080C16" },
+    { media: "(prefers-color-scheme: light)", color: "#F7F7F8" },
+    { media: "(prefers-color-scheme: dark)", color: "#0A0A0A" },
   ],
   viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   ),
   title: {
     default: "PocketPulse - Expense Tracker",
@@ -83,9 +84,9 @@ export default function RootLayout({
       lang="en"
       className={cn(
         "h-full antialiased",
-        dmSans.variable,
-        dmMono.variable,
-        playfair.variable,
+        inter.variable,
+        manrope.variable,
+        jetbrainsMono.variable,
       )}
       suppressHydrationWarning
     >

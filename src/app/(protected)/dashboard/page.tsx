@@ -5,7 +5,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BudgetAlertsWidget } from "@/features/budgets/components/budget-alerts-widget";
 import { AccountBalances } from "@/features/dashboard/components/account-balances";
 import { HeroBalanceCard } from "@/features/dashboard/components/hero-balance-card";
-import { QuickActionsDesktopTrigger, QuickActionsMobileTiles, QuickActionsProvider } from "@/features/dashboard/components/quick-actions";
+import {
+  QuickActionsDesktopTrigger,
+  QuickActionsMobileTiles,
+  QuickActionsProvider,
+} from "@/features/dashboard/components/quick-actions";
 import { RecentExpensesList } from "@/features/dashboard/components/recent-expenses-list";
 import { StatsCards } from "@/features/dashboard/components/stats-cards";
 import { useDashboardStats } from "@/features/dashboard/hooks";
@@ -20,15 +24,24 @@ import { useEffect, useRef } from "react";
 // Lazy-load below-fold widgets — defers their JS and API fetches until after
 // above-fold content has rendered and hydrated.
 const AIInsightsWidget = dynamic(
-  () => import("@/features/ai/components/ai-insights-widget").then((m) => ({ default: m.AIInsightsWidget })),
+  () =>
+    import("@/features/ai/components/ai-insights-widget").then((m) => ({
+      default: m.AIInsightsWidget,
+    })),
   { loading: () => <Skeleton className="h-52 w-full" />, ssr: false },
 );
 const OutstandingDebtsWidget = dynamic(
-  () => import("@/features/dashboard/components/outstanding-debts-widget").then((m) => ({ default: m.OutstandingDebtsWidget })),
+  () =>
+    import("@/features/dashboard/components/outstanding-debts-widget").then(
+      (m) => ({ default: m.OutstandingDebtsWidget }),
+    ),
   { loading: () => <Skeleton className="h-48 w-full" />, ssr: false },
 );
 const GroupBalancesSummary = dynamic(
-  () => import("@/features/dashboard/components/group-balances-summary").then((m) => ({ default: m.GroupBalancesSummary })),
+  () =>
+    import("@/features/dashboard/components/group-balances-summary").then(
+      (m) => ({ default: m.GroupBalancesSummary }),
+    ),
   { loading: () => <Skeleton className="h-48 w-full" />, ssr: false },
 );
 
@@ -76,7 +89,9 @@ export default function DashboardPage() {
   if (error || !stats) {
     return (
       <div className="flex items-center justify-center h-96">
-        <p className="text-destructive">Failed to load dashboard. Please try again.</p>
+        <p className="text-destructive">
+          Failed to load dashboard. Please try again.
+        </p>
       </div>
     );
   }
@@ -90,7 +105,6 @@ export default function DashboardPage() {
     <QuickActionsProvider>
       <>
         <div className="flex min-w-0 w-full max-w-full flex-col gap-4 md:gap-6 @container/dashboard">
-
           {/* Hero — dark canvas with balance, always rendered first */}
           <div className="order-1">
             <div className="mb-3 hidden items-center justify-between md:flex">
@@ -98,7 +112,9 @@ export default function DashboardPage() {
                 <h1 className="text-xl font-semibold tracking-tight">
                   Welcome back{user?.firstName ? `, ${user.firstName}` : ""}
                 </h1>
-                <p className="text-sm text-muted-foreground">Here&apos;s your financial snapshot.</p>
+                <p className="text-sm text-muted-foreground">
+                  Here&apos;s your financial snapshot.
+                </p>
               </div>
               <QuickActionsDesktopTrigger />
             </div>
@@ -149,19 +165,25 @@ export default function DashboardPage() {
           href="/ai"
           aria-label="Open AI assistant"
           className="md:hidden fixed right-4 z-50"
-          style={{ bottom: "calc(5rem + env(safe-area-inset-bottom) + 1.25rem)" }}
+          style={{
+            bottom: "calc(5rem + env(safe-area-inset-bottom) + 1.25rem)",
+          }}
         >
           <Button
             size="lg"
-            className="h-14 w-14 rounded-full shadow-2xl transition-all active:scale-95 bg-[#C9993F] hover:bg-[#B8872E] text-[#080C16]"
+            className="h-14 w-14 rounded-full glow-primary transition-all active:scale-95"
           >
             <IconSparkles className="h-6 w-6" />
           </Button>
         </Link>
-        <Link href="/ai" aria-label="Open AI assistant" className="hidden md:block fixed bottom-6 right-6 z-50">
+        <Link
+          href="/ai"
+          aria-label="Open AI assistant"
+          className="hidden md:block fixed bottom-6 right-6 z-50"
+        >
           <Button
             size="lg"
-            className="h-14 w-14 rounded-full shadow-2xl transition-all hover:scale-110 bg-[#C9993F] hover:bg-[#B8872E] text-[#080C16]"
+            className="h-14 w-14 rounded-full glow-primary transition-all hover:scale-110"
           >
             <IconSparkles className="h-6 w-6" />
           </Button>
