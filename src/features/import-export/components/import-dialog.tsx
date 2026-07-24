@@ -1,360 +1,246 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import Papa from "papaparse";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
-  IconUpload,
-  IconFileTypeCsv,
-  IconFileTypeXls,
-  IconAlertCircle,
-  IconDownload,
-  IconCheck,
-  IconX,
-  IconArrowLeft,
-} from "@tabler/icons-react";
-import { useImportExpenses, useDownloadTemplate } from "../hooks";
-import { normalizeHeader } from "../utils/normalize";
-import type { ImportResult } from "../types";
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useState } from "react";
+import { useImportExpenses, useSmartImport } from "../hooks";
+import type {
+  ImportResult,
+  SmartImportConfirmResult,
+  SmartImportRow,
+} from "../types";
+import { CsvImportTab, CsvPreviewStep, CsvResultStep } from "./csv-import-tab";
+import { ImageImportTab } from "./image-import-tab";
+import { PasteImportTab } from "./paste-import-tab";
+import { SmartResultStep, SmartReviewStep } from "./smart-review-step";
 
-type Step = "upload" | "preview" | "result";
-
-type PreviewRow = Record<string, string>;
-
-const REQUIRED_COLUMNS = ["date", "amount", "description", "category"];
-const OPTIONAL_COLUMNS = ["account", "type", "method", "notes"];
-const ALL_EXPECTED = new Set([...REQUIRED_COLUMNS, ...OPTIONAL_COLUMNS]);
+type ImportMethod = "paste" | "screenshot" | "csv";
+type Step = "input" | "csv-preview" | "smart-review" | "result";
 
 type ImportDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
-  const [step, setStep] = useState<Step>("upload");
-  const [file, setFile] = useState<File | null>(null);
-  const [previewRows, setPreviewRows] = useState<PreviewRow[]>([]);
-  const [detectedColumns, setDetectedColumns] = useState<string[]>([]);
-  const [result, setResult] = useState<ImportResult | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+type ImportDialogBodyProps = {
+  onClose: () => void;
+  variant: "dialog" | "drawer";
+};
 
+const ImportDialogBody = ({ onClose, variant }: ImportDialogBodyProps) => {
+  const [method, setMethod] = useState<ImportMethod>("paste");
+  const [step, setStep] = useState<Step>("input");
+  const [smartRows, setSmartRows] = useState<SmartImportRow[]>([]);
+  const [sessionId, setSessionId] = useState("");
+  const [smartResult, setSmartResult] =
+    useState<SmartImportConfirmResult | null>(null);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [csvPreviewRows, setCsvPreviewRows] = useState<
+    Record<string, string>[]
+  >([]);
+  const [csvDetectedColumns, setCsvDetectedColumns] = useState<string[]>([]);
+  const [csvResult, setCsvResult] = useState<ImportResult | null>(null);
+
+  const {
+    analyzeText,
+    analyzeImages,
+    confirmImport,
+    isAnalyzing,
+    isConfirming,
+  } = useSmartImport();
   const { importExpenses, isImporting } = useImportExpenses();
-  const { downloadTemplate } = useDownloadTemplate();
 
-  const parseForPreview = useCallback(async (f: File) => {
-    if (f.name.endsWith(".xlsx")) {
-      // Excel: send to server for parsing (ExcelJS is server-only)
-      const formData = new FormData();
-      formData.append("file", f);
-      const res = await fetch("/api/import-export/preview", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) return;
-      const json = await res.json();
-      setPreviewRows(json.data.rows);
-      setDetectedColumns(json.data.columns);
-    } else {
-      // CSV: parse client-side instantly
-      const text = await f.text();
-      const parsed = Papa.parse<PreviewRow>(text, {
-        header: true,
-        skipEmptyLines: true,
-        preview: 6,
-        transformHeader: normalizeHeader,
-      });
-      setPreviewRows(parsed.data);
-      setDetectedColumns(parsed.meta.fields ?? []);
-    }
-  }, []);
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile) return;
-    setFile(selectedFile);
-    setResult(null);
-    setStep("preview");
-    await parseForPreview(selectedFile);
+  const handleAnalyzeText = async (text: string) => {
+    const result = await analyzeText(text);
+    setSessionId(result.sessionId);
+    setSmartRows(result.rows);
+    setStep("smart-review");
   };
 
-  const handleImport = async () => {
-    if (!file) return;
-    try {
-      const importResult = await importExpenses(file);
-      setResult(importResult);
-      setStep("result");
-    } catch {
-      // error handled in hook
-    }
+  const handleAnalyzeImages = async (images: File[]) => {
+    const result = await analyzeImages(images);
+    setSessionId(result.sessionId);
+    setSmartRows(result.rows);
+    setStep("smart-review");
   };
 
-  const handleClose = () => {
-    setFile(null);
-    setResult(null);
-    setPreviewRows([]);
-    setDetectedColumns([]);
-    setStep("upload");
-    onOpenChange(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const handleConfirmSmartImport = async () => {
+    const result = await confirmImport(sessionId, smartRows);
+    setSmartResult(result);
+    setStep("result");
+  };
+
+  const handleCsvPreviewReady = (
+    file: File,
+    previewRows: Record<string, string>[],
+    detectedColumns: string[],
+  ) => {
+    setCsvFile(file);
+    setCsvPreviewRows(previewRows);
+    setCsvDetectedColumns(detectedColumns);
+    setStep("csv-preview");
+  };
+
+  const handleCsvImport = async () => {
+    if (!csvFile) return;
+    const result = await importExpenses(csvFile);
+    setCsvResult(result);
+    setStep("result");
   };
 
   const handleBack = () => {
-    setStep("upload");
-    setFile(null);
-    setPreviewRows([]);
-    setDetectedColumns([]);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    setStep("input");
+    setSmartRows([]);
+    setSessionId("");
+    setCsvFile(null);
+    setCsvPreviewRows([]);
+    setCsvDetectedColumns([]);
   };
 
-  const missingRequired = REQUIRED_COLUMNS.filter(
-    (col) => !detectedColumns.includes(col),
+  const handleClose = () => {
+    onClose();
+  };
+
+  const description =
+    step === "smart-review"
+      ? "Review and edit extracted transactions before importing"
+      : step === "csv-preview"
+        ? `Preview — ${csvPreviewRows.length} rows shown (up to 5)`
+        : step === "result"
+          ? "Import complete"
+          : "Paste messages, upload screenshots, or import a CSV file";
+
+  const content = (
+    <div className="space-y-4">
+      {step === "input" && (
+        <Tabs
+          value={method}
+          onValueChange={(v) => setMethod(v as ImportMethod)}
+        >
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="paste">Paste Text</TabsTrigger>
+            <TabsTrigger value="screenshot">Screenshot</TabsTrigger>
+            <TabsTrigger value="csv">CSV / Excel</TabsTrigger>
+          </TabsList>
+          <TabsContent value="paste" className="mt-4">
+            <PasteImportTab
+              onAnalyze={handleAnalyzeText}
+              isAnalyzing={isAnalyzing}
+            />
+          </TabsContent>
+          <TabsContent value="screenshot" className="mt-4">
+            <ImageImportTab
+              onAnalyze={handleAnalyzeImages}
+              isAnalyzing={isAnalyzing}
+            />
+          </TabsContent>
+          <TabsContent value="csv" className="mt-4">
+            <CsvImportTab onPreviewReady={handleCsvPreviewReady} />
+          </TabsContent>
+        </Tabs>
+      )}
+
+      {step === "smart-review" && (
+        <SmartReviewStep
+          rows={smartRows}
+          onRowsChange={setSmartRows}
+          onConfirm={handleConfirmSmartImport}
+          onBack={handleBack}
+          isConfirming={isConfirming}
+        />
+      )}
+
+      {step === "csv-preview" && csvFile && (
+        <CsvPreviewStep
+          file={csvFile}
+          previewRows={csvPreviewRows}
+          detectedColumns={csvDetectedColumns}
+          onImport={handleCsvImport}
+          onBack={handleBack}
+          isImporting={isImporting}
+        />
+      )}
+
+      {step === "result" && smartResult && (
+        <SmartResultStep result={smartResult} onClose={handleClose} />
+      )}
+
+      {step === "result" && csvResult && !smartResult && (
+        <CsvResultStep result={csvResult} onClose={handleClose} />
+      )}
+    </div>
   );
-  const unknownColumns = detectedColumns.filter(
-    (col) => !ALL_EXPECTED.has(col),
-  );
+
+  if (variant === "drawer") {
+    return (
+      <>
+        <DrawerHeader className="shrink-0 text-left">
+          <DrawerTitle>Import Expenses</DrawerTitle>
+          <DrawerDescription>{description}</DrawerDescription>
+        </DrawerHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-6">
+          {content}
+        </div>
+      </>
+    );
+  }
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[680px] max-h-[90vh] overflow-y-auto overflow-x-hidden">
-        <DialogHeader>
-          <DialogTitle>Import Expenses</DialogTitle>
-          <DialogDescription>
-            {step === "upload" && "Upload a CSV file to import expenses"}
-            {step === "preview" &&
-              `Preview — ${previewRows.length} rows shown (up to 5)`}
-            {step === "result" && "Import complete"}
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <DialogHeader>
+        <DialogTitle>Import Expenses</DialogTitle>
+        <DialogDescription>{description}</DialogDescription>
+      </DialogHeader>
+      {content}
+    </>
+  );
+};
 
-        {/* ─── UPLOAD STEP ─── */}
-        {step === "upload" && (
-          <div className="space-y-4">
-            <Card className="p-4 bg-muted/50">
-              <div className="flex items-start gap-3">
-                <IconAlertCircle className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <p>
-                    Download the Excel template — it has dropdowns pre-filled
-                    with your categories and accounts. Required columns:{" "}
-                    <strong>date, amount, description, category</strong>.
-                  </p>
-                  <p className="text-xs">
-                    Accepts <code>.xlsx</code> and <code>.csv</code> files.
-                    Flexible column names and date formats (DD/MM/YYYY,
-                    YYYY-MM-DD, etc.) are handled automatically.
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={downloadTemplate}
-                    className="mt-2"
-                  >
-                    <IconDownload className="h-4 w-4 mr-2" />
-                    Download Template
-                  </Button>
-                </div>
-              </div>
-            </Card>
+export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
+  const isMobile = useIsMobile();
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv,.xlsx"
-              onChange={handleFileChange}
-              className="hidden"
-              id="csv-file-input"
+  const handleOpenChange = (nextOpen: boolean) => {
+    onOpenChange(nextOpen);
+  };
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={handleOpenChange}>
+        <DrawerContent className="flex max-h-[95dvh] min-h-0 flex-col overflow-hidden">
+          {open && (
+            <ImportDialogBody
+              onClose={() => handleOpenChange(false)}
+              variant="drawer"
             />
-            <label htmlFor="csv-file-input" className="block">
-              <div className="flex flex-col items-center justify-center gap-2 h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                <IconUpload className="h-8 w-8 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  Click to select a CSV or Excel (.xlsx) file
-                </p>
-              </div>
-            </label>
-          </div>
-        )}
-
-        {/* ─── PREVIEW STEP ─── */}
-        {step === "preview" && (
-          <div className="space-y-4 min-w-0">
-            {/* File info */}
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-              {file?.name.endsWith(".xlsx") ? (
-                <IconFileTypeXls className="h-6 w-6 text-primary shrink-0" />
-              ) : (
-                <IconFileTypeCsv className="h-6 w-6 text-primary shrink-0" />
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium truncate">{file?.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {((file?.size ?? 0) / 1024).toFixed(1)} KB
-                </p>
-              </div>
-            </div>
-
-            {/* Column detection */}
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Detected columns
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {detectedColumns.map((col) => (
-                  <Badge
-                    key={col}
-                    variant={ALL_EXPECTED.has(col) ? "default" : "secondary"}
-                    className="text-xs"
-                  >
-                    {col}
-                  </Badge>
-                ))}
-                {unknownColumns.length > 0 && (
-                  <span className="text-xs text-muted-foreground self-center">
-                    (unrecognized columns will be ignored)
-                  </span>
-                )}
-              </div>
-
-              {missingRequired.length > 0 && (
-                <div className="flex items-start gap-2 p-2 rounded bg-destructive/10 text-destructive text-xs">
-                  <IconX className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                  <span>
-                    Missing required columns:{" "}
-                    <strong>{missingRequired.join(", ")}</strong>
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Preview table */}
-            {previewRows.length > 0 && (
-              <div className="overflow-x-auto rounded-lg border">
-                <table className="text-xs w-full">
-                  <thead>
-                    <tr className="bg-muted/50">
-                      {detectedColumns
-                        .filter((c) => ALL_EXPECTED.has(c))
-                        .map((col) => (
-                          <th
-                            key={col}
-                            className="px-3 py-2 text-left font-medium text-muted-foreground whitespace-nowrap"
-                          >
-                            {col}
-                          </th>
-                        ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {previewRows.map((row, idx) => (
-                      <tr key={idx} className="border-t">
-                        {detectedColumns
-                          .filter((c) => ALL_EXPECTED.has(c))
-                          .map((col) => (
-                            <td
-                              key={col}
-                              className="px-3 py-2 max-w-[160px] truncate"
-                              title={row[col]}
-                            >
-                              {row[col] ?? "—"}
-                            </td>
-                          ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {previewRows.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                No rows detected in the file.
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* ─── RESULT STEP ─── */}
-        {step === "result" && result && (
-          <Card className="p-4">
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Imported</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {result.success}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Failed</p>
-                  <p className="text-2xl font-bold text-red-600">
-                    {result.failed}
-                  </p>
-                </div>
-              </div>
-
-              {result.errors.length > 0 && (
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  <p className="text-sm font-medium">Row errors:</p>
-                  {result.errors.map((error, index) => (
-                    <div
-                      key={index}
-                      className="text-xs p-2 bg-destructive/10 rounded border border-destructive/20"
-                    >
-                      <span className="font-medium">Row {error.row}:</span>{" "}
-                      {error.error}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {result.failed === 0 && (
-                <div className="flex items-center gap-2 text-sm text-green-600">
-                  <IconCheck className="h-4 w-4" />
-                  All rows imported successfully
-                </div>
-              )}
-            </div>
-          </Card>
-        )}
-
-        <DialogFooter className="gap-2">
-          {step === "upload" && (
-            <Button variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
           )}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
-          {step === "preview" && (
-            <>
-              <Button variant="outline" onClick={handleBack}>
-                <IconArrowLeft className="h-4 w-4 mr-1" />
-                Back
-              </Button>
-              <Button
-                onClick={handleImport}
-                disabled={
-                  isImporting ||
-                  missingRequired.length > 0 ||
-                  previewRows.length === 0
-                }
-              >
-                {isImporting ? "Importing..." : "Import"}
-              </Button>
-            </>
-          )}
-
-          {step === "result" && <Button onClick={handleClose}>Close</Button>}
-        </DialogFooter>
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-180 max-h-[90vh] overflow-y-auto overflow-x-hidden">
+        {open && (
+          <ImportDialogBody
+            onClose={() => handleOpenChange(false)}
+            variant="dialog"
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

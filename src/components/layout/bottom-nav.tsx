@@ -11,6 +11,7 @@ import { AccountFormDialog } from "@/features/accounts/components/account-form-d
 import { ContactFormDialog } from "@/features/contacts/components/contact-form-dialog";
 import { ExpenseFormDialog } from "@/features/expenses/components/expense-form-dialog";
 import { GroupFormDialog } from "@/features/groups/components/group-form-dialog";
+import { ImportDialog } from "@/features/import-export/components/import-dialog";
 import {
   getAccentIconTileClass,
   getFeatureAccentByHref,
@@ -24,6 +25,7 @@ import {
   IconChartBar,
   IconChartPie,
   IconDotsVertical,
+  IconFileImport,
   IconHome,
   IconMessageChatbot,
   IconPlus,
@@ -174,6 +176,7 @@ export const BottomNav = () => {
   const [groupDialogOpen, setGroupDialogOpen] = useState(false);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [accountDialogOpen, setAccountDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const createTriggerRef = useRef<HTMLButtonElement | null>(null);
   const moreTriggerRef = useRef<HTMLButtonElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -334,7 +337,7 @@ export const BottomNav = () => {
           <DrawerHeader className="shrink-0">
             <DrawerTitle>Create New</DrawerTitle>
             <DrawerDescription>
-              Add an expense, group, account, or contact
+              Add an expense, import transactions, or create a group
             </DrawerDescription>
           </DrawerHeader>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 [-webkit-overflow-scrolling:touch]">
@@ -345,6 +348,12 @@ export const BottomNav = () => {
                   label: "Add expense",
                   desc: "Record a personal or account expense",
                   action: () => { setIsCreateOpen(false); setExpenseDialogOpen(true); },
+                },
+                {
+                  icon: IconFileImport,
+                  label: "Import expenses",
+                  desc: "Paste SMS, upload screenshots, or CSV",
+                  action: () => { setIsCreateOpen(false); setImportDialogOpen(true); },
                 },
                 {
                   icon: IconUsers,
@@ -468,6 +477,7 @@ export const BottomNav = () => {
       <GroupFormDialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen} />
       <ContactFormDialog open={contactDialogOpen} onOpenChange={setContactDialogOpen} />
       <AccountFormDialog open={accountDialogOpen} onOpenChange={setAccountDialogOpen} />
+      <ImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} />
     </>
   );
 };

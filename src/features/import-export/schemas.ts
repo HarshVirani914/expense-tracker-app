@@ -49,3 +49,27 @@ export const exportFiltersSchema = z.object({
 })
 
 export type CsvRowInput = z.infer<typeof csvRowSchema>
+
+export const smartImportRowSchema = z.object({
+  id: z.string().optional(),
+  date: z.string(),
+  description: z.string().min(1),
+  amount: z.number().positive(),
+  category: z.string().min(1),
+  type: z.enum(['EXPENSE', 'INCOME']),
+  paymentMethod: z
+    .enum(['CASH', 'CARD', 'UPI', 'BANK_TRANSFER', 'OTHER'])
+    .optional(),
+  merchant: z.string().optional(),
+  confidence: z.number().min(0).max(1),
+  included: z.boolean().optional().default(true),
+  possibleDuplicate: z.boolean().optional().default(false),
+})
+
+export const confirmSmartImportSchema = z.object({
+  sessionId: z.string().min(1),
+  rows: z.array(smartImportRowSchema).min(1),
+})
+
+export type SmartImportRowInput = z.infer<typeof smartImportRowSchema>
+export type ConfirmSmartImportInput = z.infer<typeof confirmSmartImportSchema>

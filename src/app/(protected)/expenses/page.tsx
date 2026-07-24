@@ -130,7 +130,7 @@ function ExpensesPageContent() {
             className="flex-1 gap-2"
           >
             <IconFileImport className="h-4 w-4" />
-            Import CSV
+            Import
           </Button>
           <Button
             onClick={() => setIsExportOpen(true)}
