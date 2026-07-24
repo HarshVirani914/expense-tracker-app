@@ -13,11 +13,13 @@ import {
   useToggleRecurringExpense,
 } from "@/features/recurring-expenses/hooks";
 import type { RecurringExpenseWithRelations } from "@/features/recurring-expenses/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { IconPlus, IconRefresh } from "@tabler/icons-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function RecurringExpensesPage() {
+  const isMobile = useIsMobile();
   const [formOpen, setFormOpen] = useState(false);
   const [selectedRecurringExpense, setSelectedRecurringExpense] = useState<
     RecurringExpenseWithRelations | undefined
@@ -82,32 +84,63 @@ export default function RecurringExpensesPage() {
 
   return (
     <div className="flex min-w-0 w-full max-w-full flex-col gap-6">
-      <FeaturePageHero className="p-4 sm:p-5">
-        <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div className="min-w-0 flex-1 space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">
-              Recurring Expenses
-            </h1>
-            <p className="text-muted-foreground">
-              Automate regular transactions that repeat
-            </p>
+      {!isMobile && (
+        <FeaturePageHero className="p-4 sm:p-5">
+          <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="min-w-0 flex-1 space-y-1">
+              <h1 className="text-3xl font-bold tracking-tight min-[480px]:text-4xl">
+                Recurring Expenses
+              </h1>
+              <p className="text-muted-foreground text-base">
+                Automate regular transactions that repeat
+              </p>
+            </div>
+            <div className="flex min-w-0 shrink-0 flex-wrap gap-2">
+              <Button
+                onClick={handleProcessNow}
+                disabled={isProcessing}
+                variant="outline"
+                size="lg"
+                className="gap-2 shrink-0"
+              >
+                <IconRefresh className="h-5 w-5" />
+                Process Now
+              </Button>
+              <Button
+                onClick={() => setFormOpen(true)}
+                className="gap-2 shrink-0"
+                size="lg"
+              >
+                <IconPlus className="h-5 w-5" />
+                Add Recurring
+              </Button>
+            </div>
           </div>
-          <div className="flex min-w-0 shrink-0 flex-wrap gap-2">
+        </FeaturePageHero>
+      )}
+
+      {isMobile && (
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="min-w-0 truncate text-2xl font-bold tracking-tight">
+            Recurring
+          </h1>
+          <div className="flex shrink-0 gap-2">
             <Button
               onClick={handleProcessNow}
               disabled={isProcessing}
               variant="outline"
+              size="icon"
+              aria-label="Process recurring expenses now"
             >
               <IconRefresh className="h-4 w-4" />
-              Process Now
             </Button>
-            <Button onClick={() => setFormOpen(true)}>
+            <Button onClick={() => setFormOpen(true)} className="gap-2">
               <IconPlus className="h-4 w-4" />
               Add Recurring
             </Button>
           </div>
         </div>
-      </FeaturePageHero>
+      )}
 
       <Tabs defaultValue="active" className="min-w-0 w-full max-w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
@@ -126,6 +159,7 @@ export default function RecurringExpensesPage() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             onToggle={handleToggle}
+            onAddRecurringExpense={() => setFormOpen(true)}
           />
         </TabsContent>
 

@@ -74,9 +74,9 @@ function Shimmer() {
         <motion.div
           animate={{ opacity: [0.4, 0.8, 0.4] }}
           transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-500/15"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/15"
         >
-          <div className="h-3.5 w-3.5 rounded-full bg-violet-400/50" />
+          <div className="h-3.5 w-3.5 rounded-full bg-primary/50" />
         </motion.div>
 
         <div className="flex-1 space-y-1.5">
@@ -85,7 +85,7 @@ function Shimmer() {
             <motion.span
               animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
-              className="inline-block h-1.5 w-1.5 rounded-full bg-violet-500"
+              className="inline-block h-1.5 w-1.5 rounded-full bg-primary"
             />
             {/* Skeleton text */}
             <div className="h-3.5 w-40 rounded-full bg-muted-foreground/15" />
@@ -93,7 +93,7 @@ function Shimmer() {
           {/* Shimmer bar */}
           <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
             <motion.div
-              className="h-full rounded-full bg-linear-to-r from-violet-400/30 via-violet-500/50 to-violet-400/30"
+              className="h-full rounded-full bg-linear-to-r from-primary/30 via-primary/50 to-primary/30"
               animate={{ x: ["-100%", "100%"] }}
               transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
             />
@@ -131,9 +131,9 @@ function RunningToolCard({ toolKey }: { toolKey: string }) {
         <motion.div
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-500/15"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/15"
         >
-          <Icon className="h-3.5 w-3.5 text-violet-500" />
+          <Icon className="h-3.5 w-3.5 text-primary" />
         </motion.div>
 
         <div className="flex-1 min-w-0 space-y-1.5">
@@ -141,14 +141,14 @@ function RunningToolCard({ toolKey }: { toolKey: string }) {
             <motion.span
               animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}
-              className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-violet-500"
+              className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
             />
             <p className="text-xs font-medium text-muted-foreground truncate">{label}</p>
           </div>
           {/* Progress shimmer bar */}
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
             <motion.div
-              className="h-full rounded-full bg-linear-to-r from-violet-400/40 via-violet-500/60 to-indigo-400/40"
+              className="h-full rounded-full bg-linear-to-r from-primary/40 via-primary/60 to-primary/40"
               animate={{ x: ["-100%", "100%"] }}
               transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
             />

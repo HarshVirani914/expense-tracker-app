@@ -2,11 +2,10 @@
 
 import { useAccounts } from '../hooks/use-accounts'
 import { useDeleteAccount } from '../hooks/use-delete-account'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { toast } from 'sonner'
 import type { AccountWithBalance } from '../types'
 import { useConfirmDialog } from '@/components/confirm-dialog'
+import { EmptyState } from '@/components/empty-state'
 import { GridSkeleton } from '@/components/skeletons'
 import { AccountCard } from './account-card'
 import { IconWallet } from '@tabler/icons-react'
@@ -48,22 +47,13 @@ export const AccountList = ({ onEdit, onAddAccount }: AccountListProps) => {
 
   if (!accounts || accounts.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12 px-4 text-center">
-          <div className="rounded-full bg-primary/10 p-6 mb-4">
-            <IconWallet className="h-12 w-12 text-primary" />
-          </div>
-          <h3 className="text-xl font-semibold mb-2">No accounts yet</h3>
-          <p className="text-muted-foreground max-w-md mb-6">
-            Create your first account to start tracking your balances and transactions
-          </p>
-          {onAddAccount && (
-            <Button onClick={onAddAccount} size="lg">
-              Add First Account
-            </Button>
-          )}
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={IconWallet}
+        title="No accounts yet"
+        description="Create your first account to start tracking your balances and transactions"
+        actionLabel="Add First Account"
+        onAction={onAddAccount}
+      />
     )
   }
 

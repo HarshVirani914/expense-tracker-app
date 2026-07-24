@@ -45,7 +45,7 @@ export const ExpenseSummaryCard = memo(
               <p className="text-sm text-muted-foreground font-medium">
                 Net Cash Flow
               </p>
-              <div className="text-4xl font-bold tracking-tight font-mono">
+              <div className="text-4xl font-bold tracking-tight font-display">
                 {formatCurrency(Math.abs(netAmount))}
               </div>
             </div>
@@ -53,8 +53,8 @@ export const ExpenseSummaryCard = memo(
               className={cn(
                 "rounded-full p-3",
                 isPositive
-                  ? "bg-green-500/10 text-green-600 dark:text-green-400"
-                  : "bg-red-500/10 text-red-600 dark:text-red-400",
+                  ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                  : "bg-red-500/10 text-red-700 dark:text-red-400",
               )}
             >
               <IconCash className="h-6 w-6" />
@@ -70,7 +70,7 @@ export const ExpenseSummaryCard = memo(
                 <p className="text-xs text-muted-foreground font-medium">
                   Expenses
                 </p>
-                <p className="text-lg font-bold text-red-700 dark:text-red-400 font-mono">
+                <p className="text-lg font-bold text-red-700 dark:text-red-400 font-display">
                   {formatCurrency(totalExpenses)}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -80,15 +80,15 @@ export const ExpenseSummaryCard = memo(
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 rounded-lg bg-green-500/10 p-4">
-              <div className="rounded-full bg-green-500/20 p-2">
-                <IconTrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 rounded-lg bg-emerald-500/10 p-4">
+              <div className="rounded-full bg-emerald-500/20 p-2">
+                <IconTrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div className="space-y-0.5">
                 <p className="text-xs text-muted-foreground font-medium">
                   Income
                 </p>
-                <p className="text-lg font-bold text-green-700 dark:text-green-400 font-mono">
+                <p className="text-lg font-bold text-emerald-700 dark:text-emerald-400 font-display">
                   {formatCurrency(totalIncome)}
                 </p>
                 <p className="text-xs text-muted-foreground">

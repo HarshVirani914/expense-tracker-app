@@ -263,6 +263,7 @@ export const GroupActivityCard = ({
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label="Expense actions"
                           className="h-11 w-11 min-h-11 min-w-11 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                           onClick={(e) => e.stopPropagation()}
                         >

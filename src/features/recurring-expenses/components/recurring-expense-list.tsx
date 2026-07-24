@@ -1,7 +1,9 @@
 "use client"
 
 import { RecurringExpenseCard } from "./recurring-expense-card"
+import { EmptyState } from "@/components/empty-state"
 import { Skeleton } from "@/components/ui/skeleton"
+import { IconRepeat } from "@tabler/icons-react"
 import type { RecurringExpenseWithRelations } from "../types"
 
 type RecurringExpenseListProps = {
@@ -10,6 +12,7 @@ type RecurringExpenseListProps = {
   onEdit?: (recurringExpense: RecurringExpenseWithRelations) => void
   onDelete?: (id: string) => void
   onToggle?: (id: string) => void
+  onAddRecurringExpense?: () => void
 }
 
 export const RecurringExpenseList = ({
@@ -18,6 +21,7 @@ export const RecurringExpenseList = ({
   onEdit,
   onDelete,
   onToggle,
+  onAddRecurringExpense,
 }: RecurringExpenseListProps) => {
   if (isLoading) {
     return (
@@ -31,12 +35,13 @@ export const RecurringExpenseList = ({
 
   if (!recurringExpenses || recurringExpenses.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <p className="text-muted-foreground text-lg mb-2">No recurring expenses yet</p>
-        <p className="text-muted-foreground text-sm">
-          Create a recurring expense to automate regular transactions
-        </p>
-      </div>
+      <EmptyState
+        icon={IconRepeat}
+        title="No recurring expenses yet"
+        description="Create a recurring expense to automate regular transactions"
+        actionLabel="Add Recurring Expense"
+        onAction={onAddRecurringExpense}
+      />
     )
   }
 

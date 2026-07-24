@@ -152,6 +152,7 @@ export const ManageCategoriesSheet = ({
                             variant="ghost"
                             size="icon"
                             onClick={() => handleEdit(category)}
+                            aria-label="Edit category"
                             className="h-8 w-8"
                           >
                             <IconPencil className="h-4 w-4" />
@@ -163,6 +164,7 @@ export const ManageCategoriesSheet = ({
                               handleDelete(category.id, category.name)
                             }
                             disabled={isDeleting}
+                            aria-label="Delete category"
                             className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                           >
                             <IconTrash className="h-4 w-4" />

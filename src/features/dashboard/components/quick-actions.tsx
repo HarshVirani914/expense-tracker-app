@@ -167,10 +167,7 @@ export const QuickActionsDesktopTrigger = ({
     <div className={className}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            className="gap-2 border-none shadow-lg transition-shadow hover:shadow-xl"
-            size="lg"
-          >
+          <Button className="gap-2" size="lg">
             <IconPlus className="h-5 w-5" />
             Create
             <IconChevronDown className="ml-1 h-4 w-4" />

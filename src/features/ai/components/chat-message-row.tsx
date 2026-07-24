@@ -34,16 +34,16 @@ export const ChatMessageRow = ({
       transition={{ duration: 0.22, ease: "easeOut" as const }}
       className={cn("flex items-end gap-2.5", isUser ? "flex-row-reverse" : "flex-row")}
     >
-      {/* Gradient sparkle avatar — assistant only */}
+      {/* Sparkle avatar — assistant only */}
       {!isUser && (
         <div
           aria-hidden
-          className="flex h-8 w-8 shrink-0 self-end mb-0.5 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-indigo-600 shadow-sm shadow-violet-500/30"
+          className="flex h-8 w-8 shrink-0 self-end mb-0.5 items-center justify-center rounded-full bg-primary shadow-sm shadow-primary/30"
         >
           {isStreaming ? (
-            <IconLoader className="h-3.5 w-3.5 animate-spin text-white" />
+            <IconLoader className="h-3.5 w-3.5 animate-spin text-primary-foreground" />
           ) : (
-            <IconSparkles className="h-3.5 w-3.5 text-white" />
+            <IconSparkles className="h-3.5 w-3.5 text-primary-foreground" />
           )}
         </div>
       )}

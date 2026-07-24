@@ -127,10 +127,21 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
     setResolvePromise(null)
   }
 
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open)
+    if (!open) {
+      // Dismissal via Escape/overlay must still settle the awaited promise
+      if (resolvePromise) {
+        resolvePromise(false)
+      }
+      setResolvePromise(null)
+    }
+  }
+
   return (
     <ConfirmDialogContext.Provider value={{ confirm }}>
       {children}
-      <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+      <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{options.title}</AlertDialogTitle>

@@ -125,7 +125,7 @@ export const OutstandingDebtsWidget = () => {
                   className={`rounded-full p-2 ${
                     debt.type === "owes"
                       ? "bg-destructive/10 text-destructive"
-                      : "bg-green-500/10 text-green-600 dark:text-green-400"
+                      : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
                   }`}
                 >
                   {debt.type === "owes" ? (
@@ -170,7 +170,7 @@ export const OutstandingDebtsWidget = () => {
                     className={
                       debt.type === "owes"
                         ? "text-destructive border-destructive/50"
-                        : "text-green-600 dark:text-green-400 border-green-600/50 dark:border-green-400/50"
+                        : "text-emerald-600 dark:text-emerald-400 border-emerald-600/50 dark:border-emerald-400/50"
                     }
                   >
                     {formatCurrency(debt.amount)}

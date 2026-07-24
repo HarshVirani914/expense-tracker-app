@@ -162,7 +162,7 @@ export const ImageImportTab = ({ onAnalyze, isAnalyzing }: ImageImportTabProps) 
               <button
                 type="button"
                 onClick={() => handleRemove(index)}
-                className="absolute top-1 right-1 p-1 rounded-full bg-background/80 text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-1 right-1 p-1 rounded-full bg-background/80 text-destructive opacity-0 group-hover:opacity-100 max-sm:opacity-100 transition-opacity"
                 aria-label={`Remove screenshot ${index + 1}`}
               >
                 <IconTrash className="h-3.5 w-3.5" />

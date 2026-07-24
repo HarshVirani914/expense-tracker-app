@@ -101,15 +101,15 @@ export const GroupBalanceSummary = memo(
                   <div className="flex items-center gap-2">
                     {currentUserBalance.netBalance > 0.01 ? (
                       <>
-                        <IconTrendingUp className="h-4 w-4 text-green-600" />
-                        <span className="font-bold text-green-600">
+                        <IconTrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400">
                           +{formatCurrency(currentUserBalance.netBalance)}
                         </span>
                       </>
                     ) : currentUserBalance.netBalance < -0.01 ? (
                       <>
-                        <IconTrendingDown className="h-4 w-4 text-red-600" />
-                        <span className="font-bold text-red-600">
+                        <IconTrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
+                        <span className="font-bold text-red-600 dark:text-red-400">
                           {formatCurrency(currentUserBalance.netBalance)}
                         </span>
                       </>
@@ -159,7 +159,7 @@ export const GroupBalanceSummary = memo(
                         <span className="text-muted-foreground">
                           {debt.memberName}
                         </span>
-                        <Badge className="bg-green-600">
+                        <Badge className="bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
                           {formatCurrency(debt.amount)}
                         </Badge>
                       </div>
@@ -195,7 +195,7 @@ export const GroupBalanceSummary = memo(
                   </div>
                   <div className="flex items-center gap-2">
                     {balance.netBalance > 0.01 ? (
-                      <Badge className="bg-green-600">
+                      <Badge className="bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
                         +{formatCurrency(balance.netBalance)}
                       </Badge>
                     ) : (

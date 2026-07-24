@@ -39,8 +39,17 @@ export const GroupCard = ({
 
   return (
     <Card
-      className="group shadow-none hover:shadow-md transition-all duration-200 cursor-pointer"
+      role="button"
+      tabIndex={0}
+      aria-label={`View group ${group.name}`}
+      className="group shadow-none hover:shadow-md transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       onClick={() => onView(group.id)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onView(group.id);
+        }
+      }}
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
@@ -88,7 +97,8 @@ export const GroupCard = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label={`View group ${group.name}`}
+              className="h-8 w-8 max-sm:h-9 max-sm:w-9 opacity-0 group-hover:opacity-100 max-sm:opacity-100 transition-opacity"
               onClick={() => onView(group.id)}
             >
               <IconEye className="h-4 w-4" />
@@ -96,7 +106,12 @@ export const GroupCard = ({
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Group actions"
+                  className="h-8 w-8 max-sm:h-9 max-sm:w-9"
+                >
                   <IconDotsVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

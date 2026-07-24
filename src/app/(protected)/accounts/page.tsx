@@ -41,14 +41,16 @@ export default function AccountsPage() {
         <FeaturePageHero className="p-4 sm:p-5">
           <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="min-w-0 flex-1 space-y-1">
-              <h1 className="text-4xl font-bold tracking-tight">Accounts</h1>
+              <h1 className="text-3xl font-bold tracking-tight min-[480px]:text-4xl">
+                Accounts
+              </h1>
               <p className="text-muted-foreground text-base">
                 Manage your accounts and track balances
               </p>
             </div>
             <Button
               onClick={handleAddAccount}
-              className="gap-2 shadow-lg hover:shadow-xl transition-shadow shrink-0"
+              className="gap-2 shrink-0"
               size="lg"
             >
               <IconPlus className="h-5 w-5" />
@@ -76,6 +78,7 @@ export default function AccountsPage() {
         <Button
           onClick={handleAddAccount}
           size="lg"
+          aria-label="Add account"
           className="fixed bottom-26 right-6 h-14 w-14 rounded-full shadow-2xl z-40 hover:scale-110 transition-transform"
         >
           <IconPlus className="h-6 w-6" />

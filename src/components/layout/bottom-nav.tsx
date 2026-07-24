@@ -35,7 +35,7 @@ import {
   IconUsers,
   IconWallet,
 } from "@tabler/icons-react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -169,6 +169,7 @@ const moreNavSections: MoreNavSection[] = [
 
 export const BottomNav = () => {
   const pathname = usePathname();
+  const prefersReducedMotion = useReducedMotion();
   const [indicatorStyle, setIndicatorStyle] = useState({ width: 0, left: 0 });
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -265,8 +266,10 @@ export const BottomNav = () => {
                     btnRefs.current[index] = el;
                   }}
                   onClick={() => handleItemClick(index, item)}
+                  aria-current={isItemActive ? "page" : undefined}
                   className={cn(
                     "relative z-10 flex flex-1 flex-col items-center justify-center gap-1 rounded-full px-2 py-2.5 text-sm font-medium transition-colors duration-200",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     isItemActive
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground",
@@ -280,7 +283,7 @@ export const BottomNav = () => {
               );
             }
 
-            // Add button — gold accent
+            // Add button — primary cobalt accent
             if (isAddButton) {
               return (
                 <button
@@ -290,7 +293,8 @@ export const BottomNav = () => {
                     createTriggerRef.current = el;
                   }}
                   onClick={() => handleItemClick(index, item)}
-                  className="relative z-10 flex flex-1 flex-col items-center justify-center gap-1 px-2 py-2.5"
+                  aria-label="Add"
+                  className="relative z-10 flex flex-1 flex-col items-center justify-center gap-1 rounded-full px-2 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/40 transition-transform active:scale-95">
                     <IconComponent className="h-5 w-5 text-primary-foreground" />
@@ -310,6 +314,7 @@ export const BottomNav = () => {
                 onClick={() => handleItemClick(index, item)}
                 className={cn(
                   "relative z-10 flex flex-1 flex-col items-center justify-center gap-1 rounded-full px-2 py-2.5 text-sm font-medium transition-colors duration-200",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                   isMoreRouteActive
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground",
@@ -323,10 +328,14 @@ export const BottomNav = () => {
             );
           })}
 
-          {/* Sliding active indicator — gold, subtle */}
+          {/* Sliding active indicator — primary cobalt, subtle */}
           <motion.div
             animate={indicatorStyle}
-            transition={{ type: "spring", stiffness: 420, damping: 32 }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { type: "spring", stiffness: 420, damping: 32 }
+            }
             className="pointer-events-none absolute top-1.5 bottom-1.5 z-0 rounded-full bg-primary/10"
           />
         </div>

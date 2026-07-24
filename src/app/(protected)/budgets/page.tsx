@@ -11,8 +11,10 @@ import { ConfirmDialog } from "@/components/confirm-dialog"
 import { useBudgets, useDeleteBudget } from "@/features/budgets/hooks"
 import type { BudgetWithSpending } from "@/features/budgets/types"
 import { formatCurrencyWithDecimals } from "@/lib/format"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export default function BudgetsPage() {
+  const isMobile = useIsMobile()
   const [formOpen, setFormOpen] = useState(false)
   const [selectedBudget, setSelectedBudget] = useState<BudgetWithSpending | undefined>()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -51,20 +53,41 @@ export default function BudgetsPage() {
 
   return (
     <div className="flex min-w-0 w-full max-w-full flex-col gap-6">
-      <FeaturePageHero className="p-4 sm:p-5">
-        <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div className="min-w-0 flex-1 space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight">Budgets</h1>
-            <p className="text-muted-foreground">
-              Set spending limits and track your progress
-            </p>
+      {!isMobile && (
+        <FeaturePageHero className="p-4 sm:p-5">
+          <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="min-w-0 flex-1 space-y-1">
+              <h1 className="text-3xl font-bold tracking-tight min-[480px]:text-4xl">
+                Budgets
+              </h1>
+              <p className="text-muted-foreground text-base">
+                Set spending limits and track your progress
+              </p>
+            </div>
+            <Button
+              onClick={() => setFormOpen(true)}
+              className="gap-2 shrink-0"
+              size="lg"
+            >
+              <IconPlus className="h-5 w-5" />
+              Add Budget
+            </Button>
           </div>
-          <Button onClick={() => setFormOpen(true)} className="shrink-0">
-            <IconPlus className="h-4 w-4 mr-2" />
+        </FeaturePageHero>
+      )}
+
+      {isMobile && (
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold tracking-tight">Budgets</h1>
+          <Button
+            onClick={() => setFormOpen(true)}
+            className="gap-2 shrink-0"
+          >
+            <IconPlus className="h-4 w-4" />
             Add Budget
           </Button>
         </div>
-      </FeaturePageHero>
+      )}
 
       <div className="grid min-w-0 w-full max-w-full gap-4 md:grid-cols-2">
         <Card className="p-6">
@@ -92,6 +115,7 @@ export default function BudgetsPage() {
         isLoading={isLoading}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onAddBudget={() => setFormOpen(true)}
       />
 
       <BudgetFormDialog

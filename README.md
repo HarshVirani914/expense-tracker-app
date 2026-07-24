@@ -4,25 +4,53 @@ A modern Progressive Web Application for tracking expenses, managing budgets, an
 
 ## Features
 
-- 💰 **Expense Tracking**: Record and categorize expenses with ease
-- 👥 **Group Expenses**: Split bills and track shared expenses
-- 📊 **Dashboard**: Visual overview of your financial health
-- 💳 **Multiple Accounts**: Manage expenses across different accounts
-- 📱 **Progressive Web App**: Install on any device for offline access
-- 🌓 **Dark Mode**: Automatic theme switching
-- 🔒 **Secure**: Built with Clerk authentication
-- ⚡ **Fast**: Optimized with React Server Components
+### Expense Tracking
 
-## PWA Capabilities
+- Record income and expenses with amount, category, date, account, payment method (UPI, card, bank transfer, cash), and notes
+- Color-coded categories: seeded defaults plus unlimited user-defined categories
+- Multiple accounts (savings, current, wallet, credit card, cash) with live balances
+- Filterable, searchable expense list — data table on desktop, date-grouped cards on mobile
 
-This app is a fully-featured Progressive Web App:
+### Smart Bulk Import (AI)
 
-- ✅ **Installable**: Add to home screen on mobile and desktop
-- ✅ **Offline Support**: Access your data without internet
-- ✅ **Background Sync**: Automatic data sync when back online
-- ✅ **App Shortcuts**: Quick actions from home screen
-- ✅ **Responsive**: Works seamlessly on all devices
-- ✅ **Secure**: HTTPS with security headers
+- **Paste text**: paste one or many bank SMS / payment notifications; Gemini extracts every transaction (amount, merchant, date, category, payment method) and ignores OTPs and promotional messages
+- **Screenshots**: upload, drag-drop, clipboard-paste, or camera-capture up to 4 screenshots of SMS threads or banking apps; a vision model reads them directly — no separate OCR step
+- **CSV / Excel**: classic import with a downloadable template pre-filled with your categories and accounts
+- Every AI import lands in an editable review table with per-row confidence scores and automatic duplicate detection (same amount within one day) before anything is saved
+- Export filtered expenses to CSV or Excel
+
+### Groups and Bill Splitting
+
+- Shared expense groups with equal, percentage, or custom splits
+- Settlements, outstanding-debt tracking, and per-group balance summaries
+- Contacts directory for people you split with
+
+### Budgets, Recurring, and Analytics
+
+- Per-category budgets with progress rings and approaching-limit / over-budget alerts
+- Recurring expenses (daily to yearly) with upcoming-payment preview and one-tap processing
+- Analytics: spending trends, category breakdown, and month-over-month comparison against the prior period
+
+### AI Assistant
+
+- Conversational assistant (Google Gemini via the Vercel AI SDK) that can query and create expenses with tool calls
+- Natural-language expense entry ("450 on Swiggy yesterday, UPI")
+- AI-generated spending insights on the dashboard
+- Per-user rate limiting and automatic model fallback under load
+
+### Design and Accessibility
+
+- Revolut-inspired design system: cobalt accent, ink-and-cloud neutral surfaces, pill-shaped controls with a soft accent glow, liquid-glass bottom navigation
+- Typography tuned for money: Inter for UI, Manrope tabular numerals for balances, JetBrains Mono where code-like text appears
+- Full light and dark modes driven by CSS design tokens
+- Accessibility-first: labeled icon controls, keyboard-operable cards and navigation, WCAG-conscious contrast, `prefers-reduced-motion` support, pinch-zoom enabled, 36px+ touch targets on mobile
+
+### Progressive Web App
+
+- Installable on mobile and desktop with home-screen shortcuts
+- Offline support with a dedicated offline page (Serwist service worker)
+- Responsive from 375px phones to wide desktops, with safe-area-aware floating controls
+- Optional web push notification support (VAPID)
 
 ## Getting Started
 
@@ -57,6 +85,7 @@ This app is a fully-featured Progressive Web App:
    - `DATABASE_URL`: PostgreSQL connection string
    - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: From Clerk dashboard
    - `CLERK_SECRET_KEY`: From Clerk dashboard
+   - `GOOGLE_GENERATIVE_AI_API_KEY`: From Google AI Studio (powers smart import, AI chat, and insights)
    - `NEXT_PUBLIC_APP_URL`: Your app URL (use `http://localhost:3000` for local)
 
 4. Set up the database:
@@ -107,13 +136,16 @@ The PWA features (service worker, offline support) only work in production mode.
 ## Key Technologies
 
 - **Framework**: Next.js 16.2 with App Router
-- **UI**: React 19, Tailwind CSS 4, Shadcn UI
+- **UI**: React 19, Tailwind CSS 4, shadcn/ui (Radix primitives)
 - **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: Clerk
+- **Authentication**: Clerk (with webhook-based user sync)
+- **AI**: Vercel AI SDK with Google Gemini (structured outputs, vision, tool calling)
 - **State Management**: TanStack Query (React Query)
 - **Forms**: React Hook Form + Zod
-- **PWA**: Custom Service Worker + Web App Manifest
-- **Theming**: next-themes
+- **Charts**: Recharts (theme-driven chart palette)
+- **PWA**: Serwist service worker + Web App Manifest
+- **Typography**: Inter, Manrope, JetBrains Mono (next/font)
+- **Theming**: next-themes with oklch design tokens
 - **Icons**: Tabler Icons
 
 ## Available Scripts
@@ -138,13 +170,15 @@ See `.env.example` for all required environment variables.
 - `DATABASE_URL` - PostgreSQL connection string
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk public key
 - `CLERK_SECRET_KEY` - Clerk secret key
+- `GOOGLE_GENERATIVE_AI_API_KEY` - Google Gemini key (required for smart import, AI chat, and insights)
 
 ### Optional
 
 - `NEXT_PUBLIC_APP_URL` - App URL for PWA manifest (default: localhost:3000)
+- `CLERK_WEBHOOK_SECRET` - For Clerk user-sync webhooks
 - `LOG_LEVEL` - Logging level (debug|info|warn|error)
-- `NEXT_PUBLIC_VAPID_PUBLIC_KEY` - For push notifications (future)
-- `VAPID_PRIVATE_KEY` - For push notifications (future)
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY` - For push notifications
+- `VAPID_PRIVATE_KEY` - For push notifications
 
 ## PWA Testing
 

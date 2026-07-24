@@ -205,25 +205,25 @@ export const analyticsService = {
       },
     })
 
-    const monthlyTotals = new Map<string, { current: number; previous?: number }>()
-    
+    const monthlyTotals = new Map<string, number>()
+
     expenses.forEach(expense => {
-      const expenseDate = new Date(expense.date)
-      const monthKey = format(expenseDate, 'MMM yyyy')
-      
-      if (!monthlyTotals.has(monthKey)) {
-        monthlyTotals.set(monthKey, { current: 0 })
-      }
-      
-      const entry = monthlyTotals.get(monthKey)!
-      entry.current += Number(expense.amount)
+      const monthKey = format(new Date(expense.date), 'MMM yyyy')
+      monthlyTotals.set(
+        monthKey,
+        (monthlyTotals.get(monthKey) ?? 0) + Number(expense.amount)
+      )
     })
 
+    // The query fetches one extra period back so each month can be paired
+    // with the total of the calendar month immediately before it.
     return Array.from(monthlyTotals.entries())
-      .map(([month, data]) => ({
+      .map(([month, current]) => ({
         month,
-        current: data.current,
-        previous: data.previous,
+        current,
+        previous: monthlyTotals.get(
+          format(subMonths(new Date(month), 1), 'MMM yyyy')
+        ),
       }))
       .sort((a, b) => {
         const dateA = new Date(a.month)

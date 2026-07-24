@@ -107,7 +107,7 @@ function ExpensesPageContent() {
               </Button>
               <Button
                 onClick={() => setIsDialogOpen(true)}
-                className="min-w-0 gap-2 shadow-lg hover:shadow-xl transition-shadow shrink-0"
+                className="min-w-0 gap-2 shrink-0"
                 size="lg"
               >
                 <IconPlus className="h-5 w-5 shrink-0" />
@@ -150,7 +150,11 @@ function ExpensesPageContent() {
         onFiltersChange={setFilters}
       />
 
-      <ExpenseList onEdit={handleEdit} filters={filtersWithParams} />
+      <ExpenseList
+        onEdit={handleEdit}
+        filters={filtersWithParams}
+        onAddExpense={() => setIsDialogOpen(true)}
+      />
 
       <ExpenseFormDialog
         open={isDialogOpen}
@@ -172,7 +176,9 @@ function ExpensesPageContent() {
         <Button
           onClick={() => setIsDialogOpen(true)}
           size="lg"
-          className="fixed bottom-26 right-6 h-14 w-14 rounded-full glow-primary z-40 hover:scale-110 transition-transform"
+          aria-label="Add expense"
+          className="fixed right-6 h-14 w-14 rounded-full glow-primary z-40 hover:scale-110 transition-transform motion-reduce:transition-none motion-reduce:transform-none"
+          style={{ bottom: "calc(5rem + env(safe-area-inset-bottom) + 1.25rem)" }}
         >
           <IconPlus className="h-6 w-6" />
         </Button>

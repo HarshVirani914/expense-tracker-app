@@ -22,10 +22,10 @@ function BudgetRing({
 }) {
   const filled = RING_C * (pct / 100);
   const strokeColor = isExceeded
-    ? "#ef4444"
+    ? "var(--destructive)"
     : isWarning
-    ? "#f59e0b"
-    : "#10b981";
+    ? "var(--chart-4)"
+    : "var(--chart-2)";
 
   return (
     <div className="relative h-14 w-14 shrink-0">
@@ -39,17 +39,16 @@ function BudgetRing({
           strokeWidth="3"
           className="stroke-muted"
         />
-        {/* Progress arc */}
+        {/* Progress arc — stroke set via style so CSS variables resolve */}
         <circle
           cx="18"
           cy="18"
           r={RING_R}
           fill="none"
           strokeWidth="3"
-          stroke={strokeColor}
           strokeLinecap="round"
           strokeDasharray={`${filled} ${RING_C}`}
-          style={{ transition: "stroke-dasharray 0.7s ease" }}
+          style={{ stroke: strokeColor, transition: "stroke-dasharray 0.7s ease" }}
         />
       </svg>
       {/* Percentage label in center */}
@@ -141,9 +140,9 @@ export const BudgetAlertsWidget = () => {
                     <p
                       className={
                         isExceeded
-                          ? "mt-0.5 text-[10px] font-medium text-red-500"
+                          ? "mt-0.5 text-[10px] font-medium text-destructive"
                           : isWarning
-                          ? "mt-0.5 text-[10px] font-medium text-amber-500"
+                          ? "mt-0.5 text-[10px] font-medium text-chart-4"
                           : "hidden"
                       }
                     >

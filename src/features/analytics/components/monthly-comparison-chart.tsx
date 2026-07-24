@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/card";
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
@@ -28,6 +30,10 @@ const chartConfig = {
   current: {
     label: "Spending",
     color: "var(--chart-1)",
+  },
+  previous: {
+    label: "Prior month",
+    color: "var(--chart-2)",
   },
 } satisfies ChartConfig;
 
@@ -124,7 +130,14 @@ export const MonthlyComparisonChart = ({
                 />
               }
             />
+            <Bar
+              dataKey="previous"
+              fill="var(--color-previous)"
+              fillOpacity={0.5}
+              radius={8}
+            />
             <Bar dataKey="current" fill="var(--color-current)" radius={8} />
+            <ChartLegend content={<ChartLegendContent />} />
           </BarChart>
         </ChartContainer>
         <div className="sr-only">

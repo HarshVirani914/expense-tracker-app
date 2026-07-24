@@ -32,15 +32,15 @@ export const CategorySpendingSummaryCard = memo(
         label: "Active Categories",
         value: activeCategories,
         icon: IconTag,
-        color: "text-blue-600 dark:text-blue-400",
-        bg: "bg-blue-500/10",
+        color: "text-chart-3",
+        bg: "bg-chart-3/10",
       },
       {
         label: "Transactions",
         value: totalTransactions,
         icon: IconList,
-        color: "text-green-600 dark:text-green-400",
-        bg: "bg-green-500/10",
+        color: "text-chart-2",
+        bg: "bg-chart-2/10",
       },
     ];
 
@@ -59,7 +59,7 @@ export const CategorySpendingSummaryCard = memo(
               <p className="text-sm text-muted-foreground font-medium">
                 Category Spending
               </p>
-              <div className="text-4xl font-bold tracking-tight font-mono">
+              <div className="text-4xl font-bold tracking-tight font-display">
                 {formatCurrency(totalSpending)}
               </div>
               <p className="text-sm text-muted-foreground">
@@ -74,14 +74,14 @@ export const CategorySpendingSummaryCard = memo(
 
           <div className="grid grid-cols-3 gap-3">
             {stats.map(({ label, value, icon: Icon, color, bg }) => (
-              <div key={label} className={cn("rounded-lg p-3 space-y-2", bg)}>
+              <div key={label} className={cn("rounded-2xl p-3 space-y-2", bg)}>
                 <div className="flex items-center gap-2">
                   <Icon className={cn("h-4 w-4", color)} />
                   <p className="text-xs font-medium text-muted-foreground">
                     {label}
                   </p>
                 </div>
-                <p className={cn("text-xl font-bold font-mono", color)}>
+                <p className={cn("text-xl font-bold font-display", color)}>
                   {value}
                 </p>
               </div>

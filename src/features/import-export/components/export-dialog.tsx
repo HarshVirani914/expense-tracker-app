@@ -9,7 +9,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -30,6 +39,7 @@ type ExportDialogProps = {
 };
 
 export const ExportDialog = ({ open, onOpenChange }: ExportDialogProps) => {
+  const isMobile = useIsMobile();
   const [filters, setFilters] = useState<ExportFilters>({});
   const { categories } = useCategories();
   const { groups } = useGroups({ limit: 100 });
@@ -51,6 +61,154 @@ export const ExportDialog = ({ open, onOpenChange }: ExportDialogProps) => {
     }));
   };
 
+  const filtersContent = (
+    <div className="space-y-4">
+      <div className="space-y-3">
+        <p className="text-sm text-muted-foreground">
+          Leave dates empty to export all expenses
+        </p>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="export-start-date">Start Date</Label>
+            <DatePicker
+              id="export-start-date"
+              date={
+                filters.startDate ? new Date(filters.startDate) : undefined
+              }
+              onSelect={(date) => handleDateChange("startDate", date)}
+              placeholder="Select start date"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="export-end-date">End Date</Label>
+            <DatePicker
+              id="export-end-date"
+              date={filters.endDate ? new Date(filters.endDate) : undefined}
+              onSelect={(date) => handleDateChange("endDate", date)}
+              placeholder="Select end date"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="export-group">Group (Optional)</Label>
+        <Select
+          value={filters.groupId || "all"}
+          onValueChange={(value) =>
+            setFilters((prev) => ({
+              ...prev,
+              groupId: value === "all" ? undefined : value,
+            }))
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="All expenses" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All expenses</SelectItem>
+            {groups?.map((group) => (
+              <SelectItem key={group.id} value={group.id}>
+                {group.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="export-category">Category</Label>
+        <Select
+          value={filters.categoryId || "all"}
+          onValueChange={(value) =>
+            setFilters((prev) => ({
+              ...prev,
+              categoryId: value === "all" ? undefined : value,
+            }))
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="All categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All categories</SelectItem>
+            {categories?.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                <div className="flex items-center gap-2">
+                  <div
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: category.color }}
+                  />
+                  {category.name}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="export-type">Type</Label>
+        <Select
+          value={filters.type || "all"}
+          onValueChange={(value) =>
+            setFilters((prev) => ({
+              ...prev,
+              type:
+                value === "all" ? undefined : (value as "EXPENSE" | "INCOME"),
+            }))
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="All types" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All types</SelectItem>
+            <SelectItem value="EXPENSE">Expenses Only</SelectItem>
+            <SelectItem value="INCOME">Income Only</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="flex max-h-[95dvh] min-h-0 flex-col">
+          <DrawerHeader className="shrink-0 text-left">
+            <DrawerTitle>Export Expenses</DrawerTitle>
+            <DrawerDescription>
+              Configure filters and download your expenses as CSV
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4">
+            {filtersContent}
+          </div>
+          <DrawerFooter className="shrink-0 pt-2">
+            <Button
+              onClick={handleExport}
+              disabled={isExporting}
+              className="h-12 w-full"
+            >
+              {isExporting ? "Exporting..." : "Export"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isExporting}
+              className="h-11 w-full"
+            >
+              Cancel
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -61,115 +219,7 @@ export const ExportDialog = ({ open, onOpenChange }: ExportDialogProps) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">
-              Leave dates empty to export all expenses
-            </p>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="export-start-date">Start Date</Label>
-                <DatePicker
-                  date={
-                    filters.startDate ? new Date(filters.startDate) : undefined
-                  }
-                  onSelect={(date) => handleDateChange("startDate", date)}
-                  placeholder="Select start date"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="export-end-date">End Date</Label>
-                <DatePicker
-                  date={filters.endDate ? new Date(filters.endDate) : undefined}
-                  onSelect={(date) => handleDateChange("endDate", date)}
-                  placeholder="Select end date"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="export-group">Group (Optional)</Label>
-            <Select
-              value={filters.groupId || "all"}
-              onValueChange={(value) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  groupId: value === "all" ? undefined : value,
-                }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All expenses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All expenses</SelectItem>
-                {groups?.map((group) => (
-                  <SelectItem key={group.id} value={group.id}>
-                    {group.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="export-category">Category</Label>
-            <Select
-              value={filters.categoryId || "all"}
-              onValueChange={(value) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  categoryId: value === "all" ? undefined : value,
-                }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All categories</SelectItem>
-                {categories?.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="h-3 w-3 rounded-full"
-                        style={{ backgroundColor: category.color }}
-                      />
-                      {category.name}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="export-type">Type</Label>
-            <Select
-              value={filters.type || "all"}
-              onValueChange={(value) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  type:
-                    value === "all"
-                      ? undefined
-                      : (value as "EXPENSE" | "INCOME"),
-                }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All types</SelectItem>
-                <SelectItem value="EXPENSE">Expenses Only</SelectItem>
-                <SelectItem value="INCOME">Income Only</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        {filtersContent}
 
         <DialogFooter>
           <Button

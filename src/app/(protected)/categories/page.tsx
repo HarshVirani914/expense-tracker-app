@@ -6,7 +6,8 @@ import { CategorySpendingSummaryCard } from "@/features/categories/components/ca
 import { CategorySpendingList } from "@/features/categories/components/category-spending-list";
 import { ManageCategoriesSheet } from "@/features/categories/components/manage-categories-sheet";
 import { useCategorySpending } from "@/features/categories/hooks/use-category-spending";
-import { IconSettings, IconPlus } from "@tabler/icons-react";
+import { EmptyState } from "@/components/empty-state";
+import { IconSettings, IconPlus, IconChartPie } from "@tabler/icons-react";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -46,7 +47,7 @@ export default function CategoriesPage() {
               />
               <Button
                 onClick={() => setIsDialogOpen(true)}
-                className="min-w-0 gap-2 shadow-lg hover:shadow-xl transition-shadow shrink-0"
+                className="min-w-0 gap-2 shrink-0"
                 size="lg"
               >
                 <IconPlus className="h-5 w-5 shrink-0" />
@@ -68,11 +69,11 @@ export default function CategoriesPage() {
           <CategorySpendingList categorySpending={categorySpending} />
         </>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-muted-foreground">
-            No spending data available. Add some expenses to see insights.
-          </p>
-        </div>
+        <EmptyState
+          icon={IconChartPie}
+          title="No spending data yet"
+          description="Add some expenses to see insights by category."
+        />
       )}
 
       <CategoryFormDialog
@@ -87,6 +88,7 @@ export default function CategoriesPage() {
               <Button
                 size="lg"
                 variant="secondary"
+                aria-label="Manage categories"
                 className="h-14 w-14 rounded-full shadow-2xl hover:scale-110 transition-transform"
               >
                 <IconSettings className="h-6 w-6" />
@@ -96,6 +98,7 @@ export default function CategoriesPage() {
           <Button
             onClick={() => setIsDialogOpen(true)}
             size="lg"
+            aria-label="Add category"
             className="h-14 w-14 rounded-full shadow-2xl hover:scale-110 transition-transform"
           >
             <IconPlus className="h-6 w-6" />

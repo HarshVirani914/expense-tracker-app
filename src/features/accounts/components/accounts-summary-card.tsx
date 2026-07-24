@@ -40,29 +40,29 @@ export const AccountsSummaryCard = memo(
         type: AccountType.SAVINGS,
         label: "Savings",
         icon: IconBuildingBank,
-        color: "text-blue-600 dark:text-blue-400",
-        bg: "bg-blue-500/10",
+        color: "text-chart-3",
+        bg: "bg-chart-3/10",
       },
       {
         type: AccountType.CURRENT,
         label: "Current",
         icon: IconBuildingBank,
-        color: "text-purple-600 dark:text-purple-400",
-        bg: "bg-purple-500/10",
+        color: "text-chart-1",
+        bg: "bg-chart-1/10",
       },
       {
         type: AccountType.WALLET,
         label: "Wallet",
         icon: IconWallet,
-        color: "text-green-600 dark:text-green-400",
-        bg: "bg-green-500/10",
+        color: "text-chart-2",
+        bg: "bg-chart-2/10",
       },
       {
         type: AccountType.CREDIT_CARD,
         label: "Credit Card",
         icon: IconCreditCard,
-        color: "text-orange-600 dark:text-orange-400",
-        bg: "bg-orange-500/10",
+        color: "text-chart-4",
+        bg: "bg-chart-4/10",
       },
       {
         type: AccountType.CASH,
@@ -88,7 +88,7 @@ export const AccountsSummaryCard = memo(
               <p className="text-sm text-muted-foreground font-medium">
                 Total Balance
               </p>
-              <div className="text-4xl font-bold tracking-tight font-mono">
+              <div className="text-4xl font-bold tracking-tight font-display">
                 {formatCurrency(totalBalance)}
               </div>
               <p className="text-sm text-muted-foreground">
@@ -107,14 +107,14 @@ export const AccountsSummaryCard = memo(
               if (balance === 0) return null;
 
               return (
-                <div key={type} className={cn("rounded-lg p-3 space-y-2", bg)}>
+                <div key={type} className={cn("rounded-2xl p-3 space-y-2", bg)}>
                   <div className="flex items-center gap-2">
                     <Icon className={cn("h-4 w-4", color)} />
                     <p className="text-xs font-medium text-muted-foreground">
                       {label}
                     </p>
                   </div>
-                  <p className={cn("text-lg font-bold font-mono", color)}>
+                  <p className={cn("text-lg font-bold font-display", color)}>
                     {formatCurrency(balance)}
                   </p>
                 </div>

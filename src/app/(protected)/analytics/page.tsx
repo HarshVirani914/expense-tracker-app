@@ -10,9 +10,11 @@ import { InsightsSummary } from "@/features/analytics/components/insights-summar
 import { useAnalytics } from "@/features/analytics/hooks"
 import { MONEY_SEMANTICS } from "@/lib/money-semantics"
 import type { AnalyticsFilters } from "@/features/analytics/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 
 export default function AnalyticsPage() {
+  const isMobile = useIsMobile();
   const [filters, setFilters] = useState<AnalyticsFilters>({
     timeRange: 'this-month',
   })
@@ -21,14 +23,22 @@ export default function AnalyticsPage() {
 
   return (
     <div className="flex min-w-0 w-full max-w-full flex-col gap-6">
-      <FeaturePageHero className="p-4 sm:p-5">
-        <div className="min-w-0 space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-          <p className="text-muted-foreground">
-            {MONEY_SEMANTICS.analyticsPageSubtitle}
-          </p>
-        </div>
-      </FeaturePageHero>
+      {!isMobile && (
+        <FeaturePageHero className="p-4 sm:p-5">
+          <div className="min-w-0 space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight min-[480px]:text-4xl">
+              Analytics
+            </h1>
+            <p className="text-muted-foreground text-base">
+              {MONEY_SEMANTICS.analyticsPageSubtitle}
+            </p>
+          </div>
+        </FeaturePageHero>
+      )}
+
+      {isMobile && (
+        <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
+      )}
 
       <TimeRangeSelector filters={filters} onFiltersChange={setFilters} />
 

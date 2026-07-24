@@ -15,7 +15,8 @@ import type {
   ContactWithRelations,
 } from "@/features/contacts/types";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { IconPlus, IconSearch } from "@tabler/icons-react";
+import { EmptyState } from "@/components/empty-state";
+import { IconAddressBook, IconPlus, IconSearch } from "@tabler/icons-react";
 import { useState } from "react";
 
 export default function ContactsPage() {
@@ -71,14 +72,16 @@ export default function ContactsPage() {
         <FeaturePageHero className="p-4 sm:p-5">
           <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="min-w-0 flex-1 space-y-1">
-              <h1 className="text-4xl font-bold tracking-tight">Contacts</h1>
+              <h1 className="text-3xl font-bold tracking-tight min-[480px]:text-4xl">
+                Contacts
+              </h1>
               <p className="text-muted-foreground text-base">
                 People you split expenses with
               </p>
             </div>
             <Button
               onClick={handleAddContact}
-              className="gap-2 shadow-lg hover:shadow-xl transition-shadow shrink-0"
+              className="gap-2 shrink-0"
               size="lg"
             >
               <IconPlus className="h-5 w-5" />
@@ -97,6 +100,7 @@ export default function ContactsPage() {
       <div className="relative max-w-sm min-w-0 w-full">
         <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
+          aria-label="Search contacts"
           placeholder="Search contacts..."
           value={filters.search}
           onChange={(e) => handleSearchChange(e.target.value)}
@@ -109,19 +113,17 @@ export default function ContactsPage() {
       ) : contacts && contacts.length > 0 ? (
         <ContactsGrid contacts={contacts} onContactClick={handleContactClick} />
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-muted-foreground mb-4">
-            {filters.search
-              ? "No contacts found matching your search."
-              : "No contacts yet. Add your first contact to get started."}
-          </p>
-          {!filters.search && (
-            <Button onClick={handleAddContact} size="lg">
-              <IconPlus className="h-5 w-5 mr-2" />
-              Add First Contact
-            </Button>
-          )}
-        </div>
+        <EmptyState
+          icon={IconAddressBook}
+          title={filters.search ? "No contacts found" : "No contacts yet"}
+          description={
+            filters.search
+              ? "Try adjusting your search to find who you're looking for."
+              : "Add your first contact to get started."
+          }
+          actionLabel={filters.search ? undefined : "Add First Contact"}
+          onAction={handleAddContact}
+        />
       )}
 
       <ContactFormDialog
@@ -143,6 +145,7 @@ export default function ContactsPage() {
         <Button
           onClick={handleAddContact}
           size="lg"
+          aria-label="Add contact"
           className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-2xl z-40 hover:scale-110 transition-transform"
         >
           <IconPlus className="h-6 w-6" />

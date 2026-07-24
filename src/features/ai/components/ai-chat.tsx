@@ -143,12 +143,12 @@ export const AIChat = ({ className }: AIChatProps) => {
       {/* ── Compact header with live status dot ─────────────────────────────── */}
       <header className="shrink-0 flex items-center justify-between gap-3 border-b bg-muted/20 px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2.5">
-          {/* Gradient sparkle avatar */}
+          {/* Sparkle avatar */}
           <div
             aria-hidden
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-indigo-600 shadow-sm"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary shadow-sm"
           >
-            <IconSparkles className="h-3.5 w-3.5 text-white" />
+            <IconSparkles className="h-3.5 w-3.5 text-primary-foreground" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
@@ -321,7 +321,7 @@ export const AIChat = ({ className }: AIChatProps) => {
               type="submit"
               disabled={isBusy || !input.trim()}
               size="icon"
-              className="shrink-0 h-11 w-11 rounded-2xl mb-5 bg-violet-600 hover:bg-violet-700 disabled:opacity-40"
+              className="shrink-0 h-11 w-11 rounded-2xl mb-5 disabled:opacity-40"
               aria-label="Send message"
             >
               <IconSend className="h-4 w-4" />

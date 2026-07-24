@@ -199,14 +199,13 @@ const RowEditor = ({ row, categories, onChange, isMobile }: RowEditorProps) => {
           </div>
 
           <div
-            role="radiogroup"
+            role="group"
             aria-label="Transaction type"
             className="grid grid-cols-2 gap-1 rounded-full bg-muted p-1"
           >
             <button
               type="button"
-              role="radio"
-              aria-checked={row.type === "EXPENSE"}
+              aria-pressed={row.type === "EXPENSE"}
               onClick={() => handleFieldChange("type", "EXPENSE")}
               className={cn(
                 "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
@@ -219,8 +218,7 @@ const RowEditor = ({ row, categories, onChange, isMobile }: RowEditorProps) => {
             </button>
             <button
               type="button"
-              role="radio"
-              aria-checked={row.type === "INCOME"}
+              aria-pressed={row.type === "INCOME"}
               onClick={() => handleFieldChange("type", "INCOME")}
               className={cn(
                 "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",

@@ -12,6 +12,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import {
   Form,
   FormControl,
   FormField,
@@ -50,6 +58,8 @@ import { SplitPreview } from "./split-calculator/split-preview";
 import { useUpdateGroupExpense } from "../hooks/use-update-group-expense";
 import type { ExpenseWithRelations } from "../types";
 import { logger } from "@/lib/logger";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 type GroupExpenseFormDialogProps = {
   open: boolean;
@@ -64,6 +74,7 @@ export const GroupExpenseFormDialog = ({
   defaultGroupId,
   expense,
 }: GroupExpenseFormDialogProps) => {
+  const isMobile = useIsMobile();
   const { categories } = useCategories();
   const { groups } = useGroups({ limit: 100 });
 
@@ -269,16 +280,313 @@ export const GroupExpenseFormDialog = ({
     return true;
   }, [participants, totalAmount, splitType]);
 
+  const title = isEditMode ? "Edit Group Expense" : "Add Group Expense";
+  const formDescription = isEditMode
+    ? "Update expense and split configuration"
+    : "Split an expense with your group members";
+  const submitLabel =
+    isCreating || isUpdating
+      ? isEditMode
+        ? "Updating..."
+        : "Creating..."
+      : isEditMode
+        ? "Update Expense"
+        : "Create Expense";
+
+  // Field/section renderers shared by the mobile drawer and desktop dialog so
+  // form wiring stays single-sourced across both shells.
+  const renderExpenseDetailFields = (isMobileLayout: boolean) => (
+    <div className="space-y-4">
+      <FormField
+        control={form.control}
+        name="amount"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Amount *</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                placeholder="0.00"
+                className={cn("text-lg", isMobileLayout && "h-12")}
+                {...field}
+                onChange={(e) => field.onChange(parseFloat(e.target.value))}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="description"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Description</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="e.g., Dinner at restaurant"
+                className={cn(isMobileLayout && "h-12 text-base")}
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <div
+        className={cn(
+          "grid gap-4",
+          isMobileLayout ? "grid-cols-1" : "grid-cols-2",
+        )}
+      >
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Date</FormLabel>
+              <DatePicker
+                date={field.value instanceof Date ? field.value : undefined}
+                onSelect={field.onChange}
+                placeholder="Select date"
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="categoryId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Category *</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger
+                    className={cn(isMobileLayout && "h-12 text-base")}
+                  >
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {categories?.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      <FormField
+        control={form.control}
+        name="groupId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Group *</FormLabel>
+            <Select
+              onValueChange={(value) => {
+                field.onChange(value);
+                setSelectedGroupId(value);
+                setPayerId(""); // Reset payer when group changes
+              }}
+              value={field.value}
+              disabled={isEditMode} // Can't change group when editing
+            >
+              <FormControl>
+                <SelectTrigger
+                  className={cn(isMobileLayout && "h-12 text-base")}
+                >
+                  <SelectValue placeholder="Select group" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {groups?.map((group) => (
+                  <SelectItem key={group.id} value={group.id}>
+                    {group.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
+  );
+
+  const renderSplitConfiguration = (isMobileLayout: boolean) =>
+    groupMembers.length > 0 ? (
+      <>
+        <div>
+          <h3 className="text-sm font-semibold text-foreground mb-1">
+            Split Configuration
+          </h3>
+          <p className="text-xs text-muted-foreground mb-4">
+            {splitType === SplitType.EXACT
+              ? "Specify who paid what amounts."
+              : "Select who paid for this expense."}
+          </p>
+
+          {/* Who Paid Selector */}
+          {splitType !== SplitType.EXACT && (
+            <div className="mb-4">
+              <label
+                htmlFor="group-expense-payer"
+                className="text-sm font-medium mb-2 block"
+              >
+                Who paid?
+              </label>
+              <Select value={payerId} onValueChange={setPayerId}>
+                <SelectTrigger
+                  id="group-expense-payer"
+                  className={cn(isMobileLayout && "h-12 text-base")}
+                >
+                  <SelectValue placeholder="Select who paid" />
+                </SelectTrigger>
+                <SelectContent>
+                  {groupMembers.map((member) => (
+                    <SelectItem
+                      key={member.userId || member.contactId}
+                      value={member.userId || member.contactId || ""}
+                    >
+                      {member.name}
+                      {member.isCurrentUser && " (You)"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <Tabs
+            onValueChange={(v) => handleSplitTypeChange(v as SplitType)}
+            value={splitType}
+            orientation="horizontal"
+            className="flex-col w-full"
+          >
+            <TabsList className="w-full">
+              <TabsTrigger value={SplitType.EQUAL}>Equal</TabsTrigger>
+              <TabsTrigger value={SplitType.EXACT}>Exact</TabsTrigger>
+              <TabsTrigger value={SplitType.PERCENTAGE}>%</TabsTrigger>
+              <TabsTrigger value={SplitType.SHARES}>Shares</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value={SplitType.EQUAL}>
+              <EqualSplit members={groupMembers} totalAmount={totalAmount} />
+            </TabsContent>
+            <TabsContent value={SplitType.EXACT}>
+              <ExactSplit
+                members={groupMembers}
+                totalAmount={totalAmount}
+                initialValues={splitValues}
+                onChange={handleSplitValuesChange}
+              />
+            </TabsContent>
+            <TabsContent value={SplitType.PERCENTAGE}>
+              <PercentageSplit
+                members={groupMembers}
+                totalAmount={totalAmount}
+                initialValues={splitValues}
+                onChange={handleSplitValuesChange}
+              />
+            </TabsContent>
+            <TabsContent value={SplitType.SHARES}>
+              <SharesSplit
+                members={groupMembers}
+                totalAmount={totalAmount}
+                initialValues={splitValues}
+                onChange={handleSplitValuesChange}
+              />
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        <SplitPreview
+          members={groupMembers}
+          participants={participants}
+          totalAmount={totalAmount}
+        />
+      </>
+    ) : (
+      <div
+        className={cn(
+          "flex items-center justify-center",
+          isMobileLayout ? "min-h-[160px]" : "h-full min-h-[300px]",
+        )}
+      >
+        <div className="text-center space-y-2">
+          <p className="text-muted-foreground">
+            Select a group to configure split
+          </p>
+        </div>
+      </div>
+    );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="flex max-h-[95dvh] min-h-0 flex-col">
+          <DrawerHeader className="shrink-0 text-left">
+            <DrawerTitle>{title}</DrawerTitle>
+            <DrawerDescription>{formDescription}</DrawerDescription>
+          </DrawerHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [-webkit-overflow-scrolling:touch]">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="space-y-6 px-4 pb-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground mb-4">
+                      Expense Details
+                    </h3>
+                    {renderExpenseDetailFields(true)}
+                  </div>
+
+                  <div className="space-y-6 rounded-2xl bg-muted/30 p-4">
+                    {renderSplitConfiguration(true)}
+                  </div>
+                </div>
+              </form>
+            </Form>
+          </div>
+          <DrawerFooter className="shrink-0 pt-2">
+            <Button
+              type="button"
+              onClick={form.handleSubmit(onSubmit)}
+              disabled={isCreating || isUpdating || !isFormValid}
+              className="h-12 w-full"
+            >
+              {submitLabel}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="h-11 w-full"
+            >
+              Cancel
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="md:max-w-7xl w-full max-h-[90vh] p-0 flex flex-col">
         <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
-          <DialogTitle className="text-2xl">
-            {isEditMode ? "Edit Group Expense" : "Add Group Expense"}
-          </DialogTitle>
-          <DialogDescription>
-            {isEditMode ? "Update expense and split configuration" : "Split an expense with your group members"}
-          </DialogDescription>
+          <DialogTitle className="text-2xl">{title}</DialogTitle>
+          <DialogDescription>{formDescription}</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -294,250 +602,13 @@ export const GroupExpenseFormDialog = ({
                     <h3 className="text-sm font-semibold text-foreground mb-4">
                       Expense Details
                     </h3>
-
-                    <div className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="amount"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Amount *</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                        inputMode="decimal"
-                                step="0.01"
-                                placeholder="0.00"
-                                className="text-lg"
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(parseFloat(e.target.value))
-                                }
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Description</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="e.g., Dinner at restaurant"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="date"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                              <FormLabel>Date</FormLabel>
-                              <DatePicker
-                                date={
-                                  field.value instanceof Date
-                                    ? field.value
-                                    : undefined
-                                }
-                                onSelect={field.onChange}
-                                placeholder="Select date"
-                              />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="categoryId"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Category *</FormLabel>
-                              <Select
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select category" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {categories?.map((category) => (
-                                    <SelectItem
-                                      key={category.id}
-                                      value={category.id}
-                                    >
-                                      {category.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <FormField
-                        control={form.control}
-                        name="groupId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Group *</FormLabel>
-                            <Select
-                              onValueChange={(value) => {
-                                field.onChange(value);
-                                setSelectedGroupId(value);
-                                setPayerId(""); // Reset payer when group changes
-                              }}
-                              value={field.value}
-                              disabled={isEditMode} // Can't change group when editing
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select group" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {groups?.map((group) => (
-                                  <SelectItem key={group.id} value={group.id}>
-                                    {group.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    {renderExpenseDetailFields(false)}
                   </div>
                 </div>
 
                 {/* Right Column - Split Configuration */}
                 <div className="p-6 space-y-6 bg-muted/30">
-                  {groupMembers.length > 0 ? (
-                    <>
-                      <div>
-                        <h3 className="text-sm font-semibold text-foreground mb-1">
-                          Split Configuration
-                        </h3>
-                        <p className="text-xs text-muted-foreground mb-4">
-                          {splitType === SplitType.EXACT
-                            ? "Specify who paid what amounts."
-                            : "Select who paid for this expense."}
-                        </p>
-
-                        {/* Who Paid Selector */}
-                        {splitType !== SplitType.EXACT && (
-                          <div className="mb-4">
-                            <label className="text-sm font-medium mb-2 block">
-                              Who paid?
-                            </label>
-                            <Select value={payerId} onValueChange={setPayerId}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select who paid" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {groupMembers.map((member) => (
-                                  <SelectItem
-                                    key={member.userId || member.contactId}
-                                    value={
-                                      member.userId || member.contactId || ""
-                                    }
-                                  >
-                                    {member.name}
-                                    {member.isCurrentUser && " (You)"}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        )}
-
-                        <Tabs
-                          onValueChange={(v) =>
-                            handleSplitTypeChange(v as SplitType)
-                          }
-                          value={splitType}
-                          orientation="horizontal"
-                          className="flex-col w-full"
-                        >
-                          <TabsList className="w-full">
-                            <TabsTrigger value={SplitType.EQUAL}>
-                              Equal
-                            </TabsTrigger>
-                            <TabsTrigger value={SplitType.EXACT}>
-                              Exact
-                            </TabsTrigger>
-                            <TabsTrigger value={SplitType.PERCENTAGE}>
-                              %
-                            </TabsTrigger>
-                            <TabsTrigger value={SplitType.SHARES}>
-                              Shares
-                            </TabsTrigger>
-                          </TabsList>
-
-                          <TabsContent value={SplitType.EQUAL}>
-                            <EqualSplit
-                              members={groupMembers}
-                              totalAmount={totalAmount}
-                            />
-                          </TabsContent>
-                          <TabsContent value={SplitType.EXACT}>
-                            <ExactSplit
-                              members={groupMembers}
-                              totalAmount={totalAmount}
-                              initialValues={splitValues}
-                              onChange={handleSplitValuesChange}
-                            />
-                          </TabsContent>
-                          <TabsContent value={SplitType.PERCENTAGE}>
-                            <PercentageSplit
-                              members={groupMembers}
-                              totalAmount={totalAmount}
-                              initialValues={splitValues}
-                              onChange={handleSplitValuesChange}
-                            />
-                          </TabsContent>
-                          <TabsContent value={SplitType.SHARES}>
-                            <SharesSplit
-                              members={groupMembers}
-                              totalAmount={totalAmount}
-                              initialValues={splitValues}
-                              onChange={handleSplitValuesChange}
-                            />
-                          </TabsContent>
-                        </Tabs>
-                      </div>
-
-                      <SplitPreview
-                        members={groupMembers}
-                        participants={participants}
-                        totalAmount={totalAmount}
-                      />
-                    </>
-                  ) : (
-                    <div className="flex items-center justify-center h-full min-h-[300px]">
-                      <div className="text-center space-y-2">
-                        <p className="text-muted-foreground">
-                          Select a group to configure split
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                  {renderSplitConfiguration(false)}
                 </div>
               </div>
             </div>
@@ -557,9 +628,7 @@ export const GroupExpenseFormDialog = ({
                   disabled={isCreating || isUpdating || !isFormValid}
                   className="min-w-[140px]"
                 >
-                  {isCreating || isUpdating 
-                    ? (isEditMode ? "Updating..." : "Creating...") 
-                    : (isEditMode ? "Update Expense" : "Create Expense")}
+                  {submitLabel}
                 </Button>
               </DialogFooter>
             </div>

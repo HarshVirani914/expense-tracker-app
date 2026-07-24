@@ -25,12 +25,12 @@ export const AIChatThinkingIndicator = ({
       transition={{ duration: 0.2 }}
       className="flex items-end gap-2.5"
     >
-      {/* Gradient sparkle avatar matches message rows */}
+      {/* Sparkle avatar matches message rows */}
       <div
         aria-hidden
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-indigo-600 shadow-sm shadow-violet-500/30"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary shadow-sm shadow-primary/30"
       >
-        <IconSparkles className="h-3.5 w-3.5 text-white" />
+        <IconSparkles className="h-3.5 w-3.5 text-primary-foreground" />
       </div>
 
       {/* Bouncing dots — iMessage typing style */}

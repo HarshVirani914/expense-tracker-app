@@ -1,7 +1,9 @@
 "use client"
 
 import { BudgetCard } from "./budget-card"
+import { EmptyState } from "@/components/empty-state"
 import { Skeleton } from "@/components/ui/skeleton"
+import { IconTarget } from "@tabler/icons-react"
 import type { BudgetWithSpending } from "../types"
 
 type BudgetListProps = {
@@ -9,9 +11,16 @@ type BudgetListProps = {
   isLoading?: boolean
   onEdit?: (budget: BudgetWithSpending) => void
   onDelete?: (id: string) => void
+  onAddBudget?: () => void
 }
 
-export const BudgetList = ({ budgets, isLoading, onEdit, onDelete }: BudgetListProps) => {
+export const BudgetList = ({
+  budgets,
+  isLoading,
+  onEdit,
+  onDelete,
+  onAddBudget,
+}: BudgetListProps) => {
   if (isLoading) {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -24,12 +33,13 @@ export const BudgetList = ({ budgets, isLoading, onEdit, onDelete }: BudgetListP
 
   if (!budgets || budgets.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <p className="text-muted-foreground text-lg mb-2">No budgets yet</p>
-        <p className="text-muted-foreground text-sm">
-          Create a budget to start tracking your spending limits
-        </p>
-      </div>
+      <EmptyState
+        icon={IconTarget}
+        title="No budgets yet"
+        description="Create a budget to start tracking your spending limits"
+        actionLabel="Create Budget"
+        onAction={onAddBudget}
+      />
     )
   }
 

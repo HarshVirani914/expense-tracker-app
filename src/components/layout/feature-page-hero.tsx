@@ -18,7 +18,7 @@ export const FeaturePageHero = ({
   return (
     <div
       className={cn(
-        "relative w-full min-w-0 overflow-hidden rounded-2xl border border-border/60",
+        "relative w-full min-w-0 overflow-hidden rounded-4xl border border-border/60",
         accent.pageHeroTint,
         className,
       )}

@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { EmptyState } from "@/components/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconUsers } from "@tabler/icons-react";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ import { GroupCard } from "./group-card";
 type GroupListProps = {
   onEdit: (group: GroupWithMembers) => void;
   filters: GroupFilters;
+  onCreateGroup?: () => void;
 };
 
 const GridSkeleton = () => (
@@ -33,7 +35,7 @@ const GridSkeleton = () => (
   </div>
 );
 
-export const GroupList = ({ onEdit, filters }: GroupListProps) => {
+export const GroupList = ({ onEdit, filters, onCreateGroup }: GroupListProps) => {
   const router = useRouter();
   const { groups, isLoading } = useGroups(filters);
   const { deleteGroup, isDeleting } = useDeleteGroup();
@@ -72,17 +74,17 @@ export const GroupList = ({ onEdit, filters }: GroupListProps) => {
 
   if (!groups || groups.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="rounded-full bg-primary/10 p-6 mb-4">
-          <IconUsers className="h-12 w-12 text-primary" />
-        </div>
-        <h3 className="text-xl font-semibold mb-2">No groups found</h3>
-        <p className="text-muted-foreground mb-6 max-w-sm">
-          {filters.search
+      <EmptyState
+        icon={IconUsers}
+        title="No groups found"
+        description={
+          filters.search
             ? "Try adjusting your search to find what you're looking for."
-            : "Create your first group to start splitting expenses with others."}
-        </p>
-      </div>
+            : "Create your first group to start splitting expenses with others."
+        }
+        actionLabel={filters.search ? undefined : "Create Group"}
+        onAction={onCreateGroup}
+      />
     );
   }
 

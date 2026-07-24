@@ -16,7 +16,7 @@ export const AIChatEmptyState = ({
 }: AIChatEmptyStateProps) => (
   <div className="flex flex-col items-center justify-center min-h-[320px] text-center px-3 py-8 sm:px-6">
 
-    {/* Animated gradient sparkle icon */}
+    {/* Animated sparkle icon */}
     <motion.div
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
@@ -28,10 +28,10 @@ export const AIChatEmptyState = ({
       <motion.div
         animate={{ scale: [1, 1.12, 1], opacity: [0.4, 0.7, 0.4] }}
         transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute inset-0 rounded-full bg-violet-500/20 blur-md"
+        className="absolute inset-0 rounded-full bg-primary/20 blur-md"
       />
-      <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/30">
-        <IconSparkles className="h-8 w-8 text-white" />
+      <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/30">
+        <IconSparkles className="h-8 w-8 text-primary-foreground" />
       </div>
     </motion.div>
 

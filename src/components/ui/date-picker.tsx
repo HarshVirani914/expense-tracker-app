@@ -20,6 +20,7 @@ type DatePickerProps = {
   disabled?: boolean;
   className?: string;
   formatStr?: string;
+  id?: string;
 };
 
 export function DatePicker({
@@ -29,11 +30,13 @@ export function DatePicker({
   disabled = false,
   className,
   formatStr = "PPP",
+  id,
 }: DatePickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
+          id={id}
           variant="outline"
           disabled={disabled}
           className={cn(

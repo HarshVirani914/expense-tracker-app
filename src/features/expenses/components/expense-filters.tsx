@@ -89,15 +89,17 @@ export const ExpenseFiltersBar = ({
     });
   };
 
-  const hasActiveFilters =
+  // Filters hidden behind the collapse toggle (search is always visible)
+  const hasCollapsedFilters =
     filters.categoryId ||
     filters.groupId ||
     filters.type ||
     filters.startDate ||
     filters.endDate ||
-    filters.search ||
     filters.minAmount !== undefined ||
     filters.maxAmount !== undefined;
+
+  const hasActiveFilters = hasCollapsedFilters || filters.search;
 
   const activeFilterCount = [
     filters.categoryId,
@@ -143,6 +145,8 @@ export const ExpenseFiltersBar = ({
               variant="ghost"
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
+              aria-expanded={isExpanded}
+              aria-controls="expense-filters-region"
               className="gap-2"
             >
               {isExpanded ? (
@@ -160,26 +164,28 @@ export const ExpenseFiltersBar = ({
           </div>
         </div>
 
-        {isExpanded && (
-          <div className="space-y-4 pt-4 border-t">
-            <div className="space-y-2">
-              <Label htmlFor="search" className="text-sm font-medium">
-                Search
-              </Label>
-              <Input
-                id="search"
-                placeholder="Search description or notes..."
-                value={filters.search || ''}
-                onChange={(e) => handleSearchChange(e.target.value)}
-              />
-            </div>
+        {/* Search stays visible even when the rest of the filters are collapsed */}
+        <div className="space-y-2">
+          <Label htmlFor="search" className="text-sm font-medium">
+            Search
+          </Label>
+          <Input
+            id="search"
+            placeholder="Search description or notes..."
+            value={filters.search || ''}
+            onChange={(e) => handleSearchChange(e.target.value)}
+          />
+        </div>
 
+        {isExpanded && (
+          <div id="expense-filters-region" className="space-y-4 pt-4 border-t">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <div className="space-y-2">
                 <Label htmlFor="start-date" className="text-sm font-medium">
                   From Date
                 </Label>
                 <DatePicker
+                  id="start-date"
                   date={filters.startDate ? new Date(filters.startDate) : undefined}
                   onSelect={(date) => handleDateChange("startDate", date)}
                   placeholder="Select start date"
@@ -191,6 +197,7 @@ export const ExpenseFiltersBar = ({
                   To Date
                 </Label>
                 <DatePicker
+                  id="end-date"
                   date={filters.endDate ? new Date(filters.endDate) : undefined}
                   onSelect={(date) => handleDateChange("endDate", date)}
                   placeholder="Select end date"
@@ -270,7 +277,9 @@ export const ExpenseFiltersBar = ({
                   </SelectItem>
                   <SelectItem value="INCOME">
                     <div className="flex items-center gap-2">
-                      <Badge className="text-xs bg-green-600">Income</Badge>
+                      <Badge className="text-xs bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
+                        Income
+                      </Badge>
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -310,13 +319,8 @@ export const ExpenseFiltersBar = ({
           </div>
         )}
 
-        {hasActiveFilters && !isExpanded && (
+        {hasCollapsedFilters && !isExpanded && (
           <div className="flex flex-wrap gap-2 pt-2 border-t">
-            {filters.search && (
-              <Badge variant="secondary" className="gap-1">
-                Search: {filters.search}
-              </Badge>
-            )}
             {filters.startDate && (
               <Badge variant="secondary" className="gap-1">
                 From: {new Date(filters.startDate).toLocaleDateString()}

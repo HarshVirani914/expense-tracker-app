@@ -61,18 +61,14 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="flex min-w-0 w-full max-w-full flex-col gap-4 md:gap-6 @container/dashboard">
-        <Skeleton className="h-44 w-full rounded-2xl" />
-        <Skeleton className="h-28 w-full md:hidden" />
-        <div className="grid grid-cols-1 gap-4 @xl/dashboard:grid-cols-2 @4xl/dashboard:grid-cols-3">
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32 @xl/dashboard:col-span-2 @4xl/dashboard:col-span-1" />
-        </div>
-        <div className="grid grid-cols-1 gap-4 @xl/dashboard:grid-cols-2 md:gap-6">
+        <Skeleton className="order-1 h-44 w-full rounded-2xl" />
+        <Skeleton className="order-2 h-20 w-full" />
+        <Skeleton className="order-5 h-28 w-full md:hidden" />
+        <div className="order-4 grid grid-cols-1 gap-4 @xl/dashboard:grid-cols-2 md:order-3 md:gap-6">
           <Skeleton className="h-52" />
           <Skeleton className="h-52" />
         </div>
-        <div className="flex flex-col gap-4 @4xl/dashboard:grid @4xl/dashboard:grid-cols-3 @4xl/dashboard:items-start md:gap-6">
+        <div className="order-3 flex flex-col gap-4 @4xl/dashboard:grid @4xl/dashboard:grid-cols-3 @4xl/dashboard:items-start md:order-4 md:gap-6">
           <div className="flex flex-col gap-4 @4xl/dashboard:col-span-2 md:gap-6">
             <Skeleton className="h-72 w-full" />
             <Skeleton className="h-56 w-full" />
@@ -105,17 +101,9 @@ export default function DashboardPage() {
     <QuickActionsProvider>
       <>
         <div className="flex min-w-0 w-full max-w-full flex-col gap-4 md:gap-6 @container/dashboard">
-          {/* Hero — dark canvas with balance, always rendered first */}
+          {/* Hero — dark canvas with balance and greeting, always rendered first */}
           <div className="order-1">
-            <div className="mb-3 hidden items-center justify-between md:flex">
-              <div>
-                <h1 className="text-xl font-semibold tracking-tight">
-                  Welcome back{user?.firstName ? `, ${user.firstName}` : ""}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  Here&apos;s your financial snapshot.
-                </p>
-              </div>
+            <div className="mb-3 hidden justify-end md:flex">
               <QuickActionsDesktopTrigger />
             </div>
             <HeroBalanceCard
@@ -127,27 +115,27 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Mobile quick actions */}
-          <div className="order-2 md:hidden">
+          {/* Stats cards — top spending category (hero covers income/expenses) */}
+          <div className="order-2">
+            <StatsCards stats={stats.currentMonth} />
+          </div>
+
+          {/* Mobile quick actions — below content so recent activity ranks first */}
+          <div className="order-5 md:hidden">
             <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Quick actions
             </p>
             <QuickActionsMobileTiles />
           </div>
 
-          {/* Stats cards */}
-          <div className="order-3">
-            <StatsCards stats={stats.currentMonth} />
-          </div>
-
           {/* Budget + Recurring widgets */}
-          <div className="order-4 grid grid-cols-1 gap-4 @xl/dashboard:grid-cols-2 md:gap-6">
+          <div className="order-4 grid grid-cols-1 gap-4 @xl/dashboard:grid-cols-2 md:order-3 md:gap-6">
             <BudgetAlertsWidget />
             <UpcomingRecurringWidget />
           </div>
 
-          {/* Main content grid */}
-          <div className="order-5 flex flex-col gap-4 @4xl/dashboard:grid @4xl/dashboard:grid-cols-3 @4xl/dashboard:items-start md:gap-6">
+          {/* Main content grid — recent activity first */}
+          <div className="order-3 flex flex-col gap-4 @4xl/dashboard:grid @4xl/dashboard:grid-cols-3 @4xl/dashboard:items-start md:order-4 md:gap-6">
             <div className="flex min-w-0 flex-col gap-4 @4xl/dashboard:col-span-2 md:gap-6">
               <RecentExpensesList expenses={stats.recentExpenses} />
               <AIInsightsWidget />
@@ -171,7 +159,7 @@ export default function DashboardPage() {
         >
           <Button
             size="lg"
-            className="h-14 w-14 rounded-full glow-primary transition-all active:scale-95"
+            className="h-14 w-14 rounded-full glow-primary transition-all active:scale-95 motion-reduce:transition-none motion-reduce:transform-none"
           >
             <IconSparkles className="h-6 w-6" />
           </Button>
@@ -183,7 +171,7 @@ export default function DashboardPage() {
         >
           <Button
             size="lg"
-            className="h-14 w-14 rounded-full glow-primary transition-all hover:scale-110"
+            className="h-14 w-14 rounded-full glow-primary transition-all hover:scale-110 motion-reduce:transition-none motion-reduce:transform-none"
           >
             <IconSparkles className="h-6 w-6" />
           </Button>

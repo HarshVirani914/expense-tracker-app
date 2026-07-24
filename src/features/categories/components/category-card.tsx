@@ -50,12 +50,13 @@ export const CategoryCard = ({
           </div>
 
           {!category.isDefault && (
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 max-sm:opacity-100 transition-opacity">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => onEdit(category)}
-                className="h-8 w-8"
+                aria-label="Edit category"
+                className="h-8 w-8 max-sm:h-9 max-sm:w-9"
               >
                 <IconPencil className="h-4 w-4" />
               </Button>
@@ -64,7 +65,8 @@ export const CategoryCard = ({
                 size="icon"
                 onClick={() => onDelete(category.id, category.name)}
                 disabled={isDeleting}
-                className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                aria-label="Delete category"
+                className="h-8 w-8 max-sm:h-9 max-sm:w-9 text-destructive hover:text-destructive hover:bg-destructive/10"
               >
                 <IconTrash className="h-4 w-4" />
               </Button>

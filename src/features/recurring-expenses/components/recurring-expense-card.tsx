@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { IconEdit, IconTrash, IconPlayerPause, IconPlayerPlay } from "@tabler/icons-react"
 import type { RecurringExpenseWithRelations } from "../types"
 import { format } from "date-fns"
+import { formatCurrency } from "@/lib/format"
 
 type RecurringExpenseCardProps = {
   recurringExpense: RecurringExpenseWithRelations
@@ -63,8 +64,8 @@ export const RecurringExpenseCard = ({
 
         <div className="flex items-baseline justify-between pt-2 border-t">
           <div>
-            <p className="text-2xl font-bold">
-              ₹{recurringExpense.amount}
+            <p className="text-2xl font-bold font-display">
+              {formatCurrency(Number(recurringExpense.amount))}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               {getFrequencyLabel()}
@@ -121,6 +122,7 @@ export const RecurringExpenseCard = ({
               variant="ghost"
               size="sm"
               onClick={() => onDelete(recurringExpense.id)}
+              aria-label="Delete recurring expense"
               className="text-destructive hover:text-destructive"
             >
               <IconTrash className="h-4 w-4" />

@@ -28,15 +28,15 @@ export const ContactsSummaryCard = memo(
         label: "Active Contacts",
         value: activeContacts,
         icon: IconUserCheck,
-        color: "text-green-600 dark:text-green-400",
-        bg: "bg-green-500/10",
+        color: "text-chart-2",
+        bg: "bg-chart-2/10",
       },
       {
         label: "Total Expenses",
         value: totalExpenses,
         icon: IconReceipt,
-        color: "text-blue-600 dark:text-blue-400",
-        bg: "bg-blue-500/10",
+        color: "text-chart-3",
+        bg: "bg-chart-3/10",
       },
     ];
 
@@ -69,7 +69,7 @@ export const ContactsSummaryCard = memo(
 
           <div className="grid grid-cols-3 gap-3">
             {statItems.map(({ label, value, icon: Icon, color, bg }) => (
-              <div key={label} className={cn("rounded-lg p-3 space-y-2", bg)}>
+              <div key={label} className={cn("rounded-2xl p-3 space-y-2", bg)}>
                 <div className="flex items-center gap-2">
                   <Icon className={cn("h-4 w-4", color)} />
                   <p className="text-xs font-medium text-muted-foreground">

@@ -131,25 +131,7 @@ function ExpenseFormContent({
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="e.g., Grocery shopping"
-                  className={cn(isMobile && "h-12 text-base")}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Category + Account */}
+        {/* Category + Date */}
         <div
           className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-2")}
         >
@@ -180,6 +162,27 @@ function ExpenseFormContent({
 
           <FormField
             control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Date</FormLabel>
+                <DatePicker
+                  date={field.value instanceof Date ? field.value : undefined}
+                  onSelect={field.onChange}
+                  placeholder="Select date"
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Account + Payment method */}
+        <div
+          className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-2")}
+        >
+          <FormField
+            control={form.control}
             name="accountId"
             render={({ field }) => (
               <FormItem>
@@ -204,27 +207,6 @@ function ExpenseFormContent({
                     ))}
                   </SelectContent>
                 </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Date + Payment method */}
-        <div
-          className={cn("grid gap-3", isMobile ? "grid-cols-1" : "grid-cols-2")}
-        >
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Date</FormLabel>
-                <DatePicker
-                  date={field.value instanceof Date ? field.value : undefined}
-                  onSelect={field.onChange}
-                  placeholder="Select date"
-                />
                 <FormMessage />
               </FormItem>
             )}
@@ -257,6 +239,24 @@ function ExpenseFormContent({
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="e.g., Grocery shopping"
+                  className={cn(isMobile && "h-12 text-base")}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}

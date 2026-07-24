@@ -66,14 +66,14 @@ export const GroupsSummaryCard = memo(({ stats }: GroupsSummaryCardProps) => {
           </div>
 
           <div className="space-y-1">
-            <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+            <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
               <IconTrendingUp className="h-3.5 w-3.5" />
               <span className="text-xs font-medium">Owed to You</span>
             </div>
             <p
               className={cn(
                 "text-lg font-semibold",
-                stats.totalOwed > 0 ? "text-green-600 dark:text-green-400" : "",
+                stats.totalOwed > 0 ? "text-emerald-600 dark:text-emerald-400" : "",
               )}
             >
               {formatCurrency(stats.totalOwed)}

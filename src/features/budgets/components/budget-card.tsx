@@ -18,13 +18,13 @@ export const BudgetCard = ({ budget, onEdit, onDelete }: BudgetCardProps) => {
   const getStatusColor = () => {
     switch (budget.status) {
       case 'safe':
-        return 'bg-green-500'
+        return 'bg-chart-2'
       case 'warning':
-        return 'bg-yellow-500'
+        return 'bg-chart-4'
       case 'exceeded':
-        return 'bg-red-500'
+        return 'bg-destructive'
       default:
-        return 'bg-gray-500'
+        return 'bg-muted-foreground'
     }
   }
 
@@ -63,7 +63,7 @@ export const BudgetCard = ({ budget, onEdit, onDelete }: BudgetCardProps) => {
               variant={budget.status === 'exceeded' ? 'destructive' : 'secondary'}
               className={cn(
                 'gap-1',
-                budget.status === 'warning' && 'bg-yellow-100 text-yellow-900 dark:bg-yellow-900 dark:text-yellow-100'
+                budget.status === 'warning' && 'bg-amber-500/15 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400'
               )}
             >
               {budget.status === 'exceeded' && <IconAlertCircle className="h-3 w-3" />}
@@ -74,7 +74,7 @@ export const BudgetCard = ({ budget, onEdit, onDelete }: BudgetCardProps) => {
 
         <div className="space-y-2">
           <div className="flex items-baseline justify-between">
-            <p className="text-2xl font-bold">{formatCurrencyWithDecimals(budget.spent)}</p>
+            <p className="text-2xl font-bold font-display">{formatCurrencyWithDecimals(budget.spent)}</p>
             <p className="text-sm text-muted-foreground">of {formatCurrencyWithDecimals(budget.amount)}</p>
           </div>
 
@@ -115,6 +115,7 @@ export const BudgetCard = ({ budget, onEdit, onDelete }: BudgetCardProps) => {
               variant="ghost"
               size="sm"
               onClick={() => onDelete(budget.id)}
+              aria-label="Delete budget"
               className="text-destructive hover:text-destructive"
             >
               <IconTrash className="h-4 w-4" />

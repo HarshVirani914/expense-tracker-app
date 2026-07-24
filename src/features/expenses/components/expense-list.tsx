@@ -27,9 +27,10 @@ import { cn } from "@/lib/utils";
 type ExpenseListProps = {
   onEdit: (expense: ExpenseWithRelations) => void;
   filters: ExpenseFilters;
+  onAddExpense?: () => void;
 };
 
-export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
+export const ExpenseList = ({ onEdit, filters, onAddExpense }: ExpenseListProps) => {
   const pageSize = 20;
   const isMobile = useIsMobile();
 
@@ -150,7 +151,7 @@ export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
       header: "Amount",
       cell: ({ row }) => (
         <span
-          className={`font-medium ${row.original.type === "INCOME" ? "text-green-600" : "text-red-600"}`}
+          className={`font-medium ${row.original.type === "INCOME" ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}
         >
           {row.original.type === "INCOME" ? "+" : "-"}
           {formatCurrency(Number(row.original.amount))}
@@ -162,7 +163,7 @@ export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Expense actions">
               <IconDotsVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -178,7 +179,7 @@ export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
                   row.original.description || undefined,
                 )
               }
-              className="text-red-600"
+              className="text-destructive"
             >
               <IconTrash className="mr-2 h-4 w-4" />
               Delete
@@ -203,7 +204,7 @@ export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
   }
 
   if (!expenses || expenses.length === 0) {
-    return <ExpenseEmptyState />;
+    return <ExpenseEmptyState onAddExpense={onAddExpense} />;
   }
 
   if (isMobile) {
@@ -241,7 +242,7 @@ export const ExpenseList = ({ onEdit, filters }: ExpenseListProps) => {
                   className={cn(
                     "text-xs font-semibold tabular-nums",
                     dayTotal >= 0
-                      ? "text-green-600 dark:text-green-400"
+                      ? "text-emerald-600 dark:text-emerald-400"
                       : "text-red-600 dark:text-red-400",
                   )}
                 >

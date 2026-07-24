@@ -17,7 +17,6 @@ import { IconUsers, IconArrowRight, IconReceipt } from "@tabler/icons-react";
 import Link from "next/link";
 import { memo } from "react";
 import { formatCurrency } from "@/lib/format";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 type RecentExpensesListProps = {
@@ -36,7 +35,7 @@ function formatDateLabel(dateStr: string) {
 const TimelineRow = ({ expense }: { expense: ExpenseWithRelations }) => {
   const isIncome = expense.type === "INCOME";
   return (
-    <div className="flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-accent/50">
+    <div className="flex items-center gap-3 rounded-lg px-2 py-2.5">
       {/* Category color tile */}
       <div
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
@@ -152,8 +151,6 @@ const MobileTimeline = ({ expenses }: { expenses: ExpenseWithRelations[] }) => {
 
 export const RecentExpensesList = memo(
   ({ expenses }: RecentExpensesListProps) => {
-    const isMobile = useIsMobile();
-
     if (expenses.length === 0) {
       return (
         <Card className="shadow-none">
@@ -193,10 +190,10 @@ export const RecentExpensesList = memo(
           </Link>
         </CardHeader>
         <CardContent className="min-w-0">
-          {isMobile ? (
+          <div className="@lg/recent:hidden">
             <MobileTimeline expenses={expenses} />
-          ) : (
-            <div className="hidden min-w-0 overflow-x-auto @lg/recent:block">
+          </div>
+          <div className="hidden min-w-0 overflow-x-auto @lg/recent:block">
               <Table className="min-w-xl">
                 <TableHeader>
                   <TableRow>
@@ -215,7 +212,7 @@ export const RecentExpensesList = memo(
                 </TableHeader>
                 <TableBody>
                   {expenses.map((expense) => (
-                    <TableRow key={expense.id} className="cursor-pointer">
+                    <TableRow key={expense.id} className="hover:bg-transparent">
                       <TableCell className="whitespace-nowrap font-medium">
                         {format(new Date(expense.date), "MMM dd")}
                       </TableCell>
@@ -280,8 +277,7 @@ export const RecentExpensesList = memo(
                   ))}
                 </TableBody>
               </Table>
-            </div>
-          )}
+          </div>
         </CardContent>
       </Card>
     );

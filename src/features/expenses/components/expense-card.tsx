@@ -88,7 +88,8 @@ export const ExpenseCard = ({ expense, onEdit, onDelete }: ExpenseCardProps) => 
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+              aria-label="Expense actions"
+              className="h-8 w-8 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 max-sm:opacity-100"
             >
               <IconDotsVertical className="h-4 w-4" />
             </Button>

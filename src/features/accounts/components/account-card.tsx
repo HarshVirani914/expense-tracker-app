@@ -33,19 +33,19 @@ const ACCOUNT_ICONS = {
 
 const ACCOUNT_COLORS = {
   [AccountType.SAVINGS]: {
-    bg: "bg-blue-500/10",
-    text: "text-blue-600 dark:text-blue-400",
-    icon: "text-blue-600 dark:text-blue-400",
+    bg: "bg-chart-3/10",
+    text: "text-chart-3",
+    icon: "text-chart-3",
   },
   [AccountType.CURRENT]: {
-    bg: "bg-purple-500/10",
-    text: "text-purple-600 dark:text-purple-400",
-    icon: "text-purple-600 dark:text-purple-400",
+    bg: "bg-chart-1/10",
+    text: "text-chart-1",
+    icon: "text-chart-1",
   },
   [AccountType.WALLET]: {
-    bg: "bg-green-500/10",
-    text: "text-green-600 dark:text-green-400",
-    icon: "text-green-600 dark:text-green-400",
+    bg: "bg-chart-2/10",
+    text: "text-chart-2",
+    icon: "text-chart-2",
   },
   [AccountType.CASH]: {
     bg: "bg-emerald-500/10",
@@ -53,9 +53,9 @@ const ACCOUNT_COLORS = {
     icon: "text-emerald-600 dark:text-emerald-400",
   },
   [AccountType.CREDIT_CARD]: {
-    bg: "bg-orange-500/10",
-    text: "text-orange-600 dark:text-orange-400",
-    icon: "text-orange-600 dark:text-orange-400",
+    bg: "bg-chart-4/10",
+    text: "text-chart-4",
+    icon: "text-chart-4",
   },
 };
 
@@ -88,7 +88,8 @@ export const AccountCard = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => onEdit(account)}
-                className="h-8 w-8"
+                aria-label="Edit account"
+                className="h-8 w-8 max-sm:h-9 max-sm:w-9"
               >
                 <IconPencil className="h-4 w-4" />
               </Button>
@@ -96,9 +97,10 @@ export const AccountCard = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => onDelete(account.id, account.name)}
-                className="h-8 w-8"
+                aria-label="Delete account"
+                className="h-8 w-8 max-sm:h-9 max-sm:w-9"
               >
-                <IconTrash className="h-4 w-4 text-red-600" />
+                <IconTrash className="h-4 w-4 text-destructive" />
               </Button>
             </div>
           </div>
@@ -108,7 +110,7 @@ export const AccountCard = ({
               <p className="text-xs text-muted-foreground font-medium">
                 Current Balance
               </p>
-              <p className={cn("text-2xl font-bold font-mono", colors.text)}>
+              <p className={cn("text-2xl font-bold font-display", colors.text)}>
                 {formatCurrency(account.currentBalance)}
               </p>
             </div>
